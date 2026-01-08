@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wig Hub - Admin Login</title>
+    <link rel="stylesheet" href="admin-dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <h1><i class="fas fa-crown"></i> WIG HUB ADMIN</h1>
+                <p>Administrator Login Panel</p>
+            </div>
+            
+            <form id="adminLoginForm" class="login-form">
+                <div class="form-group">
+                    <label for="adminEmail">
+                        <i class="fas fa-envelope"></i> Email Address
+                    </label>
+                    <input type="email" id="adminEmail" placeholder="phidaliskipyego@gmail.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="adminPassword">
+                        <i class="fas fa-lock"></i> Password
+                    </label>
+                    <input type="password" id="adminPassword" placeholder="Enter password" required>
+                </div>
+                
+                <div class="form-options">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="rememberMe">
+                        Remember me
+                    </label>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-login">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+                
+                <div class="login-footer">
+                    <p><strong>Default Admin Credentials:</strong></p>
+                    <p><strong>Email:</strong></p>
+                    <p><strong>Password:</strong></p>
+                </div>
+            </form>
+            
+            
+            <div class="login-note">
+                <p><i class="fas fa-info-circle"></i> Contact: phidaliskipyego@gmail.com | Phone: 0768832415</p>
+            </div>
+        </div>
+        
+        <div class="login-sidebar">
+            <div class="sidebar-content">
+                <h2><i class="fas fa-shield-alt"></i> Admin Features</h2>
+                <ul class="features-list">
+                    <li><i class="fas fa-check-circle"></i> Add/Edit Products</li>
+                    <li><i class="fas fa-check-circle"></i> Manage Inventory</li>
+                    <li><i class="fas fa-check-circle"></i> View Orders</li>
+                    <li><i class="fas fa-check-circle"></i> Track Sales</li>
+                    <li><i class="fas fa-check-circle"></i> Manage Users</li>
+                    <li><i class="fas fa-check-circle"></i> Admin Management</li>
+                </ul>
+                
+                <div class="quick-links">
+                    <button class="btn btn-secondary" onclick="window.location.href='index.html'">
+                        <i class="fas fa-store"></i> View Client Store
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Login form handler - UPDATED VERSION
+        document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
+            
+            // Load admins from localStorage
+            let admins = [];
+            try {
+                const adminsJSON = localStorage.getItem('wigAdmins');
+                if (adminsJSON) {
+                    admins = JSON.parse(adminsJSON);
+                }
+            } catch (e) {
+                console.error('Error loading admins:', e);
+                admins = [];
+            }
+            
+            // If no admins exist, create default admin structure
+            if (admins.length === 0) {
+                console.log('No admins found, creating default admin...');
+                const defaultAdmin = {
+                    id: 1,
+                    name: 'System Administrator',
+                    email: 'phidaliskipyego@gmail.com',
+                    password: 'Phid@3630',
+                    role: 'super_admin',
+                    createdAt: new Date().toISOString(),
+                    isDefault: true
+                };
+                admins.push(defaultAdmin);
+                localStorage.setItem('wigAdmins', JSON.stringify(admins));
+                console.log('Default admin created successfully');
+            }
+            
+            // Find admin with matching credentials
+            const admin = admins.find(a => a.email === email && a.password === password);
+            
+            if (admin) {
+                // Set admin session
+                localStorage.setItem('adminToken', 'admin-' + Date.now());
+                localStorage.setItem('adminUser', email);
+                
+                // If remember me is checked, save credentials
+                if (rememberMe) {
+                    localStorage.setItem('rememberedAdmin', email);
+                } else {
+                    localStorage.removeItem('rememberedAdmin');
+                }
+                
+                console.log('Login successful for:', email);
+                
+                // Redirect to admin dashboard
+                window.location.href = 'admin-dashboard.html';
+            } else {
+                // Try default credentials as fallback
+                if (email === 'phidaliskipyego@gmail.com' && password === 'Phid@3630') {
+                    // Set admin session
+                    localStorage.setItem('adminToken', 'admin-' + Date.now());
+                    localStorage.setItem('adminUser', email);
+                    
+                    // If remember me is checked, save credentials
+                    if (rememberMe) {
+                        localStorage.setItem('rememberedAdmin', email);
+                    }
+                    
+                    console.log('Login with default credentials successful');
+                    window.location.href = 'admin-dashboard.html';
+                } else {
+                    // Show helpful error message
+                    const errorMessage = admins.length > 0 
+                        ? 'Invalid email or password. Please try again.'
+                        : 'Invalid credentials. Using default: phidaliskipyego@gmail.com / Phid@3630';
+                    
+                    alert(errorMessage);
+                    console.log('Login failed for:', email);
+                }
+            }
+        });
+        
+        // Auto-fill remembered admin on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const rememberedAdmin = localStorage.getItem('rememberedAdmin');
+            if (rememberedAdmin) {
+                document.getElementById('adminEmail').value = rememberedAdmin;
+                document.getElementById('rememberMe').checked = true;
+            }
+            
+            // Initialize admins storage if not exists
+            if (!localStorage.getItem('wigAdmins')) {
+                console.log('Initializing admin storage...');
+                const defaultAdmins = [{
+                    id: 1,
+                    name: 'System Administrator',
+                    email: 'phidaliskipyego@gmail.com',
+                    password: 'Phid@3630',
+                    role: 'super_admin',
+                    createdAt: new Date().toISOString(),
+                    isDefault: true
+                }];
+                localStorage.setItem('wigAdmins', JSON.stringify(defaultAdmins));
+            }
+        });
+    </script>
+</body>
+</html>

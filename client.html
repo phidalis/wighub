@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wig Hub - Client Dashboard</title>
+    <link rel="stylesheet" href="client.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-left">
+                <h1><i class="fas fa-store"></i> WIG HUB</h1>
+                <p>Welcome to your wig shopping paradise</p>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <i class="fas fa-user-circle"></i>
+                    <span id="clientName">Loading...</span>
+                </div>
+                <button class="btn btn-logout" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="dashboard-main">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-menu">
+                    <button class="sidebar-btn active" onclick="showSection('products')">
+                        <i class="fas fa-wig"></i> Browse Wigs
+                    </button>
+                    <button class="sidebar-btn" onclick="showSection('cart')">
+                        <i class="fas fa-shopping-cart"></i> My Cart
+                        <span class="cart-count" id="cartCount">0</span>
+                    </button>
+                    <button class="sidebar-btn" onclick="showSection('orders')">
+                        <i class="fas fa-box"></i> My Orders
+                    </button>
+                    <button class="sidebar-btn" onclick="showSection('profile')">
+                        <i class="fas fa-user"></i> My Profile
+                    </button>
+                    <button class="sidebar-btn" onclick="showSection('wishlist')">
+                        <i class="fas fa-heart"></i> Wishlist
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Products Section -->
+                <section id="productsSection" class="content-section active">
+                    <div class="section-header">
+                        <h2><i class="fas fa-wig"></i> Our Wigs Collection</h2>
+                        <div class="search-filter">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="searchInput" placeholder="Search wigs...">
+                            </div>
+                            <select id="categoryFilter">
+                                <option value="">All Categories</option>
+                                <option value="Brazilian">Brazilian</option>
+                                <option value="Peruvian">Peruvian</option>
+                                <option value="Malaysian">Malaysian</option>
+                                <option value="Indian">Indian</option>
+                                <option value="Synthetic">Synthetic</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="products-grid" id="productsGrid">
+                        <!-- Products will be loaded here -->
+                    </div>
+                </section>
+
+                <!-- Cart Section -->
+                <section id="cartSection" class="content-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-shopping-cart"></i> My Shopping Cart</h2>
+                    </div>
+                    <div class="cart-container" id="cartContainer">
+                        <!-- Cart items will be loaded here -->
+                    </div>
+                </section>
+
+                <!-- Orders Section -->
+                <section id="ordersSection" class="content-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-box"></i> My Orders</h2>
+                    </div>
+                    <div class="orders-container" id="ordersContainer">
+                        <!-- Orders will be loaded here -->
+                    </div>
+                </section>
+
+                <!-- Profile Section -->
+                <section id="profileSection" class="content-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-user"></i> My Profile</h2>
+                    </div>
+                    <div class="profile-container">
+                        <div class="profile-card">
+                            <div class="profile-header">
+                                <div class="profile-avatar">
+                                    <i class="fas fa-user-circle"></i>
+                                </div>
+                                <div class="profile-info">
+                                    <h3 id="profileName">Loading...</h3>
+                                    <p id="profileEmail">Loading...</p>
+                                    <span class="badge client-badge">Client Account</span>
+                                </div>
+                            </div>
+                            <div class="profile-details">
+                                <div class="detail-item">
+                                    <span class="detail-label">Member Since:</span>
+                                    <span class="detail-value" id="memberSince">Loading...</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Total Orders:</span>
+                                    <span class="detail-value" id="totalOrders">0</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Wishlist Items:</span>
+                                    <span class="detail-value" id="wishlistCount">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Wishlist Section -->
+                <section id="wishlistSection" class="content-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-heart"></i> My Wishlist</h2>
+                    </div>
+                    <div class="wishlist-grid" id="wishlistGrid">
+                        <!-- Wishlist items will be loaded here -->
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="dashboard-footer">
+            <p>© 2026 phidsolutions. All rights reserved. | <a href="#" onclick="alert('Contact: support@wighub.com\nPhone: 0768832415')">Contact Support</a></p>
+        </footer>
+    </div>
+
+    <!-- Product Modal -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <div class="modal-body" id="modalBody">
+                <!-- Product details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="client.js"></script>
+</body>
+</html>

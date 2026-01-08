@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WigHub - Premium Wigs Marketplace</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="#" class="logo">WigHub</a>
+            <div class="nav-links">
+                <a href="#home">Home</a>
+                <a href="#products">Products</a>
+                <a href="#about">About</a>
+                <a href="client-login.html?tab=login" class="btn-login">Login</a>
+                <a href="client-login.html?tab=signup" class="btn-signup">Sign Up</a>
+                <a href="admin-login.html" style="color: var(--accent); font-weight: bold;">
+                    <i class="fas fa-user-shield"></i> Admin
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero" id="home">
+        <div class="container">
+            <h1>Find Your Perfect Wig</h1>
+            <p>Premium quality wigs at affordable prices</p>
+            <a href="client-login.html?tab=signup" class="cta-button">Start Shopping</a>
+        </div>
+    </section>
+
+    <section class="featured-products" id="products">
+        <div class="container">
+            <h2>Featured Wigs</h2>
+            <p style="text-align: center; color: #666; margin-bottom: 40px; max-width: 800px; margin-left: auto; margin-right: auto;">
+                Browse our premium collection of wigs. Click any product to buy - you'll be redirected to login/signup page.
+            </p>
+            
+            <!-- Search and Filter for Home Page -->
+            <div class="search-filter-home" style="margin-bottom: 30px; display: flex; gap: 15px; justify-content: center;">
+                <div class="search-box-home" style="position: relative; max-width: 400px; width: 100%;">
+                    <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #666;"></i>
+                    <input type="text" id="homeSearchInput" placeholder="Search wigs..." style="width: 100%; padding: 12px 15px 12px 45px; border: 2px solid #ddd; border-radius: var(--radius); font-size: 14px;">
+                </div>
+                <select id="homeCategoryFilter" style="padding: 12px 15px; border: 2px solid #ddd; border-radius: var(--radius); background: white; font-size: 14px; color: var(--dark); min-width: 180px;">
+                    <option value="">All Categories</option>
+                    <option value="Brazilian">Brazilian</option>
+                    <option value="Peruvian">Peruvian</option>
+                    <option value="Malaysian">Malaysian</option>
+                    <option value="Indian">Indian</option>
+                    <option value="Synthetic">Synthetic</option>
+                </select>
+            </div>
+            
+            <div class="products-grid" id="featuredProducts">
+                <!-- Products will be loaded here via JavaScript -->
+                <div class="loading-products" style="grid-column: 1/-1; text-align: center; padding: 40px;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 40px; color: var(--primary); margin-bottom: 20px;"></i>
+                    <p style="color: #666;">Loading products...</p>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 40px;">
+                <a href="client-login.html?tab=signup" class="cta-button" style="background: linear-gradient(45deg, var(--primary), var(--secondary)); color: white;">
+                    <i class="fas fa-user-plus"></i> Sign Up to Buy Products
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="about-section" id="about">
+        <div class="container">
+            <div class="about-content">
+                <h2>About WigHub</h2>
+                <p>Your premier destination for premium quality wigs. We offer a wide selection of Brazilian, Peruvian, Malaysian, and synthetic wigs at affordable prices.</p>
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h4>Call Us</h4>
+                            <p>0768832415</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h4>Email Us</h4>
+                            <p>support@wighub.com</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h4>Business Hours</h4>
+                            <p>Mon-Sun: 9AM - 6PM</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>WigHub</h3>
+                    <p>Your trusted partner for premium wigs. Quality products at affordable prices.</p>
+                    <div class="social-links">
+                        <a href="https://www.facebook.com/phidalis.kipyego.5"><i class="fab fa-facebook"></i></a>
+                        <a href="https://www.instagram.com/phidalis254?igsh=emR3ZjIxYWNzOHI2"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="wa.me//+254768832415"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#products">Products</a></li>
+                        <li><a href="#about">About Us</a></li>
+                        <li><a href="client-login.html?tab=login">Login</a></li>
+                        <li><a href="client-login.html?tab=signup">Sign Up</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Contact Info</h3>
+                    <ul>
+                        <li><i class="fas fa-map-marker-alt"></i> 123 Wig Street, Hair City</li>
+                        <li><i class="fas fa-phone"></i> 0768832415</li>
+                        <li><i class="fas fa-envelope"></i> support@wighub.com</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 phidsolutions. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <div class="scroll-top" id="scrollTop" onclick="scrollToTop()">
+        <i class="fas fa-arrow-up"></i>
+    </div>
+
+    <script src="index.js"></script>
+</body>
+</html>
