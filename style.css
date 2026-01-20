@@ -644,4 +644,262 @@ footer {
     #homeCategoryFilter {
         width: 100%;
     }
+
+}
+/* ============================================
+   MOBILE RESPONSIVE STYLES (Phone browsers only)
+   ============================================ */
+
+/* Mobile Menu Toggle Button (hidden on desktop) */
+.menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    cursor: pointer;
+    color: var(--dark);
+    padding: 10px;
+    position: absolute;
+    right: 20px;
+    top: 15px;
+    z-index: 1000;
+}
+
+/* Mobile Responsive Design */
+@media screen and (max-width: 768px) {
+    /* General mobile adjustments */
+    body {
+        font-size: 16px;
+        width: 100%;
+        overflow-x: hidden;
+    }
+    
+    .container {
+        padding: 0 15px;
+        max-width: 100%;
+    }
+    
+    /* Show mobile menu button */
+    .menu-toggle {
+        display: block;
+    }
+    
+    /* Navigation - make it collapsible */
+    .navbar .container {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 15px 20px;
+        position: relative;
+        min-height: 70px;
+    }
+    
+    .nav-links {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        background: white;
+        position: absolute;
+        top: 70px;
+        left: 0;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        border-radius: 0 0 var(--radius) var(--radius);
+        padding: 20px;
+        z-index: 999;
+    }
+    
+    .nav-links.active {
+        display: flex;
+    }
+    
+    .nav-links a {
+        padding: 12px 0;
+        border-bottom: 1px solid #eee;
+        width: 100%;
+        display: block;
+        text-align: left;
+    }
+    
+    .nav-links a:last-child {
+        border-bottom: none;
+    }
+    
+    /* Hero section adjustments */
+    .hero {
+        padding: 130px 0 60px;
+        margin-top: 70px;
+    }
+    
+    .hero h1 {
+        font-size: 32px !important;
+        line-height: 1.3;
+    }
+    
+    .hero p {
+        font-size: 18px !important;
+        padding: 0 10px;
+    }
+    
+    .cta-button {
+        padding: 12px 30px;
+        font-size: 16px;
+        width: 90%;
+        max-width: 300px;
+    }
+    
+    /* Featured products adjustments */
+    .featured-products {
+        padding: 40px 0;
+    }
+    
+    .featured-products h2 {
+        font-size: 28px !important;
+        margin-bottom: 30px;
+    }
+    
+    .search-filter-home {
+        flex-direction: column !important;
+        gap: 10px !important;
+        padding: 0 10px;
+    }
+    
+    #homeCategoryFilter {
+        width: 100% !important;
+        min-width: auto !important;
+    }
+    
+    .search-box-home {
+        max-width: 100% !important;
+    }
+    
+    /* Products grid for mobile */
+    .products-grid {
+        grid-template-columns: 1fr !important;
+        gap: 20px;
+        padding: 0 5px;
+    }
+    
+    .product-card, .product-card-home {
+        margin: 0 auto;
+        max-width: 100%;
+    }
+    
+    /* About section */
+    .about-section {
+        padding: 40px 0;
+    }
+    
+    .about-content h2 {
+        font-size: 28px !important;
+    }
+    
+    .contact-info {
+        flex-direction: column;
+        gap: 20px;
+        padding: 0 10px;
+    }
+    
+    .contact-item {
+        width: 100%;
+        max-width: 100%;
+        min-width: auto;
+    }
+    
+    /* Footer adjustments */
+    footer {
+        padding: 40px 0 20px;
+    }
+    
+    .footer-content {
+        grid-template-columns: 1fr;
+        gap: 30px;
+        text-align: center;
+    }
+    
+    .social-links {
+        justify-content: center;
+    }
+    
+    /* Scroll to top button */
+    .scroll-top {
+        bottom: 20px;
+        right: 20px;
+        width: 45px;
+        height: 45px;
+        font-size: 18px;
+    }
+    
+    /* Text size adjustments */
+    h1 {
+        font-size: 28px !important;
+    }
+    
+    h2 {
+        font-size: 24px !important;
+    }
+    
+    h3 {
+        font-size: 20px !important;
+    }
+    
+    p, li, a, span, input, select, button {
+        font-size: 16px !important;
+    }
+    
+    /* Ensure images are responsive */
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+    
+    /* Fix any overflowing content */
+    * {
+        max-width: 100%;
+    }
+    
+    /* Add some breathing room */
+    section {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+}
+
+/* For very small phones */
+@media screen and (max-width: 480px) {
+    .hero h1 {
+        font-size: 28px !important;
+    }
+    
+    .hero p {
+        font-size: 16px !important;
+    }
+    
+    .cta-button {
+        padding: 10px 25px;
+        font-size: 15px;
+    }
+    
+    .navbar .container {
+        padding: 10px 15px;
+    }
+    
+    .logo {
+        font-size: 24px;
+    }
+    
+    .menu-toggle {
+        font-size: 1.5rem;
+        right: 15px;
+        top: 10px;
+    }
+}
+
+/* Tablet adjustments (if needed) */
+@media screen and (min-width: 769px) and (max-width: 1024px) {
+    .container {
+        padding: 0 30px;
+    }
+    
+    .products-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
