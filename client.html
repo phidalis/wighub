@@ -147,6 +147,133 @@
                     </div>
                 </section>
             </div>
+
+            <!-- Add to client.html sidebar menu (after Wishlist button) -->
+<button class="sidebar-btn" onclick="showSection('support')">
+    <i class="fas fa-headset"></i> <span class="menu-text">Support</span>
+</button>
+
+<!-- Add this Support Section in content area (after wishlistSection) -->
+<section id="supportSection" class="content-section">
+    <div class="section-header">
+        <h2><i class="fas fa-headset"></i> Customer Support</h2>
+    </div>
+    
+    <div class="support-container">
+        <div class="support-nav">
+            <button class="support-nav-btn active" onclick="showSupportTab('newTicket')">
+                <i class="fas fa-plus-circle"></i> New Ticket
+            </button>
+            <button class="support-nav-btn" onclick="showSupportTab('ticketHistory')">
+                <i class="fas fa-history"></i> Ticket History
+            </button>
+        </div>
+        
+        <!-- New Ticket Tab -->
+        <div id="newTicketTab" class="support-tab active">
+            <div class="ticket-form-card">
+                <h3><i class="fas fa-question-circle"></i> Submit a Support Request</h3>
+                <p class="form-description">Please provide details about your issue. Our team will respond within 24 hours.</p>
+                
+                <div class="form-group">
+                    <label for="ticketSubject">Subject *</label>
+                    <input type="text" id="ticketSubject" placeholder="What is the issue about?">
+                </div>
+                
+                <div class="form-group">
+                    <label for="ticketOrderId">Order ID (Optional)</label>
+                    <input type="text" id="ticketOrderId" placeholder="e.g., ORD123456">
+                    <small>If your issue is related to an order, please include the Order ID</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="ticketCategory">Category *</label>
+                    <select id="ticketCategory">
+                        <option value="">Select Category</option>
+                        <option value="order">Order Issue</option>
+                        <option value="product">Product Inquiry</option>
+                        <option value="shipping">Shipping/Delivery</option>
+                        <option value="payment">Payment Issue</option>
+                        <option value="account">Account Problem</option>
+                        <option value="refund">Refund Request</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="ticketMessage">Message *</label>
+                    <textarea id="ticketMessage" rows="6" placeholder="Please describe your issue in detail..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="ticketPriority">Priority</label>
+                    <select id="ticketPriority">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                        <option value="urgent">Urgent</option>
+                    </select>
+                </div>
+                
+                <div class="form-actions">
+                    <button class="btn btn-secondary" onclick="clearTicketForm()">
+                        Clear Form
+                    </button>
+                    <button class="btn btn-primary" onclick="submitTicket()">
+                        <i class="fas fa-paper-plane"></i> Submit Ticket
+                    </button>
+                </div>
+            </div>
+            
+            <div class="support-info">
+                <h4><i class="fas fa-info-circle"></i> Support Information</h4>
+                <p><strong>Response Time:</strong> Within 24 hours on business days</p>
+                <p><strong>Contact Email:</strong> support@wighub.com</p>
+                <p><strong>Phone:</strong> 0768832415 (Mon-Fri, 9AM-5PM)</p>
+                <p><strong>Hours:</strong> Monday to Friday, 9:00 AM - 5:00 PM</p>
+            </div>
+        </div>
+        
+        <!-- Ticket History Tab -->
+        <div id="ticketHistoryTab" class="support-tab">
+            <div class="ticket-history-header">
+                <h3><i class="fas fa-ticket-alt"></i> My Support Tickets</h3>
+                <div class="filter-controls">
+                    <select id="ticketStatusFilter" onchange="filterTickets()">
+                        <option value="">All Status</option>
+                        <option value="open">Open</option>
+                        <option value="pending">Pending</option>
+                        <option value="answered">Answered</option>
+                        <option value="resolved">Resolved</option>
+                        <option value="closed">Closed</option>
+                    </select>
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="ticketSearch" placeholder="Search tickets..." onkeyup="filterTickets()">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tickets-list" id="ticketsList">
+                <div class="empty-state">
+                    <i class="fas fa-ticket-alt"></i>
+                    <h3>No Support Tickets</h3>
+                    <p>You haven't submitted any support tickets yet.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Ticket Detail Modal -->
+<div id="ticketModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeTicketModal()">&times;</span>
+        <div class="modal-body" id="ticketModalBody">
+            <!-- Ticket details will be loaded here -->
+        </div>
+    </div>
+</div>
         </main>
 
         <!-- Footer -->
