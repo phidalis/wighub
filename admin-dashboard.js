@@ -1,4 +1,4 @@
-// Admin Dashboard JavaScript - UPDATED VERSION
+// Admin Dashboard JavaScript - COMPLETE VERSION WITH SUPPORT SYSTEM
 let allProducts = [];
 let filteredProducts = [];
 let allClients = [];
@@ -78,6 +78,12 @@ function initializeData() {
             isDefault: true
         }];
         localStorage.setItem('wigAdmins', JSON.stringify(defaultAdmins));
+    }
+    
+    // Initialize support tickets if not exist
+    if (!localStorage.getItem('wigSupportTickets')) {
+        console.log('Creating support tickets storage...');
+        localStorage.setItem('wigSupportTickets', JSON.stringify([]));
     }
     
     // Initialize orders storage for clients
@@ -160,6 +166,9 @@ function showAdminSection(sectionId) {
             break;
         case 'adminManagement':
             loadAdminList();
+            break;
+        case 'support':
+            displayAdminTickets(loadAdminTickets());
             break;
     }
 }
@@ -820,7 +829,7 @@ function loadOrdersTable() {
                     <span class="status-badge ${statusClass}" 
                           style="padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
                                  background: ${statusClass === 'delivered' ? '#d4edda' : statusClass === 'processing' ? '#d1ecf1' : '#fff3cd'};
-                                 color: ${statusClass === 'delivered' ? '#155724' : statusClass === 'processing' ? '#0c5460' : '#856404'};">
+                                 color: ${statusClass === 'delivered' ? '#155724' : statusClass === 'processing' ? '#0c5460' : '#856404'}">
                         ${statusText}
                     </span>
                 </td>
@@ -989,11 +998,12 @@ function clearAllData() {
     localStorage.removeItem('wigProducts');
     localStorage.removeItem('wigClients');
     localStorage.removeItem('wigAdmins');
+    localStorage.removeItem('wigSupportTickets');
     
     // Clear all order-related data
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key.startsWith('orders_') || key.startsWith('cart_') || key.startsWith('wishlist_')) {
+        if (key.startsWith('orders_') || key.startsWith('cart_') || key.startsWith('wishlist_') || key.startsWith('tickets_')) {
             localStorage.removeItem(key);
         }
     }
@@ -2040,4 +2050,529 @@ function initImageUpload() {
     if (imageUrl) {
         updateImagePreview(imageUrl);
     }
+}
+
+// ===== ADMIN SUPPORT SYSTEM FUNCTIONS =====
+
+// Load admin tickets
+function loadAdminTickets() {
+    const ticketsKey = 'wigSupportTickets';
+    const ticketsJSON = localStorage.getItem(ticketsKey);
+    
+    let tickets = [];
+    if (ticketsJSON) {
+        try {
+            tickets = JSON.parse(ticketsJSON);
+        } catch (e) {
+            console.error('Error parsing admin tickets:', e);
+            tickets = [];
+        }
+    } else {
+        // Initialize with empty array if not exists
+        localStorage.setItem(ticketsKey, JSON.stringify([]));
+        tickets = [];
+    }
+    
+    return tickets;
+}
+
+// Display admin tickets
+function displayAdminTickets(tickets) {
+    const tableBody = document.getElementById('adminTicketsTable');
+    if (!tableBody) return;
+    
+    if (tickets.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="9" class="empty-table">
+                    No support tickets found.
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    // Update stats
+    updateTicketStats(tickets);
+    
+    // Sort by date (newest first)
+    tickets.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    
+    let html = '';
+    
+    tickets.forEach(ticket => {
+        const statusClass = getAdminStatusClass(ticket.status);
+        const priorityClass = getAdminPriorityClass(ticket.priority);
+        const createdAt = new Date(ticket.createdAt).toLocaleDateString();
+        const updatedAt = new Date(ticket.updatedAt).toLocaleDateString();
+        const hasUnread = ticket.lastViewedByAdmin === null || 
+                         new Date(ticket.updatedAt) > new Date(ticket.lastViewedByAdmin);
+        
+        html += `
+            <tr class="${hasUnread ? 'unread-ticket' : ''}">
+                <td>
+                    <strong>${ticket.id}</strong>
+                    ${hasUnread ? '<span class="unread-badge">NEW</span>' : ''}
+                </td>
+                <td>
+                    <div class="customer-cell">
+                        <div class="customer-avatar-small">
+                            ${ticket.customer.username ? ticket.customer.username.charAt(0).toUpperCase() : 'C'}
+                        </div>
+                        <div>
+                            <div class="customer-name">${ticket.customer.username || 'Unknown'}</div>
+                            <div class="customer-email">${ticket.customer.email}</div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <strong class="ticket-subject" onclick="viewAdminTicket('${ticket.id}')">${ticket.subject}</strong>
+                    ${ticket.orderId ? `<div class="ticket-order">Order: ${ticket.orderId}</div>` : ''}
+                </td>
+                <td>
+                    <span class="category-badge">${ticket.category}</span>
+                </td>
+                <td>
+                    <span class="priority-badge ${priorityClass}">${ticket.priority}</span>
+                </td>
+                <td>
+                    <span class="status-badge ${statusClass}">${ticket.status}</span>
+                </td>
+                <td>${createdAt}</td>
+                <td>${updatedAt}</td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="action-btn view" onclick="viewAdminTicket('${ticket.id}')" title="View Ticket">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        ${ticket.status !== 'closed' && ticket.status !== 'resolved' ? `
+                            <button class="action-btn reply" onclick="quickReply('${ticket.id}')" title="Quick Reply">
+                                <i class="fas fa-reply"></i>
+                            </button>
+                            <button class="action-btn resolve" onclick="resolveTicket('${ticket.id}')" title="Mark as Resolved">
+                                <i class="fas fa-check"></i>
+                            </button>
+                        ` : ''}
+                        <button class="action-btn delete" onclick="deleteTicket('${ticket.id}')" title="Delete Ticket">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    });
+    
+    tableBody.innerHTML = html;
+}
+
+// Update ticket statistics
+function updateTicketStats(tickets) {
+    const openTickets = tickets.filter(t => t.status === 'open').length;
+    const pendingTickets = tickets.filter(t => t.status === 'pending').length;
+    const resolvedTickets = tickets.filter(t => t.status === 'resolved' || t.status === 'closed').length;
+    
+    if (document.getElementById('openTickets')) {
+        document.getElementById('openTickets').textContent = openTickets;
+    }
+    if (document.getElementById('pendingTickets')) {
+        document.getElementById('pendingTickets').textContent = pendingTickets;
+    }
+    if (document.getElementById('resolvedTickets')) {
+        document.getElementById('resolvedTickets').textContent = resolvedTickets;
+    }
+}
+
+// Filter admin tickets
+function filterAdminTickets() {
+    const searchTerm = document.getElementById('adminTicketSearch').value.toLowerCase();
+    const statusFilter = document.getElementById('adminTicketStatusFilter').value;
+    const priorityFilter = document.getElementById('adminTicketPriorityFilter').value;
+    const categoryFilter = document.getElementById('adminTicketCategoryFilter').value;
+    
+    const tickets = loadAdminTickets();
+    
+    const filteredTickets = tickets.filter(ticket => {
+        const matchesSearch = !searchTerm || 
+            ticket.subject.toLowerCase().includes(searchTerm) ||
+            ticket.message.toLowerCase().includes(searchTerm) ||
+            ticket.customer.email.toLowerCase().includes(searchTerm) ||
+            ticket.customer.username.toLowerCase().includes(searchTerm) ||
+            (ticket.orderId && ticket.orderId.toLowerCase().includes(searchTerm));
+        
+        const matchesStatus = !statusFilter || ticket.status === statusFilter;
+        const matchesPriority = !priorityFilter || ticket.priority === priorityFilter;
+        const matchesCategory = !categoryFilter || ticket.category === categoryFilter;
+        
+        return matchesSearch && matchesStatus && matchesPriority && matchesCategory;
+    });
+    
+    displayAdminTickets(filteredTickets);
+}
+
+// View admin ticket details
+function viewAdminTicket(ticketId) {
+    const tickets = loadAdminTickets();
+    const ticket = tickets.find(t => t.id === ticketId);
+    
+    if (!ticket) return;
+    
+    // Mark as viewed
+    markTicketAsViewed(ticketId);
+    
+    const modalBody = document.getElementById('adminTicketModalBody');
+    const modal = document.getElementById('adminTicketModal');
+    
+    const statusClass = getAdminStatusClass(ticket.status);
+    const priorityClass = getAdminPriorityClass(ticket.priority);
+    const createdAt = new Date(ticket.createdAt).toLocaleString();
+    const updatedAt = new Date(ticket.updatedAt).toLocaleString();
+    
+    // Build replies HTML
+    let repliesHtml = '';
+    if (ticket.replies && ticket.replies.length > 0) {
+        repliesHtml = `
+            <div class="conversation-history">
+                <h4>Conversation History</h4>
+                ${ticket.replies.map(reply => `
+                    <div class="conversation-message ${reply.from === 'admin' ? 'admin-message' : 'customer-message'}">
+                        <div class="message-header">
+                            <strong>${reply.from === 'admin' ? 'You (Support)' : ticket.customer.username || 'Customer'}</strong>
+                            <span class="message-time">${new Date(reply.timestamp).toLocaleString()}</span>
+                        </div>
+                        <div class="message-content">
+                            ${reply.message}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+    
+    modalBody.innerHTML = `
+        <div class="ticket-detail-admin">
+            <div class="ticket-header-admin">
+                <div class="ticket-title-section">
+                    <h2>${ticket.subject}</h2>
+                    <div class="ticket-meta-admin">
+                        <span class="status-badge ${statusClass}">${ticket.status}</span>
+                        <span class="priority-badge ${priorityClass}">${ticket.priority}</span>
+                        <span class="ticket-id">${ticket.id}</span>
+                    </div>
+                </div>
+                <div class="customer-info-admin">
+                    <div class="customer-avatar-admin">
+                        ${ticket.customer.username ? ticket.customer.username.charAt(0).toUpperCase() : 'C'}
+                    </div>
+                    <div>
+                        <div class="customer-name-admin">${ticket.customer.username || 'Unknown'}</div>
+                        <div class="customer-email-admin">${ticket.customer.email}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="ticket-info-admin">
+                <div class="info-grid-admin">
+                    <div class="info-item-admin">
+                        <label>Category:</label>
+                        <span>${ticket.category}</span>
+                    </div>
+                    <div class="info-item-admin">
+                        <label>Created:</label>
+                        <span>${createdAt}</span>
+                    </div>
+                    ${ticket.orderId ? `
+                        <div class="info-item-admin">
+                            <label>Order ID:</label>
+                            <span>${ticket.orderId}</span>
+                        </div>
+                    ` : ''}
+                    <div class="info-item-admin">
+                        <label>Last Updated:</label>
+                        <span>${updatedAt}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="original-message-admin">
+                <h4>Original Message from Customer</h4>
+                <div class="message-content-admin">
+                    ${ticket.message}
+                </div>
+            </div>
+            
+            ${repliesHtml}
+            
+            <div class="admin-reply-section">
+                <h4>Reply to Customer</h4>
+                <textarea id="adminReplyMessage" rows="4" placeholder="Type your response here..."></textarea>
+                <div class="reply-controls-admin">
+                    <div class="status-controls">
+                        <label>Update Status:</label>
+                        <select id="adminTicketStatus">
+                            <option value="answered" ${ticket.status === 'answered' ? 'selected' : ''}>Answered</option>
+                            <option value="pending" ${ticket.status === 'pending' ? 'selected' : ''}>Pending</option>
+                            <option value="resolved" ${ticket.status === 'resolved' ? 'selected' : ''}>Resolved</option>
+                            <option value="closed" ${ticket.status === 'closed' ? 'selected' : ''}>Closed</option>
+                        </select>
+                    </div>
+                    <div class="reply-actions-admin">
+                        <button class="btn btn-secondary" onclick="closeAdminTicketModal()">
+                            Cancel
+                        </button>
+                        <button class="btn btn-primary" onclick="sendAdminReply('${ticket.id}')">
+                            <i class="fas fa-paper-plane"></i> Send Reply
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    modal.classList.add('active');
+}
+
+// Mark ticket as viewed by admin
+function markTicketAsViewed(ticketId) {
+    const ticketsKey = 'wigSupportTickets';
+    const ticketsJSON = localStorage.getItem(ticketsKey);
+    
+    if (!ticketsJSON) return;
+    
+    const tickets = JSON.parse(ticketsJSON);
+    const ticketIndex = tickets.findIndex(t => t.id === ticketId);
+    
+    if (ticketIndex !== -1) {
+        tickets[ticketIndex].lastViewedByAdmin = new Date().toISOString();
+        localStorage.setItem(ticketsKey, JSON.stringify(tickets));
+    }
+}
+
+// Send admin reply
+function sendAdminReply(ticketId) {
+    const replyMessage = document.getElementById('adminReplyMessage').value.trim();
+    const newStatus = document.getElementById('adminTicketStatus').value;
+    
+    if (!replyMessage) {
+        alert('Please enter a reply message');
+        return;
+    }
+    
+    const ticketsKey = 'wigSupportTickets';
+    const ticketsJSON = localStorage.getItem(ticketsKey);
+    
+    if (!ticketsJSON) return;
+    
+    const tickets = JSON.parse(ticketsJSON);
+    const ticketIndex = tickets.findIndex(t => t.id === ticketId);
+    
+    if (ticketIndex === -1) return;
+    
+    // Add admin reply
+    const adminReply = {
+        message: replyMessage,
+        from: 'admin',
+        timestamp: new Date().toISOString(),
+        adminName: document.getElementById('adminName').textContent || 'Administrator'
+    };
+    
+    tickets[ticketIndex].replies.push(adminReply);
+    tickets[ticketIndex].status = newStatus;
+    tickets[ticketIndex].updatedAt = new Date().toISOString();
+    tickets[ticketIndex].adminStatus = 'handled';
+    tickets[ticketIndex].assignedTo = document.getElementById('adminName').textContent || 'Admin';
+    
+    // Save updated ticket
+    localStorage.setItem(ticketsKey, JSON.stringify(tickets));
+    
+    // Also update customer version
+    updateCustomerTicket(tickets[ticketIndex]);
+    
+    // Show success and close modal
+    alert('✅ Reply sent successfully!');
+    closeAdminTicketModal();
+    displayAdminTickets(tickets);
+}
+
+// Update customer ticket
+function updateCustomerTicket(updatedTicket) {
+    const customerEmail = updatedTicket.customer.email;
+    const customerTicketsKey = `tickets_${customerEmail}`;
+    const customerTicketsJSON = localStorage.getItem(customerTicketsKey);
+    
+    if (!customerTicketsJSON) return;
+    
+    const customerTickets = JSON.parse(customerTicketsJSON);
+    const customerTicketIndex = customerTickets.findIndex(t => t.id === updatedTicket.id);
+    
+    if (customerTicketIndex !== -1) {
+        customerTickets[customerTicketIndex] = {
+            ...customerTickets[customerTicketIndex],
+            status: updatedTicket.status,
+            replies: updatedTicket.replies,
+            updatedAt: updatedTicket.updatedAt,
+            assignedTo: updatedTicket.assignedTo
+        };
+        
+        localStorage.setItem(customerTicketsKey, JSON.stringify(customerTickets));
+    }
+}
+
+// Quick reply function
+function quickReply(ticketId) {
+    const reply = prompt('Enter your quick reply:');
+    if (reply && reply.trim()) {
+        sendQuickAdminReply(ticketId, reply.trim());
+    }
+}
+
+function sendQuickAdminReply(ticketId, message) {
+    const ticketsKey = 'wigSupportTickets';
+    const ticketsJSON = localStorage.getItem(ticketsKey);
+    
+    if (!ticketsJSON) return;
+    
+    const tickets = JSON.parse(ticketsJSON);
+    const ticketIndex = tickets.findIndex(t => t.id === ticketId);
+    
+    if (ticketIndex === -1) return;
+    
+    const adminReply = {
+        message: message,
+        from: 'admin',
+        timestamp: new Date().toISOString(),
+        adminName: document.getElementById('adminName').textContent || 'Administrator'
+    };
+    
+    tickets[ticketIndex].replies.push(adminReply);
+    tickets[ticketIndex].status = 'answered';
+    tickets[ticketIndex].updatedAt = new Date().toISOString();
+    tickets[ticketIndex].adminStatus = 'handled';
+    tickets[ticketIndex].assignedTo = document.getElementById('adminName').textContent || 'Admin';
+    
+    localStorage.setItem(ticketsKey, JSON.stringify(tickets));
+    updateCustomerTicket(tickets[ticketIndex]);
+    
+    alert('✅ Quick reply sent!');
+    displayAdminTickets(tickets);
+}
+
+// Resolve ticket
+function resolveTicket(ticketId) {
+    if (!confirm('Mark this ticket as resolved?')) return;
+    
+    const ticketsKey = 'wigSupportTickets';
+    const ticketsJSON = localStorage.getItem(ticketsKey);
+    
+    if (!ticketsJSON) return;
+    
+    const tickets = JSON.parse(ticketsJSON);
+    const ticketIndex = tickets.findIndex(t => t.id === ticketId);
+    
+    if (ticketIndex === -1) return;
+    
+    tickets[ticketIndex].status = 'resolved';
+    tickets[ticketIndex].updatedAt = new Date().toISOString();
+    tickets[ticketIndex].adminStatus = 'resolved';
+    
+    localStorage.setItem(ticketsKey, JSON.stringify(tickets));
+    updateCustomerTicket(tickets[ticketIndex]);
+    
+    alert('✅ Ticket marked as resolved!');
+    displayAdminTickets(tickets);
+}
+
+// Delete ticket
+function deleteTicket(ticketId) {
+    if (!confirm('Are you sure you want to delete this ticket? This action cannot be undone.')) {
+        return;
+    }
+    
+    const ticketsKey = 'wigSupportTickets';
+    const ticketsJSON = localStorage.getItem(ticketsKey);
+    
+    if (!ticketsJSON) return;
+    
+    const tickets = JSON.parse(ticketsJSON);
+    const updatedTickets = tickets.filter(t => t.id !== ticketId);
+    
+    localStorage.setItem(ticketsKey, JSON.stringify(updatedTickets));
+    
+    alert('✅ Ticket deleted successfully!');
+    displayAdminTickets(updatedTickets);
+}
+
+// Close admin ticket modal
+function closeAdminTicketModal() {
+    document.getElementById('adminTicketModal').classList.remove('active');
+}
+
+// Export tickets
+function exportTickets() {
+    const tickets = loadAdminTickets();
+    
+    if (tickets.length === 0) {
+        alert('No tickets to export');
+        return;
+    }
+    
+    const csvContent = convertToCSV(tickets);
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `wighub-tickets-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    
+    URL.revokeObjectURL(url);
+    alert(`✅ ${tickets.length} tickets exported successfully!`);
+}
+
+function convertToCSV(tickets) {
+    const headers = ['ID', 'Customer Name', 'Customer Email', 'Subject', 'Category', 'Priority', 'Status', 'Order ID', 'Created At', 'Last Updated', 'Replies Count'];
+    
+    const rows = tickets.map(ticket => [
+        ticket.id,
+        ticket.customer.username || 'Unknown',
+        ticket.customer.email,
+        `"${ticket.subject}"`,
+        ticket.category,
+        ticket.priority,
+        ticket.status,
+        ticket.orderId || 'N/A',
+        new Date(ticket.createdAt).toLocaleString(),
+        new Date(ticket.updatedAt).toLocaleString(),
+        ticket.replies ? ticket.replies.length : 0
+    ]);
+    
+    return [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
+}
+
+// Refresh tickets
+function refreshTickets() {
+    const tickets = loadAdminTickets();
+    displayAdminTickets(tickets);
+    showNotification('✅ Tickets refreshed!', 'success');
+}
+
+// Helper functions for admin
+function getAdminStatusClass(status) {
+    const statusClasses = {
+        'open': 'status-open',
+        'pending': 'status-pending',
+        'answered': 'status-answered',
+        'resolved': 'status-resolved',
+        'closed': 'status-closed'
+    };
+    return statusClasses[status] || 'status-open';
+}
+
+function getAdminPriorityClass(priority) {
+    const priorityClasses = {
+        'low': 'priority-low',
+        'medium': 'priority-medium',
+        'high': 'priority-high',
+        'urgent': 'priority-urgent'
+    };
+    return priorityClasses[priority] || 'priority-medium';
 }
