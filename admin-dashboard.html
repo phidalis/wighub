@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wig Hub - Admin Dashboard</title>
     <link rel="stylesheet" href="admin-dashboard.css">
+    <link rel="stylesheet" href="admin-support.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -40,11 +41,20 @@
                     <button class="admin-btn" onclick="showAdminSection('addProduct')">
                         <i class="fas fa-plus-circle"></i> Add Product
                     </button>
+                    <button class="admin-btn" onclick="showAdminSection('customers')">
+                        <i class="fas fa-users"></i> Customers
+                    </button>
                     <button class="admin-btn" onclick="showAdminSection('orders')">
                         <i class="fas fa-box"></i> Orders
                     </button>
                     <button class="admin-btn" onclick="showAdminSection('settings')">
                         <i class="fas fa-cog"></i> Settings
+                    </button>
+                    <button class="admin-btn" onclick="showAdminSection('adminManagement')">
+                        <i class="fas fa-user-shield"></i> Admin Management
+                    </button>
+                    <button class="admin-btn" onclick="showAdminSection('support')">
+                        <i class="fas fa-headset"></i> Support Tickets
                     </button>
                 </div>
                 
@@ -64,81 +74,6 @@
                     </div>
                 </div>
             </aside>
-
-            <!-- Add this button to the sidebar menu (after Settings button) -->
-<button class="admin-btn" onclick="showAdminSection('adminManagement')">
-    <i class="fas fa-user-shield"></i> Admin Management
-</button>
-
-<!-- Add this section BEFORE the closing </div> of admin-content-area -->
-<section id="adminManagementSection" class="admin-section">
-    <div class="section-header">
-        <h2><i class="fas fa-user-shield"></i> Admin Management</h2>
-        <button class="btn btn-primary" onclick="showAddAdminForm()">
-            <i class="fas fa-plus"></i> Add New Admin
-        </button>
-    </div>
-    
-    <div class="settings-container">
-        <div class="settings-card">
-            <h3>Current Admins</h3>
-            <div id="adminList">
-                <!-- Admin list will be loaded here -->
-            </div>
-        </div>
-        
-        <div class="settings-card" id="addAdminForm" style="display: none;">
-            <h3>Add New Administrator</h3>
-            <div class="settings-form">
-                <div class="form-group">
-                    <label for="newAdminName">Full Name</label>
-                    <input type="text" id="newAdminName" placeholder="Enter full name">
-                </div>
-                <div class="form-group">
-                    <label for="newAdminEmail">Email Address</label>
-                    <input type="email" id="newAdminEmail" placeholder="Enter email">
-                </div>
-                <div class="form-group">
-                    <label for="newAdminPassword">Password</label>
-                    <input type="password" id="newAdminPassword" placeholder="Enter password">
-                </div>
-                <div class="form-group">
-                    <label for="adminRole">Role</label>
-                    <select id="adminRole">
-                        <option value="super_admin">Super Admin</option>
-                        <option value="admin">Admin</option>
-                        <option value="manager">Manager</option>
-                    </select>
-                </div>
-                <div class="form-actions">
-                    <button class="btn btn-secondary" onclick="cancelAddAdmin()">Cancel</button>
-                    <button class="btn btn-primary" onclick="addNewAdmin()">Add Admin</button>
-                </div>
-            </div>
-        </div>
-        
-        <div class="settings-card">
-            <h3>Change Default Admin Credentials</h3>
-            <div class="settings-form">
-                <div class="form-group">
-                    <label>Current Default Admin</label>
-                    <input type="text" value="admin@wighub.com" readonly>
-                </div>
-                <div class="form-group">
-                    <label for="newDefaultEmail">New Email</label>
-                    <input type="email" id="newDefaultEmail" placeholder="New admin email">
-                </div>
-                <div class="form-group">
-                    <label for="newDefaultPassword">New Password</label>
-                    <input type="password" id="newDefaultPassword" placeholder="New password">
-                </div>
-                <button class="btn btn-primary" onclick="updateDefaultAdmin()">
-                    Update Default Admin
-                </button>
-            </div>
-        </div>
-    </div>
-</section>
 
             <div class="admin-content-area">
                 <!-- Dashboard Section -->
@@ -258,190 +193,153 @@
 
                 <!-- Add Product Section -->
                 <section id="addProductSection" class="admin-section">
-    <div class="section-header">
-        <h2><i class="fas fa-plus-circle"></i> Add New Product</h2>
-    </div>
-    
-    <div class="add-product-form">
-        <div class="form-row">
-            <div class="form-group">
-                <label for="productName">Product Name *</label>
-                <input type="text" id="productName" placeholder="Brazilian Straight Wig">
-            </div>
-            <div class="form-group">
-                <label for="productCategory">Category *</label>
-                <select id="productCategory">
-                    <option value="">Select Category</option>
-                    <option value="Brazilian">Brazilian</option>
-                    <option value="Peruvian">Peruvian</option>
-                    <option value="Malaysian">Malaysian</option>
-                    <option value="Indian">Indian</option>
-                    <option value="Synthetic">Synthetic</option>
-                    <option value="Other">Other</option>
-                </select>
-            </div>
-        </div>
-        
-        <div class="form-row">
-            <div class="form-group">
-                <label for="productPrice">Price ($) *</label>
-                <input type="number" id="productPrice" placeholder="89.99" step="0.01" min="0">
-            </div>
-            <div class="form-group">
-                <label for="productStock">Stock Quantity *</label>
-                <input type="number" id="productStock" placeholder="10" min="0">
-            </div>
-        </div>
-        
-        <div class="form-row">
-            <div class="form-group full-width">
-                <label for="productDescription">Description *</label>
-                <textarea id="productDescription" placeholder="Premium quality wig..." rows="3"></textarea>
-            </div>
-        </div>
-        
-        <div class="form-row">
-            <div class="form-group">
-                <label for="productLength">Length (inches)</label>
-                <input type="text" id="productLength" placeholder="22-24">
-            </div>
-            <div class="form-group">
-                <label for="productColor">Color</label>
-                <input type="text" id="productColor" placeholder="Natural Black">
-            </div>
-        </div>
-        
-        <div class="form-row">
-            <div class="form-group full-width">
-                <label for="productImage">Product Image</label>
-                
-                <!-- Image Upload Options -->
-                <div class="image-upload-options" style="margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
-                    <button type="button" class="btn btn-secondary" onclick="browseImage()" style="padding: 8px 15px; font-size: 14px;">
-                        <i class="fas fa-folder-open"></i> Browse Files
-                    </button>
-                    <button type="button" class="btn btn-secondary" onclick="openCamera()" style="padding: 8px 15px; font-size: 14px;">
-                        <i class="fas fa-camera"></i> Take Photo
-                    </button>
-                    <button type="button" class="btn btn-secondary" onclick="pasteImage()" style="padding: 8px 15px; font-size: 14px;">
-                        <i class="fas fa-paste"></i> Paste Image
-                    </button>
-                </div>
-                
-                <!-- Hidden file input -->
-                <input type="file" id="imageFileInput" accept="image/*" style="display: none;" onchange="handleImageUpload(this.files[0])">
-                
-                <!-- Image URL input (for backward compatibility) -->
-               <input type="text" id="productImage" placeholder="Enter image URL or upload image for preview...">
-                <small style="display: block; margin-top: 5px; color: #666;">
-                    Supported formats: JPG, PNG, GIF, WebP. Max size: 5MB
-                </small>
-                
-                <!-- Drag & Drop Area -->
-                <div class="drag-drop-area" id="dragDropArea" 
-                     style="border: 2px dashed #3498db; border-radius: 10px; padding: 30px; text-align: center; margin-top: 15px; cursor: pointer; background: #f8f9fa;">
-                    <i class="fas fa-cloud-upload-alt" style="font-size: 40px; color: #3498db; margin-bottom: 10px;"></i>
-                    <h4 style="margin: 10px 0; color: #333;">Drag & Drop Image Here</h4>
-                    <p style="color: #666; margin-bottom: 15px;">or click to select file</p>
-                    <button type="button" class="btn btn-primary" onclick="browseImage()" style="padding: 8px 20px;">
-                        <i class="fas fa-search"></i> Select Image
-                    </button>
-                </div>
-                
-                <!-- Image Preview -->
-                <div class="image-preview" id="imagePreview" style="margin-top: 20px;">
-                    <p style="color: #999; text-align: center;">No image selected</p>
-                </div>
-                
-                <!-- Upload Progress -->
-                <div class="upload-progress" id="uploadProgress" style="display: none; margin-top: 10px;">
-                    <div class="progress-bar" style="height: 20px; background: #f0f0f0; border-radius: 10px; overflow: hidden;">
-                        <div class="progress-fill" style="height: 100%; width: 0%; background: #3498db; transition: width 0.3s;"></div>
+                    <div class="section-header">
+                        <h2><i class="fas fa-plus-circle"></i> Add New Product</h2>
                     </div>
-                    <p class="progress-text" style="text-align: center; margin-top: 5px; color: #666;">Uploading: <span id="progressPercent">0%</span></p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="form-actions">
-            <button type="button" class="btn btn-secondary" onclick="clearProductForm()">
-                Clear Form
-            </button>
-            <button type="button" class="btn btn-primary" onclick="addProduct()">
-                Add Product
-            </button>
-        </div>
-    </div>
-</section>
-                <!-- In admin-dashboard.html, update the customers table header (around line 255-265) -->
-<table class="customers-table">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Customer</th>
-            <th>Joined</th>
-            <th>Orders</th>
-            <th>Total Spent</th>
-            <th>Status</th>
-            <th>Actions</th> <!-- Add this column -->
-        </tr>
-    </thead>
-    <tbody id="adminCustomersTable">
-        <tr><td colspan="7" class="empty-table">Loading customers...</td></tr>
-    </tbody>
-</table>
+                    
+                    <div class="add-product-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="productName">Product Name *</label>
+                                <input type="text" id="productName" placeholder="Brazilian Straight Wig">
+                            </div>
+                            <div class="form-group">
+                                <label for="productCategory">Category *</label>
+                                <select id="productCategory">
+                                    <option value="">Select Category</option>
+                                    <option value="Brazilian">Brazilian</option>
+                                    <option value="Peruvian">Peruvian</option>
+                                    <option value="Malaysian">Malaysian</option>
+                                    <option value="Indian">Indian</option>
+                                    <option value="Synthetic">Synthetic</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="productPrice">Price ($) *</label>
+                                <input type="number" id="productPrice" placeholder="89.99" step="0.01" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="productStock">Stock Quantity *</label>
+                                <input type="number" id="productStock" placeholder="10" min="0">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group full-width">
+                                <label for="productDescription">Description *</label>
+                                <textarea id="productDescription" placeholder="Premium quality wig..." rows="3"></textarea>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="productLength">Length (inches)</label>
+                                <input type="text" id="productLength" placeholder="22-24">
+                            </div>
+                            <div class="form-group">
+                                <label for="productColor">Color</label>
+                                <input type="text" id="productColor" placeholder="Natural Black">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group full-width">
+                                <label for="productImage">Product Image</label>
 
-                <div class="admin-menu">
-    <button class="admin-btn active" onclick="showAdminSection('dashboard')">
-        <i class="fas fa-tachometer-alt"></i> Dashboard
-    </button>
-    <button class="admin-btn" onclick="showAdminSection('products')">
-        <i class="fas fa-wig"></i> Manage Products
-    </button>
-    <button class="admin-btn" onclick="showAdminSection('addProduct')">
-        <i class="fas fa-plus-circle"></i> Add Product
-    </button>
-    <button class="admin-btn" onclick="showAdminSection('customers')">
-        <i class="fas fa-users"></i> Customers
-    </button>
-    <button class="admin-btn" onclick="showAdminSection('orders')">
-        <i class="fas fa-box"></i> Orders
-    </button>
-    <button class="admin-btn" onclick="showAdminSection('settings')">
-        <i class="fas fa-cog"></i> Settings
-    </button>
-</div>
-     
-      <!-- Customers Section -->
-<section id="customersSection" class="admin-section">
-    <div class="section-header">
-        <h2><i class="fas fa-users"></i> Manage Customers</h2>
-        <div class="search-filter">
-            <div class="search-box">
-                <i class="fas fa-search"></i>
-                <input type="text" id="customerSearchInput" placeholder="Search customers..." onkeyup="filterCustomers()">
-            </div>
-        </div>
-    </div>
-    
-    <div class="customers-table-container">
-        <table class="customers-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Customer</th>
-                    <th>Joined</th>
-                    <th>Orders</th>
-                    <th>Total Spent</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody id="adminCustomersTable">
-                <tr><td colspan="6" class="empty-table">Loading customers...</td></tr>
-            </tbody>
-        </table>
-    </div>
-</section>   
+                                <!-- Image Upload Options -->
+                                <div class="image-upload-options" style="margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                                    <button type="button" class="btn btn-secondary" onclick="browseImage()" style="padding: 8px 15px; font-size: 14px;">
+                                        <i class="fas fa-folder-open"></i> Browse Files
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" onclick="openCamera()" style="padding: 8px 15px; font-size: 14px;">
+                                        <i class="fas fa-camera"></i> Take Photo
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" onclick="pasteImage()" style="padding: 8px 15px; font-size: 14px;">
+                                        <i class="fas fa-paste"></i> Paste Image
+                                    </button>
+                                </div>
+                                
+                                <!-- Hidden file input -->
+                                <input type="file" id="imageFileInput" accept="image/*" style="display: none;" onchange="handleImageUpload(this.files[0])">
+                                
+                                <!-- Image URL input (for backward compatibility) -->
+                                <input type="text" id="productImage" placeholder="Enter image URL or upload image for preview...">
+                                <small style="display: block; margin-top: 5px; color: #666;">
+                                    Supported formats: JPG, PNG, GIF, WebP. Max size: 5MB
+                                </small>
+                                
+                                <!-- Drag & Drop Area -->
+                                <div class="drag-drop-area" id="dragDropArea" 
+                                     style="border: 2px dashed #3498db; border-radius: 10px; padding: 30px; text-align: center; margin-top: 15px; cursor: pointer; background: #f8f9fa;">
+                                    <i class="fas fa-cloud-upload-alt" style="font-size: 40px; color: #3498db; margin-bottom: 10px;"></i>
+                                    <h4 style="margin: 10px 0; color: #333;">Drag & Drop Image Here</h4>
+                                    <p style="color: #666; margin-bottom: 15px;">or click to select file</p>
+                                    <button type="button" class="btn btn-primary" onclick="browseImage()" style="padding: 8px 20px;">
+                                        <i class="fas fa-search"></i> Select Image
+                                    </button>
+                                </div>
+                                
+                                <!-- Image Preview -->
+                                <div class="image-preview" id="imagePreview" style="margin-top: 20px;">
+                                    <p style="color: #999; text-align: center;">No image selected</p>
+                                </div>
+                                
+                                <!-- Upload Progress -->
+                                <div class="upload-progress" id="uploadProgress" style="display: none; margin-top: 10px;">
+                                    <div class="progress-bar" style="height: 20px; background: #f0f0f0; border-radius: 10px; overflow: hidden;">
+                                        <div class="progress-fill" style="height: 100%; width: 0%; background: #3498db; transition: width 0.3s;"></div>
+                                    </div>
+                                    <p class="progress-text" style="text-align: center; margin-top: 5px; color: #666;">Uploading: <span id="progressPercent">0%</span></p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="clearProductForm()">
+                                Clear Form
+                            </button>
+                            <button type="button" class="btn btn-primary" onclick="addProduct()">
+                                Add Product
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Customers Section -->
+                <section id="customersSection" class="admin-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-users"></i> Manage Customers</h2>
+                        <div class="search-filter">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="customerSearchInput" placeholder="Search customers..." onkeyup="filterCustomers()">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="customers-table-container">
+                        <table class="customers-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Customer</th>
+                                    <th>Joined</th>
+                                    <th>Orders</th>
+                                    <th>Total Spent</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminCustomersTable">
+                                <tr><td colspan="7" class="empty-table">Loading customers...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
 
                 <!-- Orders Section -->
                 <section id="ordersSection" class="admin-section">
@@ -508,12 +406,184 @@
                         </div>
                     </div>
                 </section>
+
+                <!-- Admin Management Section -->
+                <section id="adminManagementSection" class="admin-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-user-shield"></i> Admin Management</h2>
+                        <button class="btn btn-primary" onclick="showAddAdminForm()">
+                            <i class="fas fa-plus"></i> Add New Admin
+                        </button>
+                    </div>
+                    
+                    <div class="settings-container">
+                        <div class="settings-card">
+                            <h3>Current Admins</h3>
+                            <div id="adminList">
+                                <!-- Admin list will be loaded here -->
+                            </div>
+                        </div>
+                        
+                        <div class="settings-card" id="addAdminForm" style="display: none;">
+                            <h3>Add New Administrator</h3>
+                            <div class="settings-form">
+                                <div class="form-group">
+                                    <label for="newAdminName">Full Name</label>
+                                    <input type="text" id="newAdminName" placeholder="Enter full name">
+                                </div>
+                                <div class="form-group">
+                                    <label for="newAdminEmail">Email Address</label>
+                                    <input type="email" id="newAdminEmail" placeholder="Enter email">
+                                </div>
+                                <div class="form-group">
+                                    <label for="newAdminPassword">Password</label>
+                                    <input type="password" id="newAdminPassword" placeholder="Enter password">
+                                </div>
+                                <div class="form-group">
+                                    <label for="adminRole">Role</label>
+                                    <select id="adminRole">
+                                        <option value="super_admin">Super Admin</option>
+                                        <option value="admin">Admin</option>
+                                        <option value="manager">Manager</option>
+                                    </select>
+                                </div>
+                                <div class="form-actions">
+                                    <button class="btn btn-secondary" onclick="cancelAddAdmin()">Cancel</button>
+                                    <button class="btn btn-primary" onclick="addNewAdmin()">Add Admin</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="settings-card">
+                            <h3>Change Default Admin Credentials</h3>
+                            <div class="settings-form">
+                                <div class="form-group">
+                                    <label>Current Default Admin</label>
+                                    <input type="text" value="admin@wighub.com" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label for="newDefaultEmail">New Email</label>
+                                    <input type="email" id="newDefaultEmail" placeholder="New admin email">
+                                </div>
+                                <div class="form-group">
+                                    <label for="newDefaultPassword">New Password</label>
+                                    <input type="password" id="newDefaultPassword" placeholder="New password">
+                                </div>
+                                <button class="btn btn-primary" onclick="updateDefaultAdmin()">
+                                    Update Default Admin
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Support Section -->
+                <section id="supportSection" class="admin-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-headset"></i> Support Ticket Management</h2>
+                        <div class="support-stats">
+                            <span class="stat-item">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <strong id="openTickets">0</strong> Open
+                            </span>
+                            <span class="stat-item">
+                                <i class="fas fa-clock"></i>
+                                <strong id="pendingTickets">0</strong> Pending
+                            </span>
+                            <span class="stat-item">
+                                <i class="fas fa-check-circle"></i>
+                                <strong id="resolvedTickets">0</strong> Resolved
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="support-admin-container">
+                        <div class="support-filters">
+                            <div class="search-filter-group">
+                                <div class="search-box">
+                                    <i class="fas fa-search"></i>
+                                    <input type="text" id="adminTicketSearch" placeholder="Search tickets..." onkeyup="filterAdminTickets()">
+                                </div>
+                                <select id="adminTicketStatusFilter" onchange="filterAdminTickets()">
+                                    <option value="">All Status</option>
+                                    <option value="open">Open</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="answered">Answered</option>
+                                    <option value="resolved">Resolved</option>
+                                    <option value="closed">Closed</option>
+                                </select>
+                                <select id="adminTicketPriorityFilter" onchange="filterAdminTickets()">
+                                    <option value="">All Priority</option>
+                                    <option value="low">Low</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="high">High</option>
+                                    <option value="urgent">Urgent</option>
+                                </select>
+                                <select id="adminTicketCategoryFilter" onchange="filterAdminTickets()">
+                                    <option value="">All Categories</option>
+                                    <option value="order">Order Issue</option>
+                                    <option value="product">Product Inquiry</option>
+                                    <option value="shipping">Shipping/Delivery</option>
+                                    <option value="payment">Payment Issue</option>
+                                    <option value="account">Account Problem</option>
+                                    <option value="refund">Refund Request</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            
+                            <div class="admin-actions">
+                                <button class="btn btn-primary" onclick="exportTickets()">
+                                    <i class="fas fa-download"></i> Export
+                                </button>
+                                <button class="btn btn-secondary" onclick="refreshTickets()">
+                                    <i class="fas fa-sync-alt"></i> Refresh
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="tickets-admin-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Ticket ID</th>
+                                        <th>Customer</th>
+                                        <th>Subject</th>
+                                        <th>Category</th>
+                                        <th>Priority</th>
+                                        <th>Status</th>
+                                        <th>Created</th>
+                                        <th>Last Update</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="adminTicketsTable">
+                                    <tr><td colspan="9" class="empty-table">Loading tickets...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
             </div>
         </main>
 
         <footer class="admin-footer">
             <p>© 2026 phidsolutions. All rights reserved. | Admin Panel</p>
         </footer>
+    </div>
+
+    <!-- Admin Ticket Detail Modal -->
+    <div id="adminTicketModal" class="admin-modal">
+        <div class="admin-modal-content">
+            <div class="admin-modal-header">
+                <h3><i class="fas fa-ticket-alt"></i> Ticket Details</h3>
+                <button class="btn-close-modal" onclick="closeAdminTicketModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="admin-modal-body" id="adminTicketModalBody">
+                <!-- Ticket details will be loaded here -->
+            </div>
+        </div>
     </div>
 
     <script src="admin-dashboard.js"></script>
