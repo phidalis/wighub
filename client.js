@@ -581,8 +581,10 @@ function loadCartItems() {
         `;
     });
     
-    const tax = subtotal * 0.08; // 8% tax
-    const shipping = subtotal > 100 ? 0 : 9.99;
+    // Use store configuration
+    const config = getStoreConfig();
+    const tax = subtotal * (config.taxRate / 100);
+    const shipping = subtotal >= config.freeShippingThreshold ? 0 : config.shippingFee;
     const total = subtotal + tax + shipping;
     
     cartContainer.innerHTML = `
@@ -595,13 +597,15 @@ function loadCartItems() {
                 <span>$${subtotal.toFixed(2)}</span>
             </div>
             <div class="summary-row">
-                <span>Tax (8%):</span>
+                <span>Tax (${config.taxRate}%):</span>
                 <span>$${tax.toFixed(2)}</span>
             </div>
             <div class="summary-row">
                 <span>Shipping:</span>
                 <span>${shipping === 0 ? '<span style="color: #28a745; font-weight: 600;">FREE</span>' : `$${shipping.toFixed(2)}`}</span>
-                ${subtotal < 100 ? `<small style="display: block; color: #666; margin-top: 5px;">Spend $${(100 - subtotal).toFixed(2)} more for free shipping!</small>` : ''}
+                ${subtotal < config.freeShippingThreshold ? 
+                    `<small style="display: block; color: #666; margin-top: 5px;">Spend $${(config.freeShippingThreshold - subtotal).toFixed(2)} more for free shipping!</small>` : 
+                    ''}
             </div>
             <div class="summary-row total">
                 <span>Total:</span>
@@ -630,24 +634,28 @@ function checkout() {
         }
     }
     
-    if (!confirm(`Confirm purchase for $${cart.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2)}?`)) {
-        return;
-    }
-    
-    // Create order
+    // Create order with sequential ID
     const order = {
-        id: 'ORD' + Date.now(),
+        id: generateOrderId(),
         date: new Date().toISOString(),
         items: [...cart],
         subtotal: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
-        tax: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0) * 0.08,
-        shipping: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0) > 100 ? 0 : 9.99,
+        tax: 0, // Will be calculated below
+        shipping: 0, // Will be calculated below
         total: 0,
         status: 'processing',
         customer: JSON.parse(localStorage.getItem('clientUser'))
     };
     
+    // Use store configuration
+    const config = getStoreConfig();
+    order.tax = order.subtotal * (config.taxRate / 100);
+    order.shipping = order.subtotal >= config.freeShippingThreshold ? 0 : config.shippingFee;
     order.total = order.subtotal + order.tax + order.shipping;
+    
+    if (!confirm(`Confirm purchase for $${order.total.toFixed(2)}?`)) {
+        return;
+    }
     
     // Update product stock in main products array
     for (const item of cart) {
@@ -1096,9 +1104,9 @@ function submitTicket() {
         }
     }
     
-    // Create new ticket
+    // Create new ticket with sequential ID
     const newTicket = {
-        id: 'TKT' + Date.now() + Math.random().toString(36).substr(2, 9),
+        id: generateTicketId(),
         subject,
         orderId: orderId || null,
         category,
@@ -1363,3 +1371,76 @@ function getPriorityClass(priority) {
     };
     return priorityClasses[priority] || 'priority-medium';
 }
+
+// ===== STORE CONFIG GETTER =====
+function getStoreConfig() {
+    const config = JSON.parse(localStorage.getItem('wigStoreConfig') || '{}');
+    return {
+        taxRate: config.taxRate || 8,
+        shippingFee: config.shippingFee || 9.99,
+        freeShippingThreshold: config.freeShippingThreshold || 100
+    };
+}
+
+// ===== ORDER ID GENERATOR =====
+function generateOrderId() {
+    let allOrders = [];
+    
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith('orders_')) {
+            const ordersJSON = localStorage.getItem(key);
+            if (ordersJSON) {
+                try {
+                    const userOrders = JSON.parse(ordersJSON);
+                    allOrders = allOrders.concat(userOrders);
+                } catch (e) {
+                    console.error('Error parsing orders:', e);
+                }
+            }
+        }
+    }
+    
+    let maxId = 0;
+    allOrders.forEach(order => {
+        if (order.id && order.id.startsWith('ORD')) {
+            const num = parseInt(order.id.replace('ORD', ''));
+            if (!isNaN(num) && num > maxId) {
+                maxId = num;
+            }
+        }
+    });
+    
+    const nextId = maxId + 1;
+    return 'ORD' + nextId.toString().padStart(4, '0');
+}
+
+// ===== TICKET ID GENERATOR =====
+function generateTicketId() {
+    const clientUser = JSON.parse(localStorage.getItem('clientUser') || '{}');
+    const ticketsKey = `tickets_${clientUser.email}`;
+    const ticketsJSON = localStorage.getItem(ticketsKey);
+    let tickets = [];
+    
+    if (ticketsJSON) {
+        try {
+            tickets = JSON.parse(ticketsJSON);
+        } catch (e) {
+            tickets = [];
+        }
+    }
+    
+    let maxId = 0;
+    tickets.forEach(ticket => {
+        if (ticket.id && ticket.id.startsWith('TKT')) {
+            const num = parseInt(ticket.id.replace('TKT', ''));
+            if (!isNaN(num) && num > maxId) {
+                maxId = num;
+            }
+        }
+    });
+    
+    const nextId = maxId + 1;
+    return 'TKT' + nextId.toString().padStart(4, '0');
+}
+
