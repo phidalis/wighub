@@ -5,6 +5,10 @@ let allClients = [];
 let allOrders = [];
 let uploadedImages = []; // Store uploaded images
 
+// Camera variables
+let currentCamera = 'user'; // 'user' for front, 'environment' for rear
+let currentStream = null;
+
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Admin Dashboard Initializing...');
@@ -84,6 +88,18 @@ function initializeData() {
     if (!localStorage.getItem('wigSupportTickets')) {
         console.log('Creating support tickets storage...');
         localStorage.setItem('wigSupportTickets', JSON.stringify([]));
+    }
+    
+    // Initialize store configuration if not exist
+    if (!localStorage.getItem('wigStoreConfig')) {
+        console.log('Creating store configuration...');
+        const storeConfig = {
+            taxRate: 8,
+            shippingFee: 9.99,
+            freeShippingThreshold: 100,
+            createdAt: new Date().toISOString()
+        };
+        localStorage.setItem('wigStoreConfig', JSON.stringify(storeConfig));
     }
     
     // Initialize orders storage for clients
@@ -604,6 +620,131 @@ function updateImagePreview(imageUrl) {
     }
 }
 
+// ===== STORE CONFIGURATION =====
+function loadStoreConfig() {
+    let config = JSON.parse(localStorage.getItem('wigStoreConfig') || '{}');
+    
+    config = {
+        taxRate: config.taxRate || 8,
+        shippingFee: config.shippingFee || 9.99,
+        freeShippingThreshold: config.freeShippingThreshold || 100,
+        ...config
+    };
+    
+    if (document.getElementById('taxRate')) {
+        document.getElementById('taxRate').value = config.taxRate;
+    }
+    if (document.getElementById('shippingFee')) {
+        document.getElementById('shippingFee').value = config.shippingFee;
+    }
+    if (document.getElementById('freeShippingThreshold')) {
+        document.getElementById('freeShippingThreshold').value = config.freeShippingThreshold;
+    }
+    
+    return config;
+}
+
+function saveStoreConfig() {
+    const taxRate = parseFloat(document.getElementById('taxRate').value);
+    const shippingFee = parseFloat(document.getElementById('shippingFee').value);
+    const freeShippingThreshold = parseFloat(document.getElementById('freeShippingThreshold').value);
+    
+    const config = {
+        taxRate,
+        shippingFee,
+        freeShippingThreshold,
+        updatedAt: new Date().toISOString()
+    };
+    
+    localStorage.setItem('wigStoreConfig', JSON.stringify(config));
+    alert('✅ Store configuration saved successfully!');
+}
+
+// ===== TICKET ID GENERATOR =====
+function generateTicketId() {
+    const ticketsKey = 'wigSupportTickets';
+    const ticketsJSON = localStorage.getItem(ticketsKey);
+    let tickets = [];
+    
+    if (ticketsJSON) {
+        try {
+            tickets = JSON.parse(ticketsJSON);
+        } catch (e) {
+            tickets = [];
+        }
+    }
+    
+    let maxId = 0;
+    tickets.forEach(ticket => {
+        if (ticket.id && ticket.id.startsWith('TKT')) {
+            const num = parseInt(ticket.id.replace('TKT', ''));
+            if (!isNaN(num) && num > maxId) {
+                maxId = num;
+            }
+        }
+    });
+    
+    const nextId = maxId + 1;
+    return 'TKT' + nextId.toString().padStart(4, '0');
+}
+
+// ===== ORDER ID GENERATOR (For Admin) =====
+function generateOrderIdForAdmin() {
+    let allOrders = [];
+    
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith('orders_')) {
+            const ordersJSON = localStorage.getItem(key);
+            if (ordersJSON) {
+                try {
+                    const userOrders = JSON.parse(ordersJSON);
+                    allOrders = allOrders.concat(userOrders);
+                } catch (e) {
+                    console.error('Error parsing orders:', e);
+                }
+            }
+        }
+    }
+    
+    let maxId = 0;
+    allOrders.forEach(order => {
+        if (order.id && order.id.startsWith('ORD')) {
+            const num = parseInt(order.id.replace('ORD', ''));
+            if (!isNaN(num) && num > maxId) {
+                maxId = num;
+            }
+        }
+    });
+    
+    const nextId = maxId + 1;
+    return 'ORD' + nextId.toString().padStart(4, '0');
+}
+
+// ===== IMAGE OPTIMIZATION =====
+function optimizeDataURL(dataUrl) {
+    if (dataUrl.length > 50000) {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width * 0.5;
+                canvas.height = img.height * 0.5;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                resolve(canvas.toDataURL('image/jpeg', 0.4));
+            };
+            img.src = dataUrl;
+        });
+    }
+    return Promise.resolve(dataUrl);
+}
+
+// Update loadSettings function
+function loadSettings() {
+    loadStoreConfig(); // Load store configuration
+}
+
 // Add new product
 function addProduct() {
     // Get form values
@@ -780,7 +921,7 @@ function deleteProduct(productId) {
     showAdminSection('products');
 }
 
-// Load orders table
+// Load orders table - UPDATED with sequential IDs
 function loadOrdersTable() {
     const tableBody = document.getElementById('adminOrdersTable');
     if (!tableBody) return;
@@ -800,7 +941,7 @@ function loadOrdersTable() {
     );
     
     let html = '';
-    sortedOrders.forEach((order, index) => {
+    sortedOrders.forEach((order) => {
         const orderDate = new Date(order.date || order.createdAt);
         const formattedDate = orderDate.toLocaleDateString();
         const formattedTime = orderDate.toLocaleTimeString();
@@ -813,6 +954,9 @@ function loadOrdersTable() {
         } else if (order.status === 'processing') {
             statusClass = 'processing';
             statusText = 'Processing';
+        } else if (order.status === 'shipped') {
+            statusClass = 'shipped';
+            statusText = 'Shipped';
         }
         
         const customerName = order.customer ? 
@@ -821,15 +965,15 @@ function loadOrdersTable() {
         
         html += `
             <tr>
-                <td>${order.id || 'ORD' + (index + 1)}</td>
+                <td><strong>${order.id || generateOrderIdForAdmin()}</strong></td>
                 <td>${customerName}</td>
                 <td>${formattedDate} ${formattedTime}</td>
                 <td>$${(order.total || 0).toFixed(2)}</td>
                 <td>
                     <span class="status-badge ${statusClass}" 
                           style="padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
-                                 background: ${statusClass === 'delivered' ? '#d4edda' : statusClass === 'processing' ? '#d1ecf1' : '#fff3cd'};
-                                 color: ${statusClass === 'delivered' ? '#155724' : statusClass === 'processing' ? '#0c5460' : '#856404'}">
+                                 background: ${statusClass === 'delivered' ? '#d4edda' : statusClass === 'processing' ? '#d1ecf1' : statusClass === 'shipped' ? '#cce5ff' : '#fff3cd'};
+                                 color: ${statusClass === 'delivered' ? '#155724' : statusClass === 'processing' ? '#0c5460' : statusClass === 'shipped' ? '#004085' : '#856404'}">
                         ${statusText}
                     </span>
                 </td>
@@ -946,11 +1090,6 @@ function loadSampleProducts() {
     showAdminSection('dashboard');
 }
 
-// Load settings
-function loadSettings() {
-    // This can be expanded with actual settings
-}
-
 // Export products
 function exportProducts() {
     const dataStr = JSON.stringify(allProducts, null, 2);
@@ -972,6 +1111,7 @@ function createBackup() {
         products: allProducts,
         clients: allClients,
         orders: allOrders,
+        storeConfig: JSON.parse(localStorage.getItem('wigStoreConfig') || '{}'),
         backupDate: new Date().toISOString()
     };
     
@@ -999,6 +1139,7 @@ function clearAllData() {
     localStorage.removeItem('wigClients');
     localStorage.removeItem('wigAdmins');
     localStorage.removeItem('wigSupportTickets');
+    localStorage.removeItem('wigStoreConfig');
     
     // Clear all order-related data
     for (let i = 0; i < localStorage.length; i++) {
@@ -1659,8 +1800,8 @@ function showNotification(message, type = 'info') {
     }, 3000);
 }
 
-// ===== IMAGE COMPRESSION FUNCTION =====
-function compressImage(file, maxWidth = 800, quality = 0.7) {
+// ===== ENHANCED IMAGE COMPRESSION FUNCTION =====
+function compressImage(file, maxWidth = 800, maxHeight = 800, quality = 0.6) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
@@ -1672,20 +1813,43 @@ function compressImage(file, maxWidth = 800, quality = 0.7) {
                 let width = img.width;
                 let height = img.height;
                 
-                // Resize if too large
-                if (width > maxWidth) {
-                    height = (height * maxWidth) / width;
-                    width = maxWidth;
+                // Maintain aspect ratio
+                if (width > height) {
+                    if (width > maxWidth) {
+                        height = Math.round((height * maxWidth) / width);
+                        width = maxWidth;
+                    }
+                } else {
+                    if (height > maxHeight) {
+                        width = Math.round((width * maxHeight) / height);
+                        height = maxHeight;
+                    }
                 }
+                
+                // Ensure minimum dimensions
+                width = Math.max(width, 100);
+                height = Math.max(height, 100);
                 
                 canvas.width = width;
                 canvas.height = height;
                 
                 const ctx = canvas.getContext('2d');
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, width, height);
                 ctx.drawImage(img, 0, 0, width, height);
                 
-                // Get compressed data URL
-                const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+                // Try WebP first (better compression)
+                let compressedDataUrl;
+                try {
+                    compressedDataUrl = canvas.toDataURL('image/webp', quality);
+                    if (compressedDataUrl.length < 10000) { // If too small, use JPEG
+                        compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+                    }
+                } catch (e) {
+                    // Fallback to JPEG if WebP not supported
+                    compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+                }
+                
                 resolve(compressedDataUrl);
             };
             img.onerror = reject;
@@ -1794,6 +1958,9 @@ function handleImageUpload(file) {
             // Use compression for smaller Data URLs
             compressImage(file)
                 .then(compressedDataUrl => {
+                    return optimizeDataURL(compressedDataUrl);
+                })
+                .then(optimizedDataUrl => {
                     // Hide progress bar
                     setTimeout(() => {
                         progressDiv.style.display = 'none';
@@ -1804,8 +1971,8 @@ function handleImageUpload(file) {
                         id: Date.now(),
                         name: file.name,
                         type: 'image/jpeg',
-                        size: compressedDataUrl.length,
-                        dataUrl: compressedDataUrl,
+                        size: optimizedDataUrl.length,
+                        dataUrl: optimizedDataUrl,
                         uploadedAt: new Date().toISOString()
                     };
                     
@@ -1860,7 +2027,7 @@ function handleImageUpload(file) {
     }, 100);
 }
 
-// Take photo from camera
+// ===== CAMERA FUNCTIONS WITH SWITCH CAPABILITY =====
 function openCamera() {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         alert('Camera access is not supported in your browser');
@@ -1873,75 +2040,146 @@ function openCamera() {
     cameraModal.id = 'cameraModal';
     
     cameraModal.innerHTML = `
-        <video class="camera-video" id="cameraVideo" autoplay></video>
+        <div class="camera-header">
+            <h3><i class="fas fa-camera"></i> Take Product Photo</h3>
+            <button class="btn-close-camera" onclick="closeCamera()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="camera-container">
+            <video class="camera-video" id="cameraVideo" autoplay playsinline></video>
+            <div class="camera-overlay">
+                <div class="camera-frame">
+                    <div class="frame-text">Position product within frame</div>
+                </div>
+            </div>
+        </div>
         <div class="camera-controls">
-            <button class="btn btn-primary" onclick="capturePhoto()">
+            <button class="btn-camera-switch" onclick="switchCamera()" title="Switch Camera">
+                <i class="fas fa-sync-alt"></i> Switch Camera
+            </button>
+            <button class="btn-capture" onclick="capturePhoto()">
                 <i class="fas fa-camera"></i> Capture Photo
             </button>
-            <button class="btn btn-secondary" onclick="closeCamera()">
-                <i class="fas fa-times"></i> Close
+            <button class="btn-cancel" onclick="closeCamera()">
+                <i class="fas fa-times"></i> Cancel
             </button>
         </div>
     `;
     
     document.body.appendChild(cameraModal);
     
-    // Access camera
-    navigator.mediaDevices.getUserMedia({ video: true })
-        .then(function(stream) {
-            const video = document.getElementById('cameraVideo');
-            video.srcObject = stream;
-        })
-        .catch(function(err) {
-            console.error('Camera error:', err);
-            alert('Unable to access camera. Please check permissions.');
-            closeCamera();
-        });
+    // Start with front camera
+    startCamera('user');
+}
+
+// Start camera with specific facing mode
+function startCamera(facingMode) {
+    if (currentStream) {
+        // Stop the current stream
+        currentStream.getTracks().forEach(track => track.stop());
+    }
+    
+    navigator.mediaDevices.getUserMedia({ 
+        video: { 
+            facingMode: facingMode,
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+        } 
+    })
+    .then(function(stream) {
+        currentStream = stream;
+        const video = document.getElementById('cameraVideo');
+        video.srcObject = stream;
+        
+        // Apply mirror effect only for front camera
+        if (facingMode === 'user') {
+            video.style.transform = 'scaleX(-1)';
+        } else {
+            video.style.transform = 'scaleX(1)';
+        }
+        
+        currentCamera = facingMode;
+    })
+    .catch(function(err) {
+        console.error('Camera error:', err);
+        alert('Unable to access camera. Please check permissions.');
+        closeCamera();
+    });
+}
+
+// Switch between front and rear camera
+function switchCamera() {
+    if (currentCamera === 'user') {
+        // Switch to rear camera
+        startCamera('environment');
+        showNotification('Switched to rear camera', 'info');
+    } else {
+        // Switch to front camera
+        startCamera('user');
+        showNotification('Switched to front camera', 'info');
+    }
 }
 
 // Capture photo from camera
 function capturePhoto() {
-    const video = document.getElementById('cameraVideo');
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
+    // Add flash effect
+    const flash = document.createElement('div');
+    flash.className = 'camera-flash';
+    const cameraContainer = document.querySelector('.camera-container');
+    if (cameraContainer) {
+        cameraContainer.appendChild(flash);
+        setTimeout(() => flash.remove(), 500);
+    }
     
-    // Set canvas dimensions to video dimensions
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    
-    // Draw video frame to canvas
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    
-    // Convert to data URL
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-    
-    // Create image object
-    const imageData = {
-        id: Date.now(),
-        name: `camera-photo-${Date.now()}.jpg`,
-        type: 'image/jpeg',
-        size: dataUrl.length,
-        dataUrl: dataUrl,
-        uploadedAt: new Date().toISOString(),
-        source: 'camera'
-    };
-    
-    // Add to uploaded images
-    uploadedImages.push(imageData);
-    
-    // Update preview
-    updateImagePreview(dataUrl);
-
-    // Update URL input WITH THE DATA URL
-    document.getElementById('productImage').value = dataUrl;
-
-    // Save to localStorage
-    saveUploadedImages();
-
-    // Close camera
-    closeCamera();
-
-    showNotification('✅ Photo captured successfully!', 'success');
+    setTimeout(() => {
+        const video = document.getElementById('cameraVideo');
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        
+        // Set canvas dimensions to video dimensions
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        // Draw video frame with correct orientation
+        if (currentCamera === 'user') {
+            // For front camera, flip horizontally for correct orientation
+            context.translate(canvas.width, 0);
+            context.scale(-1, 1);
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        } else {
+            // For rear camera, normal orientation
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        }
+        
+        // Convert to compressed data URL
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+        
+        // Create image object
+        const imageData = {
+            id: Date.now(),
+            name: `product-photo-${Date.now()}.jpg`,
+            type: 'image/jpeg',
+            size: dataUrl.length,
+            dataUrl: dataUrl,
+            uploadedAt: new Date().toISOString(),
+            source: 'camera',
+            cameraType: currentCamera === 'user' ? 'front' : 'rear'
+        };
+        
+        // Add to uploaded images
+        uploadedImages.push(imageData);
+        
+        // Optimize and save
+        optimizeDataURL(dataUrl)
+            .then(optimizedDataUrl => {
+                updateImagePreview(optimizedDataUrl);
+                document.getElementById('productImage').value = optimizedDataUrl;
+                saveUploadedImages();
+                closeCamera();
+                showNotification('✅ Photo captured successfully!', 'success');
+            });
+    }, 100); // Small delay for flash effect
 }
 
 // Close camera
@@ -1949,11 +2187,9 @@ function closeCamera() {
     const cameraModal = document.getElementById('cameraModal');
     if (cameraModal) {
         // Stop camera stream
-        const video = document.getElementById('cameraVideo');
-        if (video && video.srcObject) {
-            const stream = video.srcObject;
-            const tracks = stream.getTracks();
-            tracks.forEach(track => track.stop());
+        if (currentStream) {
+            currentStream.getTracks().forEach(track => track.stop());
+            currentStream = null;
         }
         
         cameraModal.remove();
@@ -2576,3 +2812,4 @@ function getAdminPriorityClass(priority) {
     };
     return priorityClasses[priority] || 'priority-medium';
 }
+
