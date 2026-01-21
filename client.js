@@ -369,19 +369,17 @@ function loadProductsGrid() {
         const stockBg = product.stock < 5 ? '#f8d7da' : '#d4edda';
         
         html += `
-            <div class="product-card">
+            <div class="product-card" onclick="showProductDetail(${product.id})" style="cursor: pointer;">
                 <div class="product-image">
                     <img src="${product.image || 'https://via.placeholder.com/400x400?text=Wig+Image'}" 
-                         alt="${product.name}"
-                         onclick="showProductDetail(${product.id})"
-                         style="cursor: pointer;">
-                    <button class="wishlist-btn" onclick="toggleWishlist(${product.id})" title="${isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}">
+                         alt="${product.name}">
+                    <button class="wishlist-btn" onclick="toggleWishlist(${product.id}); event.stopPropagation()" title="${isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}">
                         <i class="fas fa-heart${isInWishlist ? '' : '-o'}"></i>
                     </button>
                     <span class="stock-badge ${stockClass}" style="background: ${stockBg}; color: ${stockColor};">${stockText}</span>
                 </div>
                 <div class="product-info">
-                    <h3 onclick="showProductDetail(${product.id})" style="cursor: pointer;">${product.name}</h3>
+                    <h3>${product.name}</h3>
                     <div class="product-meta">
                         <span class="product-category">${product.category}</span>
                         <span class="product-length">${product.length}</span>
@@ -393,7 +391,7 @@ function loadProductsGrid() {
                     <div class="product-price">
                         <span class="price">$${product.price.toFixed(2)}</span>
                         ${product.stock > 0 ? 
-                            `<button class="btn-add-cart" onclick="addToCart(${product.id})" title="Add to Cart">
+                            `<button class="btn-add-cart" onclick="addToCart(${product.id}); event.stopPropagation()" title="Add to Cart">
                                 <i class="fas fa-cart-plus"></i> Add to Cart
                             </button>` :
                             `<span class="out-of-stock">Out of Stock</span>`
@@ -556,25 +554,23 @@ function loadCartItems() {
         subtotal += itemTotal;
         
         itemsHtml += `
-            <div class="cart-item">
+            <div class="cart-item" onclick="showProductDetail(${item.id})" style="cursor: pointer;">
                 <div class="cart-item-image">
                     <img src="${item.image || 'https://via.placeholder.com/100x100?text=Wig'}" 
-                         alt="${item.name}"
-                         onclick="showProductDetail(${item.id})"
-                         style="cursor: pointer;">
+                         alt="${item.name}">
                 </div>
                 <div class="cart-item-details">
-                    <h4 onclick="showProductDetail(${item.id})" style="cursor: pointer;">${item.name}</h4>
+                    <h4>${item.name}</h4>
                     <p class="item-category">${item.category} • ${item.length}</p>
                     <p class="item-price">$${item.price.toFixed(2)} each</p>
                 </div>
-                <div class="cart-item-quantity">
+                <div class="cart-item-quantity" onclick="event.stopPropagation()">
                     <button class="qty-btn" onclick="updateCartQuantity(${item.id}, -1)" title="Decrease quantity">-</button>
                     <span class="qty-value">${item.quantity}</span>
                     <button class="qty-btn" onclick="updateCartQuantity(${item.id}, 1)" title="Increase quantity">+</button>
                 </div>
                 <div class="cart-item-total">$${itemTotal.toFixed(2)}</div>
-                <button class="btn-remove" onclick="removeFromCart(${item.id})" title="Remove from cart">
+                <button class="btn-remove" onclick="removeFromCart(${item.id}); event.stopPropagation()" title="Remove from cart">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
@@ -731,19 +727,17 @@ function loadWishlistItems() {
     let html = '';
     wishlist.forEach(product => {
         html += `
-            <div class="wishlist-item">
+            <div class="wishlist-item" onclick="showProductDetail(${product.id})" style="cursor: pointer;">
                 <div class="wishlist-image">
                     <img src="${product.image || 'https://via.placeholder.com/80x80?text=Wig'}" 
-                         alt="${product.name}"
-                         onclick="showProductDetail(${product.id})"
-                         style="cursor: pointer;">
+                         alt="${product.name}">
                 </div>
                 <div class="wishlist-info">
-                    <h4 onclick="showProductDetail(${product.id})" style="cursor: pointer;">${product.name}</h4>
+                    <h4>${product.name}</h4>
                     <p>${product.category} • ${product.length}</p>
                     <p class="price">$${product.price.toFixed(2)}</p>
                 </div>
-                <button class="btn-remove-wishlist" onclick="removeFromWishlist(${product.id})" title="Remove from wishlist">
+                <button class="btn-remove-wishlist" onclick="removeFromWishlist(${product.id}); event.stopPropagation()" title="Remove from wishlist">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
@@ -1443,4 +1437,662 @@ function generateTicketId() {
     const nextId = maxId + 1;
     return 'TKT' + nextId.toString().padStart(4, '0');
 }
+
+function showChangePasswordModal() {
+    document.getElementById('changePasswordModal').classList.add('active');
+}
+
+function closeChangePasswordModal() {
+    document.getElementById('changePasswordModal').classList.remove('active');
+    document.getElementById('currentPassword').value = '';
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmNewPassword').value = '';
+    document.getElementById('passwordMatchStatus').textContent = '';
+    document.getElementById('newStrengthText').textContent = '';
+}
+
+function updatePassword() {
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmNewPassword').value;
+    
+    if (!currentPassword || !newPassword || !confirmPassword) {
+        alert('Please fill in all fields');
+        return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+        alert('New passwords do not match');
+        return;
+    }
+    
+    if (newPassword.length < 6) {
+        alert('New password must be at least 6 characters');
+        return;
+    }
+    
+    // Get client data
+    const clientUser = JSON.parse(localStorage.getItem('clientUser') || '{}');
+    const clients = JSON.parse(localStorage.getItem('wigClients') || '[]');
+    const clientIndex = clients.findIndex(c => c.email === clientUser.email);
+    
+    if (clientIndex === -1) {
+        alert('Client not found');
+        return;
+    }
+    
+    // Verify current password
+    if (clients[clientIndex].password !== currentPassword) {
+        alert('Current password is incorrect');
+        return;
+    }
+    
+    // Update password
+    clients[clientIndex].password = newPassword;
+    clients[clientIndex].passwordChangedAt = new Date().toISOString();
+    
+    // Save to localStorage
+    localStorage.setItem('wigClients', JSON.stringify(clients));
+    
+    // Log password change activity
+    logPasswordChange(clientUser.email);
+    
+    alert('Password updated successfully!');
+    closeChangePasswordModal();
+}
+
+function logPasswordChange(email) {
+    const logs = JSON.parse(localStorage.getItem('passwordChangeLogs') || '[]');
+    logs.push({
+        email: email,
+        changedAt: new Date().toISOString(),
+        changedBy: 'client',
+        ip: '127.0.0.1' // In real app, get from server
+    });
+    localStorage.setItem('passwordChangeLogs', JSON.stringify(logs));
+}
+
+// Update the order status display in client dashboard
+function loadOrdersList() {
+    // ... existing code ...
+    
+    // Update status display to show tracking
+    let statusClass = '';
+    let statusText = '';
+    let statusIcon = '';
+    
+    switch(order.status) {
+        case 'processing':
+            statusClass = 'status-processing';
+            statusText = 'Processing';
+            statusIcon = 'fas fa-cog';
+            break;
+        case 'verification':
+            statusClass = 'status-verification';
+            statusText = 'Verification';
+            statusIcon = 'fas fa-check-circle';
+            break;
+        case 'packaging':
+            statusClass = 'status-packaging';
+            statusText = 'Packaging';
+            statusIcon = 'fas fa-box';
+            break;
+        case 'out_for_delivery':
+            statusClass = 'status-delivery';
+            statusText = 'Out for Delivery';
+            statusIcon = 'fas fa-shipping-fast';
+            break;
+        case 'completed':
+            statusClass = 'status-completed';
+            statusText = 'Completed';
+            statusIcon = 'fas fa-check-circle';
+            break;
+        case 'cancelled':
+            statusClass = 'status-cancelled';
+            statusText = 'Cancelled';
+            statusIcon = 'fas fa-times-circle';
+            break;
+        default:
+            statusClass = 'status-processing';
+            statusText = 'Processing';
+            statusIcon = 'fas fa-cog';
+    }
+    
+    // Add tracking button
+    html += `
+        <div class="order-tracking">
+            <span class="order-status ${statusClass}">
+                <i class="${statusIcon}"></i> ${statusText}
+            </span>
+            <button class="btn-track" onclick="viewOrderTracking('${order.id}')">
+                <i class="fas fa-map-marker-alt"></i> Track Order
+            </button>
+        </div>
+    `;
+    
+    // ... rest of the code ...
+}
+
+function viewOrderTracking(orderId) {
+    // Get order details and show tracking modal
+    const order = orders.find(o => o.id === orderId);
+    
+    if (!order) return;
+    
+    // Create tracking modal
+    const modalBody = document.getElementById('modalBody');
+    modalBody.innerHTML = `
+        <div class="tracking-modal">
+            <h3>Order Tracking: ${orderId}</h3>
+            
+            <div class="tracking-timeline">
+                <div class="tracking-step ${order.status === 'processing' || order.status === 'verification' || order.status === 'packaging' || order.status === 'out_for_delivery' || order.status === 'completed' ? 'completed' : ''}">
+                    <div class="step-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="step-content">
+                        <h4>Order Placed</h4>
+                        <p>${new Date(order.date).toLocaleString()}</p>
+                    </div>
+                </div>
+                
+                <div class="tracking-step ${order.status === 'verification' || order.status === 'packaging' || order.status === 'out_for_delivery' || order.status === 'completed' ? 'completed' : ''}">
+                    <div class="step-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="step-content">
+                        <h4>Verification</h4>
+                        <p>Order verification in progress</p>
+                    </div>
+                </div>
+                
+                <div class="tracking-step ${order.status === 'packaging' || order.status === 'out_for_delivery' || order.status === 'completed' ? 'completed' : ''}">
+                    <div class="step-icon">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div class="step-content">
+                        <h4>Packaging</h4>
+                        <p>Your order is being prepared</p>
+                    </div>
+                </div>
+                
+                <div class="tracking-step ${order.status === 'out_for_delivery' || order.status === 'completed' ? 'completed' : ''}">
+                    <div class="step-icon">
+                        <i class="fas fa-shipping-fast"></i>
+                    </div>
+                    <div class="step-content">
+                        <h4>Out for Delivery</h4>
+                        <p>Your order is on its way</p>
+                    </div>
+                </div>
+                
+                <div class="tracking-step ${order.status === 'completed' ? 'completed' : ''}">
+                    <div class="step-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="step-content">
+                        <h4>Delivered</h4>
+                        <p>Order delivered successfully</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tracking-details">
+                <h4>Current Status: <span class="status-${order.status}">${order.status}</span></h4>
+                ${order.statusHistory ? `
+                    <div class="status-history">
+                        <h5>Status History:</h5>
+                        <ul>
+                            ${order.statusHistory.map(history => `
+                                <li>
+                                    <strong>${history.status}</strong> - 
+                                    ${new Date(history.changedAt).toLocaleString()}
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                ` : ''}
+            </div>
+            
+            <div class="tracking-actions">
+                <button class="btn btn-primary" onclick="contactSupportAboutOrder('${orderId}')">
+                    <i class="fas fa-headset"></i> Contact Support
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('productModal').classList.add('active');
+}
+ 
+// ===== ORDER TRACKING FUNCTIONS =====
+
+// Load orders list with tracking
+function loadOrdersList() {
+    const ordersContainer = document.getElementById('ordersContainer');
+    if (!ordersContainer) return;
+    
+    if (orders.length === 0) {
+        ordersContainer.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-box"></i>
+                <h3>No Orders Yet</h3>
+                <p>Your orders will appear here after you make a purchase.</p>
+                <button class="btn btn-primary" onclick="showSection('products')">
+                    <i class="fas fa-wig"></i> Start Shopping
+                </button>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    orders.forEach(order => {
+        const orderDate = new Date(order.date || order.createdAt);
+        const formattedDate = orderDate.toLocaleDateString();
+        const formattedTime = orderDate.toLocaleTimeString();
+        
+        // Get status
+        const currentStatus = order.status || 'processing';
+        let statusClass = 'status-processing';
+        let statusText = 'Processing';
+        let statusIcon = 'fas fa-cog';
+        
+        switch(currentStatus) {
+            case 'processing':
+                statusClass = 'status-processing';
+                statusText = 'Processing';
+                statusIcon = 'fas fa-cog';
+                break;
+            case 'verification':
+                statusClass = 'status-verification';
+                statusText = 'Verification';
+                statusIcon = 'fas fa-check-circle';
+                break;
+            case 'packaging':
+                statusClass = 'status-packaging';
+                statusText = 'Packaging';
+                statusIcon = 'fas fa-box';
+                break;
+            case 'out_for_delivery':
+                statusClass = 'status-out_for_delivery';
+                statusText = 'Out for Delivery';
+                statusIcon = 'fas fa-shipping-fast';
+                break;
+            case 'completed':
+                statusClass = 'status-completed';
+                statusText = 'Completed';
+                statusIcon = 'fas fa-check-circle';
+                break;
+            case 'cancelled':
+                statusClass = 'status-cancelled';
+                statusText = 'Cancelled';
+                statusIcon = 'fas fa-times-circle';
+                break;
+        }
+        
+        // Calculate order total
+        const orderTotal = order.total || order.items?.reduce((sum, item) => 
+            sum + (item.price * item.quantity), 0) || 0;
+        
+        // Get store config for tax/shipping
+        const config = getStoreConfig();
+        const tax = order.tax || (orderTotal * (config.taxRate / 100));
+        const shipping = order.shipping || (orderTotal >= config.freeShippingThreshold ? 0 : config.shippingFee);
+        const total = orderTotal + tax + shipping;
+        
+        html += `
+            <div class="order-card">
+                <div class="order-header">
+                    <div>
+                        <span class="order-id">Order #${order.id}</span>
+                        <span class="order-date">${formattedDate} ${formattedTime}</span>
+                    </div>
+                    <span class="order-status ${statusClass}">
+                        <i class="${statusIcon}"></i> ${statusText}
+                    </span>
+                </div>
+                
+                <div class="order-items">
+                    ${order.items?.map(item => `
+                        <div class="order-item">
+                            <span>${item.name} x${item.quantity}</span>
+                            <span>$${(item.price * item.quantity).toFixed(2)}</span>
+                        </div>
+                    `).join('') || ''}
+                </div>
+                
+                <div class="order-total">
+                    Total: $${total.toFixed(2)}
+                </div>
+                
+                <div class="order-tracking">
+                    <span class="order-status ${statusClass}">
+                        <i class="${statusIcon}"></i> ${statusText}
+                    </span>
+                    <button class="btn-track" onclick="viewOrderTracking('${order.id}')">
+                        <i class="fas fa-map-marker-alt"></i> Track Order
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+    
+    ordersContainer.innerHTML = html;
+}
+
+// View order tracking details
+function viewOrderTracking(orderId) {
+    const order = orders.find(o => o.id === orderId);
+    
+    if (!order) {
+        alert('Order not found!');
+        return;
+    }
+    
+    const currentStatus = order.status || 'processing';
+    const orderDate = new Date(order.date || order.createdAt);
+    const formattedDate = orderDate.toLocaleDateString();
+    const formattedTime = orderDate.toLocaleTimeString();
+    
+    // Create tracking modal content
+    const modalBody = document.getElementById('orderTrackingModalBody');
+    modalBody.innerHTML = `
+        <div class="tracking-modal">
+            <h3>Order Tracking: ${orderId}</h3>
+            
+            <div class="order-info">
+                <p><strong>Order Date:</strong> ${formattedDate} ${formattedTime}</p>
+                <p><strong>Current Status:</strong> <span class="status-${currentStatus}">${currentStatus}</span></p>
+                <p><strong>Total Amount:</strong> $${(order.total || 0).toFixed(2)}</p>
+            </div>
+            
+            <div class="tracking-timeline">
+                <div class="tracking-step ${['processing', 'verification', 'packaging', 'out_for_delivery', 'completed'].includes(currentStatus) ? 'completed' : ''}">
+                    <div class="step-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="step-content">
+                        <h4>Order Placed</h4>
+                        <p>${formattedDate}</p>
+                    </div>
+                </div>
+                
+                <div class="tracking-step ${['verification', 'packaging', 'out_for_delivery', 'completed'].includes(currentStatus) ? 'completed' : ''}">
+                    <div class="step-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="step-content">
+                        <h4>Verification</h4>
+                        <p>Order verification in progress</p>
+                    </div>
+                </div>
+                
+                <div class="tracking-step ${['packaging', 'out_for_delivery', 'completed'].includes(currentStatus) ? 'completed' : ''}">
+                    <div class="step-icon">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div class="step-content">
+                        <h4>Packaging</h4>
+                        <p>Your order is being prepared</p>
+                    </div>
+                </div>
+                
+                <div class="tracking-step ${['out_for_delivery', 'completed'].includes(currentStatus) ? 'completed' : ''}">
+                    <div class="step-icon">
+                        <i class="fas fa-shipping-fast"></i>
+                    </div>
+                    <div class="step-content">
+                        <h4>Out for Delivery</h4>
+                        <p>Your order is on its way</p>
+                    </div>
+                </div>
+                
+                <div class="tracking-step ${['completed'].includes(currentStatus) ? 'completed' : ''}">
+                    <div class="step-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="step-content">
+                        <h4>Delivered</h4>
+                        <p>Order delivered successfully</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tracking-details">
+                <h4>Current Status: <span class="status-${currentStatus}">${currentStatus}</span></h4>
+                ${order.statusHistory ? `
+                    <div class="status-history">
+                        <h5>Status History:</h5>
+                        <ul>
+                            ${order.statusHistory.map(history => `
+                                <li>
+                                    <strong>${history.status}</strong>
+                                    <span>${new Date(history.changedAt).toLocaleString()}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                ` : '<p>No status history available.</p>'}
+            </div>
+            
+            <div class="tracking-actions">
+                <button class="btn btn-primary" onclick="contactSupportAboutOrder('${orderId}')">
+                    <i class="fas fa-headset"></i> Contact Support
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('orderTrackingModal').classList.add('active');
+}
+
+// Close order tracking modal
+function closeOrderTrackingModal() {
+    document.getElementById('orderTrackingModal').classList.remove('active');
+}
+
+// Contact support about order
+function contactSupportAboutOrder(orderId) {
+    // Close tracking modal
+    closeOrderTrackingModal();
+    
+    // Switch to support section and pre-fill the form
+    showSection('support');
+    showSupportTab('newTicket');
+    
+    // Pre-fill the order ID in support form
+    setTimeout(() => {
+        const orderIdField = document.getElementById('ticketOrderId');
+        if (orderIdField) {
+            orderIdField.value = orderId;
+        }
+        
+        // Set category to "order"
+        const categorySelect = document.getElementById('ticketCategory');
+        if (categorySelect) {
+            categorySelect.value = 'order';
+        }
+        
+        // Pre-fill subject
+        const subjectField = document.getElementById('ticketSubject');
+        if (subjectField) {
+            subjectField.value = `Inquiry about Order #${orderId}`;
+        }
+        
+        // Pre-fill message
+        const messageField = document.getElementById('ticketMessage');
+        if (messageField) {
+            messageField.value = `I have a question about my order #${orderId}. Please provide an update on its status.`;
+        }
+    }, 100);
+}
+
+// Filter orders by status
+function filterOrders() {
+    const statusFilter = document.getElementById('orderStatusFilter').value;
+    
+    if (!statusFilter) {
+        loadOrdersList();
+        return;
+    }
+    
+    const filteredOrders = orders.filter(order => 
+        (order.status || 'processing') === statusFilter
+    );
+    
+    const ordersContainer = document.getElementById('ordersContainer');
+    
+    if (filteredOrders.length === 0) {
+        ordersContainer.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-box"></i>
+                <h3>No Orders Found</h3>
+                <p>No orders match the selected status.</p>
+                <button class="btn btn-primary" onclick="document.getElementById('orderStatusFilter').value=''; filterOrders()">
+                    Clear Filter
+                </button>
+            </div>
+        `;
+        return;
+    }
+    
+    // Re-use loadOrdersList logic but with filtered orders
+    let html = '';
+    filteredOrders.forEach(order => {
+        const orderDate = new Date(order.date || order.createdAt);
+        const formattedDate = orderDate.toLocaleDateString();
+        const formattedTime = orderDate.toLocaleTimeString();
+        
+        const currentStatus = order.status || 'processing';
+        let statusClass = 'status-processing';
+        let statusText = 'Processing';
+        let statusIcon = 'fas fa-cog';
+        
+        switch(currentStatus) {
+            case 'processing':
+                statusClass = 'status-processing';
+                statusText = 'Processing';
+                statusIcon = 'fas fa-cog';
+                break;
+            case 'verification':
+                statusClass = 'status-verification';
+                statusText = 'Verification';
+                statusIcon = 'fas fa-check-circle';
+                break;
+            case 'packaging':
+                statusClass = 'status-packaging';
+                statusText = 'Packaging';
+                statusIcon = 'fas fa-box';
+                break;
+            case 'out_for_delivery':
+                statusClass = 'status-out_for_delivery';
+                statusText = 'Out for Delivery';
+                statusIcon = 'fas fa-shipping-fast';
+                break;
+            case 'completed':
+                statusClass = 'status-completed';
+                statusText = 'Completed';
+                statusIcon = 'fas fa-check-circle';
+                break;
+            case 'cancelled':
+                statusClass = 'status-cancelled';
+                statusText = 'Cancelled';
+                statusIcon = 'fas fa-times-circle';
+                break;
+        }
+        
+        const orderTotal = order.total || order.items?.reduce((sum, item) => 
+            sum + (item.price * item.quantity), 0) || 0;
+        
+        const config = getStoreConfig();
+        const tax = order.tax || (orderTotal * (config.taxRate / 100));
+        const shipping = order.shipping || (orderTotal >= config.freeShippingThreshold ? 0 : config.shippingFee);
+        const total = orderTotal + tax + shipping;
+        
+        html += `
+            <div class="order-card">
+                <div class="order-header">
+                    <div>
+                        <span class="order-id">Order #${order.id}</span>
+                        <span class="order-date">${formattedDate} ${formattedTime}</span>
+                    </div>
+                    <span class="order-status ${statusClass}">
+                        <i class="${statusIcon}"></i> ${statusText}
+                    </span>
+                </div>
+                
+                <div class="order-items">
+                    ${order.items?.map(item => `
+                        <div class="order-item">
+                            <span>${item.name} x${item.quantity}</span>
+                            <span>$${(item.price * item.quantity).toFixed(2)}</span>
+                        </div>
+                    `).join('') || ''}
+                </div>
+                
+                <div class="order-total">
+                    Total: $${total.toFixed(2)}
+                </div>
+                
+                <div class="order-tracking">
+                    <span class="order-status ${statusClass}">
+                        <i class="${statusIcon}"></i> ${statusText}
+                    </span>
+                    <button class="btn-track" onclick="viewOrderTracking('${order.id}')">
+                        <i class="fas fa-map-marker-alt"></i> Track Order
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+    
+    ordersContainer.innerHTML = html;
+}
+
+// Update the showSection function to call loadOrdersList when orders section is shown
+function showSection(sectionId) {
+    console.log('Switching to section:', sectionId);
+    
+    // Hide all sections
+    const sections = document.querySelectorAll('.content-section');
+    sections.forEach(section => {
+        section.classList.remove('active');
+    });
+    
+    // Remove active class from all buttons
+    const buttons = document.querySelectorAll('.sidebar-btn');
+    buttons.forEach(button => {
+        button.classList.remove('active');
+    });
+    
+    // Show the selected section
+    const selectedSection = document.getElementById(sectionId + 'Section');
+    if (selectedSection) {
+        selectedSection.classList.add('active');
+    }
+    
+    // Activate the corresponding button
+    const activeButton = document.querySelector(`.sidebar-btn[onclick*="${sectionId}"]`);
+    if (activeButton) {
+        activeButton.classList.add('active');
+    }
+    
+    // Load section data
+    switch(sectionId) {
+        case 'products':
+            loadProductsGrid();
+            break;
+        case 'cart':
+            loadCartItems();
+            break;
+        case 'orders':
+            loadOrdersList(); // Changed to loadOrdersList
+            break;
+        case 'wishlist':
+            loadWishlistItems();
+            break;
+    }
+}
+
 
