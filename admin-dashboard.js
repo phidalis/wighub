@@ -3403,4 +3403,108 @@ function getAdminPriorityClass(priority) {
     return priorityClasses[priority] || 'priority-medium';
 }
 
+// Mobile Sidebar Toggle Functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Create sidebar toggle button
+    const sidebarToggle = document.createElement('button');
+    sidebarToggle.className = 'sidebar-toggle';
+    sidebarToggle.innerHTML = '<i class="fas fa-chevron-right"></i>';
+    document.body.appendChild(sidebarToggle);
+    
+    // Create overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'sidebar-overlay';
+    document.body.appendChild(overlay);
+    
+    const sidebar = document.querySelector('.admin-sidebar');
+    const contentArea = document.querySelector('.admin-content-area');
+    const footer = document.querySelector('.admin-footer');
+    
+    // Toggle sidebar function
+    function toggleSidebar() {
+        sidebar.classList.toggle('expanded');
+        sidebarToggle.classList.toggle('expanded');
+        overlay.classList.toggle('active');
+        
+        // Update toggle button icon
+        const icon = sidebarToggle.querySelector('i');
+        if (sidebar.classList.contains('expanded')) {
+            icon.className = 'fas fa-chevron-left';
+        } else {
+            icon.className = 'fas fa-chevron-right';
+        }
+    }
+    
+    // Event listeners
+    sidebarToggle.addEventListener('click', toggleSidebar);
+    overlay.addEventListener('click', toggleSidebar);
+    
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', function(event) {
+        if (window.innerWidth <= 768 && 
+            sidebar.classList.contains('expanded') &&
+            !sidebar.contains(event.target) &&
+            !sidebarToggle.contains(event.target)) {
+            toggleSidebar();
+        }
+    });
+    
+    // Handle touch events for better mobile experience
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    document.addEventListener('touchstart', function(event) {
+        touchStartX = event.changedTouches[0].screenX;
+    });
+    
+    document.addEventListener('touchend', function(event) {
+        touchEndX = event.changedTouches[0].screenX;
+        handleSwipe();
+    });
+    
+    function handleSwipe() {
+        const swipeThreshold = 50;
+        const swipeDistance = touchEndX - touchStartX;
+        
+        // Swipe right to open sidebar
+        if (swipeDistance > swipeThreshold && 
+            !sidebar.classList.contains('expanded') &&
+            touchStartX < 50) {
+            toggleSidebar();
+        }
+        
+        // Swipe left to close sidebar
+        else if (swipeDistance < -swipeThreshold && 
+                 sidebar.classList.contains('expanded')) {
+            toggleSidebar();
+        }
+    }
+    
+    // Update active menu item on click
+    const menuButtons = document.querySelectorAll('.admin-btn');
+    menuButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove active class from all buttons
+            menuButtons.forEach(btn => btn.classList.remove('active'));
+            // Add active class to clicked button
+            this.classList.add('active');
+            
+            // Auto-close sidebar on mobile after selection
+            if (window.innerWidth <= 768) {
+                setTimeout(toggleSidebar, 300);
+            }
+        });
+    });
+    
+    // Adjust for window resize
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 768) {
+            // Reset to desktop mode
+            sidebar.classList.remove('expanded');
+            sidebarToggle.classList.remove('expanded');
+            overlay.classList.remove('active');
+            sidebarToggle.querySelector('i').className = 'fas fa-chevron-right';
+        }
+    });
+});
 
