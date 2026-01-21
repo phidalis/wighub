@@ -92,15 +92,37 @@
                     </div>
                 </section>
 
-                <!-- Orders Section -->
-                <section id="ordersSection" class="content-section">
-                    <div class="section-header">
-                        <h2><i class="fas fa-box"></i> My Orders</h2>
-                    </div>
-                    <div class="orders-container" id="ordersContainer">
-                        <!-- Orders will be loaded here -->
-                    </div>
-                </section>
+                <!-- Update the entire orders section in client.html -->
+<section id="ordersSection" class="content-section">
+    <div class="section-header">
+        <h2><i class="fas fa-box"></i> My Orders</h2>
+        <div class="filter-controls">
+            <select id="orderStatusFilter" onchange="filterOrders()">
+                <option value="">All Status</option>
+                <option value="processing">Processing</option>
+                <option value="verification">Verification</option>
+                <option value="packaging">Packaging</option>
+                <option value="out_for_delivery">Out for Delivery</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="orders-container" id="ordersContainer">
+        <!-- Orders will be loaded here -->
+    </div>
+</section>
+
+<!-- Add Order Tracking Modal -->
+<div id="orderTrackingModal" class="modal">
+    <div class="modal-content" style="max-width: 800px;">
+        <span class="close-modal" onclick="closeOrderTrackingModal()">&times;</span>
+        <div class="modal-body" id="orderTrackingModalBody">
+            <!-- Order tracking details will be loaded here -->
+        </div>
+    </div>
+</div>
 
                 <!-- Profile Section -->
                 <section id="profileSection" class="content-section">
@@ -120,21 +142,58 @@
                                 </div>
                             </div>
                             <div class="profile-details">
-                                <div class="detail-item">
-                                    <span class="detail-label">Member Since:</span>
-                                    <span class="detail-value" id="memberSince">Loading...</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">Total Orders:</span>
-                                    <span class="detail-value" id="totalOrders">0</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">Wishlist Items:</span>
-                                    <span class="detail-value" id="wishlistCount">0</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+    <div class="detail-item">
+        <span class="detail-label">Member Since:</span>
+        <span class="detail-value" id="memberSince">Loading...</span>
+    </div>
+    <div class="detail-item">
+        <span class="detail-label">Total Orders:</span>
+        <span class="detail-value" id="totalOrders">0</span>
+    </div>
+    <div class="detail-item">
+        <span class="detail-label">Wishlist Items:</span>
+        <span class="detail-value" id="wishlistCount">0</span>
+    </div>
+</div>
+
+                    <!-- Add to profile section after profile-details -->
+<div class="profile-actions">
+    <h4>Account Security</h4>
+    <button class="btn btn-secondary" onclick="showChangePasswordModal()">
+        <i class="fas fa-key"></i> Change Password
+    </button>
+</div>
+
+<!-- Add Change Password Modal -->
+<div id="changePasswordModal" class="modal">
+    <div class="modal-content" style="max-width: 500px;">
+        <span class="close-modal" onclick="closeChangePasswordModal()">&times;</span>
+        <div class="modal-body">
+            <h3><i class="fas fa-key"></i> Change Password</h3>
+            <div class="form-group">
+                <label for="currentPassword">Current Password *</label>
+                <input type="password" id="currentPassword" placeholder="Enter current password">
+            </div>
+            <div class="form-group">
+                <label for="newPassword">New Password *</label>
+                <input type="password" id="newPassword" placeholder="Enter new password">
+                <div class="password-strength">
+                    <div class="strength-bar"></div>
+                    <span id="newStrengthText"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="confirmNewPassword">Confirm New Password *</label>
+                <input type="password" id="confirmNewPassword" placeholder="Confirm new password">
+                <span id="passwordMatchStatus" style="font-size: 12px;"></span>
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="closeChangePasswordModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="updatePassword()">Update Password</button>
+            </div>
+        </div>
+    </div>
+</div>
                 </section>
 
                 <!-- Wishlist Section -->
@@ -276,12 +335,6 @@
 </div>
         </main>
 
-        <!-- Footer -->
-        <footer class="dashboard-footer">
-            <p>© 2026 phidsolutions. All rights reserved. | <a href="#" onclick="alert('Contact: support@wighub.com\nPhone: 0768832415')">Contact Support</a></p>
-        </footer>
-    </div>
-
     <!-- Product Modal -->
     <div id="productModal" class="modal">
         <div class="modal-content">
@@ -292,8 +345,7 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
-    <script src="client.js"></script>
+    
     
     <!-- Mobile Menu Script -->
     <script>
@@ -338,5 +390,14 @@
             });
         }
     </script>
+
+     <!-- Footer -->
+        <footer class="dashboard-footer">
+            <p>© 2026 phidsolutions. All rights reserved. | <a href="#" onclick="alert('Contact: support@wighub.com\nPhone: 0768832415')">Contact Support</a></p>
+        </footer>
+    </div>
+    <script src="script.js"></script>
+    <script src="client.js"></script>
+
 </body>
 </html>
