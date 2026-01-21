@@ -56,6 +56,9 @@
                     <button class="admin-btn" onclick="showAdminSection('support')">
                         <i class="fas fa-headset"></i> Support Tickets
                     </button>
+                    <button class="admin-btn" onclick="showAdminSection('passwordReset')">
+                        <i class="fas fa-key"></i> Password Reset Requests
+                    </button>
                 </div>
                 
                 <div class="admin-status">
@@ -198,6 +201,16 @@
                     </div>
                     
                     <div class="add-product-form">
+                        <!-- Added Product ID field as first form-row -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="productId">Product ID (Optional)</label>
+                                <input type="text" id="productId" placeholder="e.g., WIG001" onblur="checkProductId()">
+                                <small style="color: #666;">Leave blank for auto-generated ID</small>
+                                <span id="productIdStatus" style="display: none; font-size: 12px;"></span>
+                            </div>
+                        </div>
+                        
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="productName">Product Name *</label>
@@ -354,12 +367,14 @@
                                     <th>Order ID</th>
                                     <th>Customer</th>
                                     <th>Date</th>
+                                    <th>Products</th>
                                     <th>Amount</th>
                                     <th>Status</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="adminOrdersTable">
-                                <tr><td colspan="5" class="empty-table">No orders yet</td></tr>
+                                <tr><td colspan="7" class="empty-table">No orders yet</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -404,31 +419,31 @@
                                 </button>
                             </div>
                         </div>
+                        
+                        <div class="settings-card">
+                            <h3>Store Configuration</h3>
+                            <div class="settings-form">
+                                <div class="form-group">
+                                    <label for="taxRate">Tax Rate (%)</label>
+                                    <input type="number" id="taxRate" value="8" min="0" max="100" step="0.1">
+                                    <small>Current tax rate applied to all orders</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="shippingFee">Shipping Fee ($)</label>
+                                    <input type="number" id="shippingFee" value="9.99" min="0" step="0.01">
+                                    <small>Standard shipping fee</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="freeShippingThreshold">Free Shipping Threshold ($)</label>
+                                    <input type="number" id="freeShippingThreshold" value="100" min="0" step="0.01">
+                                    <small>Order amount for free shipping</small>
+                                </div>
+                                <button class="btn btn-primary" onclick="saveStoreConfig()">
+                                    <i class="fas fa-save"></i> Save Configuration
+                                </button>
+                            </div>
+                        </div>
                     </div>
-
-       <div class="settings-card">
-    <h3>Store Configuration</h3>
-    <div class="settings-form">
-        <div class="form-group">
-            <label for="taxRate">Tax Rate (%)</label>
-            <input type="number" id="taxRate" value="8" min="0" max="100" step="0.1">
-            <small>Current tax rate applied to all orders</small>
-        </div>
-        <div class="form-group">
-            <label for="shippingFee">Shipping Fee ($)</label>
-            <input type="number" id="shippingFee" value="9.99" min="0" step="0.01">
-            <small>Standard shipping fee</small>
-        </div>
-        <div class="form-group">
-            <label for="freeShippingThreshold">Free Shipping Threshold ($)</label>
-            <input type="number" id="freeShippingThreshold" value="100" min="0" step="0.01">
-            <small>Order amount for free shipping</small>
-        </div>
-        <button class="btn btn-primary" onclick="saveStoreConfig()">
-            <i class="fas fa-save"></i> Save Configuration
-        </button>
-    </div>
-</div>
                 </section>
 
                 <!-- Admin Management Section -->
@@ -587,15 +602,51 @@
                         </div>
                     </div>
                 </section>
+
+                <!-- Password Reset Section -->
+                <section id="passwordResetSection" class="admin-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-key"></i> Password Reset Requests</h2>
+                    </div>
+                    
+                    <div class="password-reset-container">
+                        <div class="search-filter">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="resetSearch" placeholder="Search by email..." onkeyup="filterResetRequests()">
+                            </div>
+                            <select id="resetStatusFilter" onchange="filterResetRequests()">
+                                <option value="">All Status</option>
+                                <option value="pending">Pending</option>
+                                <option value="processing">Processing</option>
+                                <option value="completed">Completed</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                        
+                        <div class="reset-requests-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Request ID</th>
+                                        <th>Client Email</th>
+                                        <th>Client Name</th>
+                                        <th>Request Date</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="resetRequestsTable">
+                                    <tr><td colspan="6" class="empty-table">No password reset requests</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
             </div>
         </main>
 
-        <footer class="admin-footer">
-            <p>© 2026 phidsolutions. All rights reserved. | Admin Panel</p>
-        </footer>
-    </div>
-
-    <!-- Admin Ticket Detail Modal -->
+     <!-- Admin Ticket Detail Modal -->
     <div id="adminTicketModal" class="admin-modal">
         <div class="admin-modal-content">
             <div class="admin-modal-header">
@@ -608,6 +659,10 @@
                 <!-- Ticket details will be loaded here -->
             </div>
         </div>
+    </div>
+     <footer class="admin-footer">
+            <p>© 2026 phidsolutions. All rights reserved. | Admin Panel</p>
+        </footer>
     </div>
 
     <script src="admin-dashboard.js"></script>
