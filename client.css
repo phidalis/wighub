@@ -2490,3 +2490,1002 @@ body {
     }
 }
 
+/* ===== CHANGE PASSWORD MODAL ===== */
+#changePasswordModal .modal-content {
+    max-width: 500px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: none;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+#changePasswordModal .modal-body {
+    padding: 30px;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+#changePasswordModal h3 {
+    color: #2d3748;
+    margin-bottom: 25px;
+    font-size: 22px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+#changePasswordModal .form-group {
+    margin-bottom: 25px;
+}
+
+#changePasswordModal label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #4a5568;
+    font-size: 14px;
+}
+
+#changePasswordModal input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+#changePasswordModal input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Password Strength Indicator */
+.password-strength {
+    margin-top: 10px;
+}
+
+.strength-bar {
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 3px;
+    margin-top: 8px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.strength-weak .strength-bar {
+    background: linear-gradient(90deg, #e74c3c 0%, #fc5c65 100%);
+}
+
+.strength-medium .strength-bar {
+    background: linear-gradient(90deg, #f39c12 0%, #fed330 100%);
+}
+
+.strength-strong .strength-bar {
+    background: linear-gradient(90deg, #2ecc71 0%, #26de81 100%);
+}
+
+#newStrengthText {
+    font-size: 12px;
+    font-weight: 600;
+    display: block;
+    margin-top: 5px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: #f8fafc;
+    display: inline-block;
+}
+
+.strength-weak #newStrengthText { 
+    color: #e74c3c;
+    border-left: 4px solid #e74c3c;
+}
+
+.strength-medium #newStrengthText { 
+    color: #f39c12;
+    border-left: 4px solid #f39c12;
+}
+
+.strength-strong #newStrengthText { 
+    color: #2ecc71;
+    border-left: 4px solid #2ecc71;
+}
+
+/* Password Match Indicator */
+#passwordMatchStatus {
+    font-size: 13px;
+    font-weight: 500;
+    display: block;
+    margin-top: 5px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: #f8fafc;
+}
+
+#passwordMatchStatus:not(:empty) {
+    border-left: 4px solid;
+}
+
+#passwordMatchStatus.mismatch {
+    color: #e74c3c;
+    border-left-color: #e74c3c;
+}
+
+#passwordMatchStatus.match {
+    color: #2ecc71;
+    border-left-color: #2ecc71;
+}
+
+/* Form Actions */
+#changePasswordModal .form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+    justify-content: flex-end;
+    padding-top: 20px;
+    border-top: 2px solid #e2e8f0;
+}
+
+#changePasswordModal .btn {
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    min-width: 120px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: none;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+#changePasswordModal .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+#changePasswordModal .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+#changePasswordModal .btn-secondary {
+    background: white;
+    color: #4a5568;
+    border: 2px solid #e2e8f0;
+}
+
+#changePasswordModal .btn-secondary:hover {
+    background: #edf2f7;
+    border-color: #cbd5e0;
+}
+
+/* ===== ORDER TRACKING STYLES ===== */
+.order-tracking {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    padding: 15px;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 10px;
+    border-left: 4px solid;
+}
+
+.order-tracking .order-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.btn-track {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-track:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+}
+
+/* Tracking Modal */
+.tracking-modal {
+    padding: 10px;
+}
+
+.tracking-modal h3 {
+    color: #2d3748;
+    margin-bottom: 25px;
+    font-size: 22px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+/* Tracking Timeline */
+.tracking-timeline {
+    display: flex;
+    justify-content: space-between;
+    margin: 40px 0;
+    position: relative;
+    padding: 0 20px;
+}
+
+.tracking-timeline::before {
+    content: '';
+    position: absolute;
+    top: 25px;
+    left: 50px;
+    right: 50px;
+    height: 3px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    z-index: 1;
+}
+
+.tracking-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+    flex: 1;
+    text-align: center;
+    padding: 0 10px;
+}
+
+.tracking-step.completed .step-icon {
+    background: linear-gradient(135deg, #2ecc71 0%, #26de81 100%);
+    color: white;
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4);
+}
+
+.step-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin-bottom: 15px;
+    transition: all 0.4s ease;
+    position: relative;
+    z-index: 3;
+}
+
+.step-content {
+    text-align: center;
+    max-width: 150px;
+}
+
+.step-content h4 {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    color: #2d3748;
+    font-weight: 600;
+}
+
+.step-content p {
+    margin: 0;
+    font-size: 12px;
+    color: #718096;
+    line-height: 1.4;
+}
+
+/* Tracking Details */
+.tracking-details {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 12px;
+    padding: 25px;
+    margin: 30px 0;
+}
+
+.tracking-details h4 {
+    color: #2d3748;
+    margin-bottom: 20px;
+    font-size: 18px;
+}
+
+.tracking-details .status-processing { color: #856404; }
+.tracking-details .status-verification { color: #0c5460; }
+.tracking-details .status-packaging { color: #004085; }
+.tracking-details .status-out_for_delivery { color: #155724; }
+.tracking-details .status-completed { color: #0e6251; }
+
+.status-history {
+    margin-top: 20px;
+}
+
+.status-history h5 {
+    color: #4a5568;
+    margin-bottom: 15px;
+    font-size: 16px;
+}
+
+.status-history ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.status-history li {
+    padding: 12px;
+    background: white;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.status-history li strong {
+    color: #2d3748;
+    font-weight: 600;
+}
+
+/* Tracking Actions */
+.tracking-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 2px solid #e2e8f0;
+}
+
+.tracking-actions .btn {
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    min-width: 200px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: none;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.tracking-actions .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+/* ===== PROFILE ACTIONS ===== */
+.profile-actions {
+    margin-top: 30px;
+    padding: 25px;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+.profile-actions h4 {
+    color: #2d3748;
+    margin-bottom: 20px;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.profile-actions .btn {
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: none;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: white;
+    color: #4a5568;
+    border: 2px solid #e2e8f0;
+}
+
+.profile-actions .btn:hover {
+    background: #edf2f7;
+    border-color: #cbd5e0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* ===== SUPPORT TICKET ENHANCEMENTS ===== */
+.support-container {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.ticket-form-card {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 12px;
+    padding: 30px;
+    margin-bottom: 25px;
+    border: 1px solid #e2e8f0;
+}
+
+.ticket-form-card h3 {
+    color: #2d3748;
+    margin-bottom: 15px;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.form-description {
+    color: #718096;
+    margin-bottom: 25px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+    .tracking-timeline {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 25px;
+        padding: 0;
+    }
+    
+    .tracking-timeline::before {
+        display: none;
+    }
+    
+    .tracking-step {
+        flex-direction: row;
+        width: 100%;
+        text-align: left;
+        gap: 15px;
+    }
+    
+    .step-icon {
+        margin-bottom: 0;
+        flex-shrink: 0;
+    }
+    
+    .step-content {
+        text-align: left;
+        max-width: none;
+    }
+    
+    .order-tracking {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
+    
+    #changePasswordModal .form-actions {
+        flex-direction: column;
+    }
+    
+    #changePasswordModal .btn {
+        width: 100%;
+    }
+    
+    .status-history li {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    #changePasswordModal .modal-content {
+        margin: 10px;
+    }
+    
+    .tracking-modal {
+        padding: 5px;
+    }
+    
+    .tracking-actions .btn {
+        min-width: 100%;
+    }
+}
+
+/* ===== ORDER TRACKING STYLES ===== */
+
+/* Order Card Styling */
+.order-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border-left: 4px solid;
+    border-color: #3498db;
+    transition: all 0.3s ease;
+}
+
+.order-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eaeaea;
+}
+
+.order-id {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 16px;
+    background: #f8f9fa;
+    padding: 4px 10px;
+    border-radius: 6px;
+}
+
+.order-date {
+    color: #7f8c8d;
+    font-size: 14px;
+    margin-left: 10px;
+}
+
+/* Order Status Badges */
+.order-status {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-processing {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    color: #856404;
+    border: 1px solid #ffd966;
+}
+
+.status-verification {
+    background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+    color: #0c5460;
+    border: 1px solid #80deea;
+}
+
+.status-packaging {
+    background: linear-gradient(135deg, #cce5ff 0%, #b8daff 100%);
+    color: #004085;
+    border: 1px solid #4dabf7;
+}
+
+.status-out_for_delivery {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    color: #155724;
+    border: 1px solid #51cf66;
+}
+
+.status-completed {
+    background: linear-gradient(135deg, #d1f2eb 0%, #a3e4d7 100%);
+    color: #0e6251;
+    border: 1px solid #20c997;
+}
+
+.status-cancelled {
+    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+    color: #721c24;
+    border: 1px solid #fa5252;
+}
+
+/* Order Items */
+.order-items {
+    margin: 15px 0;
+}
+
+.order-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.order-item:last-child {
+    border-bottom: none;
+}
+
+.order-item span:first-child {
+    color: #34495e;
+    font-weight: 500;
+}
+
+.order-item span:last-child {
+    color: #2ecc71;
+    font-weight: 600;
+}
+
+/* Order Total */
+.order-total {
+    text-align: right;
+    font-size: 18px;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 2px dashed #eaeaea;
+}
+
+/* Order Tracking */
+.order-tracking {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    padding: 15px;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 10px;
+    border-left: 4px solid #667eea;
+}
+
+.order-tracking .order-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.btn-track {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-track:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+}
+
+/* Order Tracking Modal */
+.tracking-modal {
+    padding: 10px;
+}
+
+.tracking-modal h3 {
+    color: #2d3748;
+    margin-bottom: 25px;
+    font-size: 22px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+/* Tracking Timeline */
+.tracking-timeline {
+    display: flex;
+    justify-content: space-between;
+    margin: 40px 0;
+    position: relative;
+    padding: 0 20px;
+}
+
+.tracking-timeline::before {
+    content: '';
+    position: absolute;
+    top: 25px;
+    left: 50px;
+    right: 50px;
+    height: 3px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    z-index: 1;
+}
+
+.tracking-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+    flex: 1;
+    text-align: center;
+    padding: 0 10px;
+}
+
+.tracking-step.completed .step-icon {
+    background: linear-gradient(135deg, #2ecc71 0%, #26de81 100%);
+    color: white;
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4);
+}
+
+.step-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin-bottom: 15px;
+    transition: all 0.4s ease;
+    position: relative;
+    z-index: 3;
+}
+
+.step-content {
+    text-align: center;
+    max-width: 150px;
+}
+
+.step-content h4 {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    color: #2d3748;
+    font-weight: 600;
+}
+
+.step-content p {
+    margin: 0;
+    font-size: 12px;
+    color: #718096;
+    line-height: 1.4;
+}
+
+/* Tracking Details */
+.tracking-details {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 12px;
+    padding: 25px;
+    margin: 30px 0;
+}
+
+.tracking-details h4 {
+    color: #2d3748;
+    margin-bottom: 20px;
+    font-size: 18px;
+}
+
+.tracking-details .status-processing { color: #856404; }
+.tracking-details .status-verification { color: #0c5460; }
+.tracking-details .status-packaging { color: #004085; }
+.tracking-details .status-out_for_delivery { color: #155724; }
+.tracking-details .status-completed { color: #0e6251; }
+.tracking-details .status-cancelled { color: #721c24; }
+
+.status-history {
+    margin-top: 20px;
+}
+
+.status-history h5 {
+    color: #4a5568;
+    margin-bottom: 15px;
+    font-size: 16px;
+}
+
+.status-history ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.status-history li {
+    padding: 12px;
+    background: white;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.status-history li strong {
+    color: #2d3748;
+    font-weight: 600;
+}
+
+.status-history li span {
+    color: #718096;
+    font-size: 13px;
+}
+
+/* Tracking Actions */
+.tracking-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 2px solid #e2e8f0;
+}
+
+.tracking-actions .btn {
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    min-width: 200px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: none;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.tracking-actions .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+/* Order Filter Controls */
+.filter-controls {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.filter-controls select {
+    padding: 8px 15px;
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+    background: white;
+    font-size: 14px;
+    color: #4a5568;
+    cursor: pointer;
+    min-width: 160px;
+}
+
+.filter-controls select:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.empty-state i {
+    font-size: 60px;
+    color: #dee2e6;
+    margin-bottom: 20px;
+}
+
+.empty-state h3 {
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.empty-state p {
+    margin-bottom: 20px;
+    color: #666;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .tracking-timeline {
+        flex-wrap: wrap;
+        gap: 30px;
+    }
+    
+    .tracking-step {
+        flex: 0 0 calc(33.333% - 20px);
+    }
+}
+
+@media (max-width: 768px) {
+    .tracking-timeline {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 25px;
+        padding: 0;
+    }
+    
+    .tracking-timeline::before {
+        display: none;
+    }
+    
+    .tracking-step {
+        flex-direction: row;
+        width: 100%;
+        text-align: left;
+        gap: 15px;
+    }
+    
+    .step-icon {
+        margin-bottom: 0;
+        flex-shrink: 0;
+    }
+    
+    .step-content {
+        text-align: left;
+        max-width: none;
+    }
+    
+    .order-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .order-tracking {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
+    
+    .status-history li {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .filter-controls {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .filter-controls select {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .order-card {
+        padding: 15px;
+    }
+    
+    .tracking-modal {
+        padding: 5px;
+    }
+    
+    .tracking-actions .btn {
+        min-width: 100%;
+    }
+    
+    .step-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+    }
+}
+
+
