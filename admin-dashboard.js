@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeData();
     
     // Sync client data to ensure consistency
-    syncAllClientsData(); // ADDED THIS LINE
+    syncAllClientsData();
     
     // Load all data
     loadProducts();
@@ -102,6 +102,12 @@ function initializeData() {
         localStorage.setItem('wigStoreConfig', JSON.stringify(storeConfig));
     }
     
+    // Initialize password reset requests if not exist
+    if (!localStorage.getItem('passwordResetRequests')) {
+        console.log('Creating password reset requests storage...');
+        localStorage.setItem('passwordResetRequests', JSON.stringify([]));
+    }
+    
     // Initialize orders storage for clients
     const clients = JSON.parse(localStorage.getItem('wigClients') || '[]');
     clients.forEach(client => {
@@ -121,6 +127,14 @@ function setupEventListeners() {
     if (imageInput) {
         imageInput.addEventListener('input', function() {
             updateImagePreview(this.value);
+        });
+    }
+    
+    // Product ID check
+    const productIdInput = document.getElementById('productId');
+    if (productIdInput) {
+        productIdInput.addEventListener('blur', function() {
+            checkProductId();
         });
     }
     
@@ -175,7 +189,7 @@ function showAdminSection(sectionId) {
             break;
         case 'addProduct':
             clearProductForm();
-            initImageUpload(); // ADDED THIS LINE
+            initImageUpload();
             break;
         case 'settings':
             loadSettings();
@@ -185,6 +199,9 @@ function showAdminSection(sectionId) {
             break;
         case 'support':
             displayAdminTickets(loadAdminTickets());
+            break;
+        case 'passwordReset':
+            loadResetRequests();
             break;
     }
 }
@@ -286,7 +303,235 @@ function updateDashboardStats() {
     document.getElementById('dashTotalUsers').textContent = allClients.length;
 }
 
-// Load products table
+// ===== ADD PRODUCT FORM ENHANCEMENTS =====
+
+// Check Product ID availability
+function checkProductId() {
+    const productId = document.getElementById('productId').value.trim();
+    const statusSpan = document.getElementById('productIdStatus');
+    
+    if (!productId) {
+        if (statusSpan) statusSpan.style.display = 'none';
+        return;
+    }
+    
+    const products = JSON.parse(localStorage.getItem('wigProducts') || '[]');
+    const exists = products.some(p => p.id === productId);
+    
+    if (statusSpan) {
+        statusSpan.style.display = 'block';
+        if (exists) {
+            statusSpan.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: #e74c3c;"></i> ID already exists';
+            statusSpan.style.color = '#e74c3c';
+        } else {
+            statusSpan.innerHTML = '<i class="fas fa-check-circle" style="color: #2ecc71;"></i> ID available';
+            statusSpan.style.color = '#2ecc71';
+        }
+    }
+}
+
+// ===== UPDATED ADD PRODUCT FUNCTION =====
+function addProduct() {
+    // Get form values
+    const productId = document.getElementById('productId')?.value.trim() || '';
+    const name = document.getElementById('productName').value.trim();
+    const category = document.getElementById('productCategory').value;
+    const price = parseFloat(document.getElementById('productPrice').value);
+    const stock = parseInt(document.getElementById('productStock').value);
+    const description = document.getElementById('productDescription').value.trim();
+    const length = document.getElementById('productLength').value.trim();
+    const color = document.getElementById('productColor').value.trim();
+    const image = document.getElementById('productImage').value.trim();
+    
+    // Validate
+    if (!name || !category || isNaN(price) || isNaN(stock) || !description) {
+        alert('Please fill in all required fields (Name, Category, Price, Stock, Description)');
+        return;
+    }
+    
+    // Check if ID already exists (only if manual ID is provided)
+    if (productId) {
+        const existingProducts = JSON.parse(localStorage.getItem('wigProducts') || '[]');
+        if (existingProducts.some(p => p.id === productId)) {
+            alert('Product ID already exists! Please choose a different ID.');
+            return;
+        }
+    }
+    
+    // Check if image is a data URL (too long for localStorage)
+    let finalImage = image || 'https://via.placeholder.com/400x400?text=Wig+Image';
+    
+    // If it's a data URL and too long, compress or convert it
+    if (image && image.startsWith('data:image') && image.length > 100000) {
+        alert('Image is too large. Please use a smaller image or use image URL instead.');
+        return;
+    }
+    
+    // Determine product ID
+    let newProductId;
+    if (productId) {
+        newProductId = productId; // Use manual ID
+    } else {
+        // Generate auto ID
+        newProductId = allProducts.length > 0 ? Math.max(...allProducts.map(p => {
+            // Handle both numeric and string IDs
+            const id = p.id;
+            return typeof id === 'number' ? id : (parseInt(id) || 0);
+        })) + 1 : 1;
+    }
+    
+    // Create new product
+    const newProduct = {
+        id: newProductId,
+        name,
+        category,
+        price,
+        stock,
+        description,
+        length: length || 'Not specified',
+        color: color || 'Natural',
+        image: finalImage,
+        active: true,
+        createdAt: new Date().toISOString()
+    };
+    
+    // Add to products
+    allProducts.push(newProduct);
+    saveProducts();
+    
+    // Clear form
+    clearProductForm();
+    resetProductFormButtons();
+    
+    // Show success and switch to products section
+    showAdminNotification(`Product "${name}" added successfully! (ID: ${newProductId})`, 'success');
+    showAdminSection('products');
+}
+
+// ===== UPDATED EDIT PRODUCT FUNCTION =====
+function editProduct(productId) {
+    const product = allProducts.find(p => p.id == productId);
+    if (!product) {
+        alert('Product not found!');
+        return;
+    }
+    
+    // Fill the form with existing product data
+    document.getElementById('productName').value = product.name;
+    document.getElementById('productCategory').value = product.category;
+    document.getElementById('productPrice').value = product.price;
+    document.getElementById('productStock').value = product.stock;
+    document.getElementById('productDescription').value = product.description;
+    document.getElementById('productLength').value = product.length || '';
+    document.getElementById('productColor').value = product.color || '';
+    document.getElementById('productImage').value = product.image || '';
+    
+    // Show image preview if exists
+    if (product.image) {
+        updateImagePreview(product.image);
+    }
+    
+    // Change form to edit mode
+    const formActions = document.querySelector('#addProductSection .form-actions');
+    if (formActions) {
+        formActions.innerHTML = `
+            <button type="button" class="btn btn-secondary" onclick="cancelEditProduct()">
+                Cancel
+            </button>
+            <button type="button" class="btn btn-danger" onclick="deleteProduct(${product.id})">
+                Delete Product
+            </button>
+            <button type="button" class="btn btn-primary" onclick="updateProduct(${product.id})">
+                <i class="fas fa-save"></i> Update Product
+            </button>
+        `;
+    }
+    
+    // Show add product section
+    showAdminSection('addProduct');
+    
+    // Scroll to top
+    window.scrollTo(0, 0);
+}
+
+// Cancel edit and reset form
+function cancelEditProduct() {
+    clearProductForm();
+    resetProductFormButtons();
+    showAdminSection('products');
+}
+
+// Reset product form buttons to default
+function resetProductFormButtons() {
+    const formActions = document.querySelector('#addProductSection .form-actions');
+    if (formActions) {
+        formActions.innerHTML = `
+            <button type="button" class="btn btn-secondary" onclick="clearProductForm()">
+                Clear Form
+            </button>
+            <button type="button" class="btn btn-primary" onclick="addProduct()">
+                <i class="fas fa-plus"></i> Add Product
+            </button>
+        `;
+    }
+}
+
+// ===== UPDATED UPDATE PRODUCT FUNCTION =====
+function updateProduct(productId) {
+    const productIndex = allProducts.findIndex(p => p.id == productId);
+    if (productIndex === -1) {
+        alert('Product not found!');
+        return;
+    }
+    
+    // Get form values
+    const name = document.getElementById('productName').value.trim();
+    const category = document.getElementById('productCategory').value;
+    const price = parseFloat(document.getElementById('productPrice').value);
+    const stock = parseInt(document.getElementById('productStock').value);
+    const description = document.getElementById('productDescription').value.trim();
+    const length = document.getElementById('productLength').value.trim();
+    const color = document.getElementById('productColor').value.trim();
+    const image = document.getElementById('productImage').value.trim();
+    
+    // Validation
+    if (!name || !category || isNaN(price) || isNaN(stock) || !description) {
+        alert('Please fill in all required fields with valid data!');
+        return;
+    }
+    
+    // Update product (KEEP THE ORIGINAL ID)
+    allProducts[productIndex] = {
+        ...allProducts[productIndex],
+        name,
+        category,
+        price,
+        stock,
+        description,
+        length: length || allProducts[productIndex].length,
+        color: color || allProducts[productIndex].color,
+        image: image || allProducts[productIndex].image,
+        updatedAt: new Date().toISOString()
+    };
+    
+    // Save to localStorage
+    localStorage.setItem('wigProducts', JSON.stringify(allProducts));
+    
+    // Reset form
+    clearProductForm();
+    resetProductFormButtons();
+    
+    // Show success message
+    showAdminNotification(`Product "${name}" updated successfully!`, 'success');
+    
+    // Refresh products table
+    loadProductsTable();
+    
+    // Go back to products section
+    showAdminSection('products');
+}
+
+// Load products table with edit button
 function loadProductsTable() {
     const tableBody = document.getElementById('adminProductsTable');
     if (!tableBody) return;
@@ -313,7 +558,7 @@ function loadProductsTable() {
         
         html += `
             <tr>
-                <td><strong>#${product.id}</strong></td>
+                <td><strong>${product.id}</strong></td>
                 <td>
                     <img src="${product.image || 'https://via.placeholder.com/80x80?text=Wig'}" 
                          alt="${product.name}" 
@@ -340,16 +585,1029 @@ function loadProductsTable() {
                 </td>
                 <td>
                     <div style="display: flex; gap: 5px;">
-                        <button class="action-btn edit" onclick="editProduct(${product.id})" 
+                        <button class="action-btn edit" onclick="editProduct('${product.id}')" 
                                 title="Edit Product" style="background: #3498db; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer;">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="action-btn view" onclick="viewProduct(${product.id})"
+                        <button class="action-btn view" onclick="viewProduct('${product.id}')"
                                 title="View Details" style="background: #2ecc71; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer;">
                             <i class="fas fa-eye"></i>
                         </button>
-                        <button class="action-btn delete" onclick="deleteProduct(${product.id})"
+                        <button class="action-btn delete" onclick="deleteProduct('${product.id}')"
                                 title="Delete Product" style="background: #e74c3c; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer;">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    });
+    
+    tableBody.innerHTML = html;
+}
+
+// Clear product form
+function clearProductForm() {
+    document.getElementById('productName').value = '';
+    document.getElementById('productCategory').value = '';
+    document.getElementById('productPrice').value = '';
+    document.getElementById('productStock').value = '';
+    document.getElementById('productDescription').value = '';
+    document.getElementById('productLength').value = '';
+    document.getElementById('productColor').value = '';
+    document.getElementById('productImage').value = '';
+    // Clear product ID field if exists
+    const productIdField = document.getElementById('productId');
+    if (productIdField) productIdField.value = '';
+    const productIdStatus = document.getElementById('productIdStatus');
+    if (productIdStatus) productIdStatus.style.display = 'none';
+    // Clear file input
+    if (document.getElementById('imageFileInput')) {
+        document.getElementById('imageFileInput').value = '';
+    }
+    updateImagePreview('');
+}
+
+// Delete product
+function deleteProduct(productId) {
+    if (!confirm('Are you sure you want to delete this product?')) {
+        return;
+    }
+    
+    allProducts = allProducts.filter(p => p.id != productId);
+    saveProducts();
+    
+    alert('Product deleted successfully!');
+    showAdminSection('products');
+}
+
+// ===== ORDER TRACKING FUNCTIONS =====
+
+// UPDATED Load orders table with tracking
+function loadOrdersTable() {
+    const tableBody = document.getElementById('adminOrdersTable');
+    if (!tableBody) return;
+    
+    if (allOrders.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="7" class="empty-table">No orders yet</td>
+            </tr>
+        `;
+        return;
+    }
+    
+    // Sort orders by date (newest first)
+    const sortedOrders = [...allOrders].sort((a, b) => 
+        new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt)
+    );
+    
+    let html = '';
+    sortedOrders.forEach((order) => {
+        const orderDate = new Date(order.date || order.createdAt);
+        const formattedDate = orderDate.toLocaleDateString();
+        const formattedTime = orderDate.toLocaleTimeString();
+        
+        const customerName = order.customer ? 
+            order.customer.username || order.customer.email.split('@')[0] : 
+            'Unknown Customer';
+        
+        // Get current status
+        const currentStatus = order.status || 'processing';
+        
+        // Build items list
+        let itemsList = 'N/A';
+        if (order.items && order.items.length > 0) {
+            itemsList = order.items.map(item => `${item.name || 'Unknown'} x${item.quantity || 1}`).join(', ');
+            if (itemsList.length > 50) {
+                itemsList = itemsList.substring(0, 50) + '...';
+            }
+        }
+        
+        html += `
+            <tr>
+                <td><strong>${order.id || generateOrderIdForAdmin()}</strong></td>
+                <td>${customerName}</td>
+                <td>${formattedDate} ${formattedTime}</td>
+                <td title="${itemsList}">${itemsList}</td>
+                <td>$${(order.total || 0).toFixed(2)}</td>
+                <td>
+                    <select class="status-select" data-order-id="${order.id}" onchange="updateOrderStatus('${order.id}', this.value)" style="padding: 6px 10px; border-radius: 4px; border: 1px solid #ddd; background: white; font-size: 13px; cursor: pointer; min-width: 140px;">
+                        <option value="processing" ${currentStatus === 'processing' ? 'selected' : ''}>Processing</option>
+                        <option value="verification" ${currentStatus === 'verification' ? 'selected' : ''}>Verification</option>
+                        <option value="packaging" ${currentStatus === 'packaging' ? 'selected' : ''}>Packaging</option>
+                        <option value="out_for_delivery" ${currentStatus === 'out_for_delivery' ? 'selected' : ''}>Out for Delivery</option>
+                        <option value="completed" ${currentStatus === 'completed' ? 'selected' : ''}>Completed</option>
+                        <option value="cancelled" ${currentStatus === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                    </select>
+                </td>
+                <td>
+                    <button class="action-btn view" onclick="viewOrderDetails('${order.id}')"
+                            title="View Details" style="background: #2ecc71; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+    
+    tableBody.innerHTML = html;
+}
+
+// Update order status
+function updateOrderStatus(orderId, newStatus) {
+    const clients = JSON.parse(localStorage.getItem('wigClients') || '[]');
+    let orderFound = false;
+    
+    // Search through all clients' orders
+    clients.forEach(client => {
+        const ordersKey = `orders_${client.email}`;
+        const ordersJSON = localStorage.getItem(ordersKey);
+        
+        if (ordersJSON) {
+            try {
+                const orders = JSON.parse(ordersJSON);
+                const orderIndex = orders.findIndex(o => o.id === orderId);
+                
+                if (orderIndex !== -1) {
+                    // Update order status
+                    const oldStatus = orders[orderIndex].status || 'processing';
+                    orders[orderIndex].status = newStatus;
+                    orders[orderIndex].statusHistory = orders[orderIndex].statusHistory || [];
+                    orders[orderIndex].statusHistory.push({
+                        status: newStatus,
+                        changedAt: new Date().toISOString(),
+                        changedBy: document.getElementById('adminName').textContent
+                    });
+                    
+                    // Save updated orders
+                    localStorage.setItem(ordersKey, JSON.stringify(orders));
+                    orderFound = true;
+                    
+                    // Show notification
+                    showAdminNotification(`Order ${orderId} status updated from ${oldStatus} to ${newStatus}`, 'success');
+                    
+                    // Log status change
+                    logOrderStatusChange(orderId, oldStatus, newStatus, client.email);
+                }
+            } catch (e) {
+                console.error('Error updating order status:', e);
+            }
+        }
+    });
+    
+    if (!orderFound) {
+        alert('Order not found!');
+    }
+    
+    // Refresh orders table
+    loadOrders();
+    loadOrdersTable();
+}
+
+// Log order status change
+function logOrderStatusChange(orderId, oldStatus, newStatus, customerEmail) {
+    const logs = JSON.parse(localStorage.getItem('orderStatusLogs') || '[]');
+    logs.push({
+        orderId: orderId,
+        oldStatus: oldStatus,
+        newStatus: newStatus,
+        customerEmail: customerEmail,
+        changedAt: new Date().toISOString(),
+        changedBy: document.getElementById('adminName').textContent
+    });
+    localStorage.setItem('orderStatusLogs', JSON.stringify(logs));
+}
+
+// View order details
+function viewOrderDetails(orderId) {
+    const clients = JSON.parse(localStorage.getItem('wigClients') || '[]');
+    let orderDetails = null;
+    let customerEmail = '';
+    
+    // Find the order
+    for (const client of clients) {
+        const ordersKey = `orders_${client.email}`;
+        const ordersJSON = localStorage.getItem(ordersKey);
+        
+        if (ordersJSON) {
+            try {
+                const orders = JSON.parse(ordersJSON);
+                const order = orders.find(o => o.id === orderId);
+                
+                if (order) {
+                    orderDetails = order;
+                    customerEmail = client.email;
+                    break;
+                }
+            } catch (e) {
+                console.error('Error parsing orders:', e);
+            }
+        }
+    }
+    
+    if (!orderDetails) {
+        alert('Order not found!');
+        return;
+    }
+    
+    // Create modal content
+    const modalContent = `
+        <div class="order-details-modal">
+            <h3>Order Details: ${orderId}</h3>
+            
+            <div class="order-info-grid">
+                <div class="info-item">
+                    <label>Customer:</label>
+                    <span>${orderDetails.customer?.username || 'N/A'}</span>
+                </div>
+                <div class="info-item">
+                    <label>Email:</label>
+                    <span>${customerEmail}</span>
+                </div>
+                <div class="info-item">
+                    <label>Order Date:</label>
+                    <span>${new Date(orderDetails.date).toLocaleString()}</span>
+                </div>
+                <div class="info-item">
+                    <label>Current Status:</label>
+                    <span class="status-badge status-${orderDetails.status || 'processing'}">${orderDetails.status || 'Processing'}</span>
+                </div>
+                <div class="info-item">
+                    <label>Total Amount:</label>
+                    <span style="font-weight: bold; color: #2ecc71;">$${orderDetails.total?.toFixed(2) || '0.00'}</span>
+                </div>
+            </div>
+            
+            <div class="order-items-section">
+                <h4>Order Items</h4>
+                <table class="order-items-table">
+                    <thead>
+                        <tr>
+                            <th>Product ID</th>
+                            <th>Product Name</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${orderDetails.items?.map(item => `
+                            <tr>
+                                <td>${item.id || 'N/A'}</td>
+                                <td>${item.name || 'Unknown Product'}</td>
+                                <td>${item.quantity || 1}</td>
+                                <td>$${(item.price || 0).toFixed(2)}</td>
+                                <td>$${((item.price || 0) * (item.quantity || 1)).toFixed(2)}</td>
+                            </tr>
+                        `).join('') || '<tr><td colspan="5">No items</td></tr>'}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="status-history-section">
+                <h4>Status History</h4>
+                ${orderDetails.statusHistory?.length > 0 ? `
+                    <div class="status-timeline">
+                        ${orderDetails.statusHistory.map(history => `
+                            <div class="timeline-item">
+                                <div class="timeline-marker"></div>
+                                <div class="timeline-content">
+                                    <div class="timeline-status">${history.status}</div>
+                                    <div class="timeline-time">${new Date(history.changedAt).toLocaleString()}</div>
+                                    <div class="timeline-by">By: ${history.changedBy}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : '<p>No status history available.</p>'}
+            </div>
+            
+            <div class="order-actions">
+                <button class="btn btn-primary" onclick="printOrderDetails('${orderId}')">
+                    <i class="fas fa-print"></i> Print Order
+                </button>
+                <button class="btn btn-secondary" onclick="sendOrderUpdate('${orderId}', '${customerEmail}')">
+                    <i class="fas fa-envelope"></i> Email Customer
+                </button>
+            </div>
+        </div>
+    `;
+    
+    // Show in modal
+    const modalBody = document.getElementById('adminTicketModalBody');
+    modalBody.innerHTML = modalContent;
+    document.getElementById('adminTicketModal').classList.add('active');
+}
+
+// Print order details
+function printOrderDetails(orderId) {
+    alert(`Printing order ${orderId}...`);
+    // In a real application, this would open a print dialog
+}
+
+// Send order update email
+function sendOrderUpdate(orderId, customerEmail) {
+    const subject = `Order ${orderId} Update`;
+    const body = `Dear Customer,\n\nYour order ${orderId} has been updated. Please check your account for details.\n\nBest regards,\nWig Hub Support`;
+    
+    alert(`Email would be sent to ${customerEmail}\n\nSubject: ${subject}\n\nBody:\n${body}`);
+}
+
+// ===== PASSWORD RESET FUNCTIONS =====
+
+// Password Reset Functions
+function loadResetRequests() {
+    const requests = JSON.parse(localStorage.getItem('passwordResetRequests') || '[]');
+    displayResetRequests(requests);
+    return requests;
+}
+
+function displayResetRequests(requests) {
+    const table = document.getElementById('resetRequestsTable');
+    if (!table) {
+        // Create table if it doesn't exist
+        createPasswordResetSection();
+        displayResetRequests(requests);
+        return;
+    }
+    
+    if (requests.length === 0) {
+        table.innerHTML = `
+            <tr><td colspan="6" class="empty-table">No password reset requests</td></tr>
+        `;
+        return;
+    }
+    
+    let html = '';
+    requests.forEach(request => {
+        const statusClass = request.status === 'pending' ? 'status-pending' : 
+                           request.status === 'processing' ? 'status-processing' : 
+                           request.status === 'completed' ? 'status-completed' : 'status-cancelled';
+        
+        html += `
+            <tr>
+                <td>${request.id}</td>
+                <td>${request.email}</td>
+                <td>${request.username || 'N/A'}</td>
+                <td>${new Date(request.requestedAt).toLocaleDateString()}</td>
+                <td><span class="status-badge ${statusClass}">${request.status}</span></td>
+                <td>
+                    <button class="btn-action btn-view" onclick="viewResetRequest('${request.id}')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    ${request.status === 'pending' ? `
+                        <button class="btn-action btn-process" onclick="processResetRequest('${request.id}')">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                    ` : ''}
+                </td>
+            </tr>
+        `;
+    });
+    
+    table.innerHTML = html;
+}
+
+function createPasswordResetSection() {
+    const contentArea = document.querySelector('.admin-content-area');
+    
+    const passwordResetSection = document.createElement('section');
+    passwordResetSection.id = 'passwordResetSection';
+    passwordResetSection.className = 'admin-section';
+    passwordResetSection.innerHTML = `
+        <div class="section-header">
+            <h2><i class="fas fa-key"></i> Password Reset Requests</h2>
+        </div>
+        
+        <div class="password-reset-container">
+            <div class="search-filter">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="resetSearch" placeholder="Search by email..." onkeyup="filterResetRequests()">
+                </div>
+                <select id="resetStatusFilter" onchange="filterResetRequests()">
+                    <option value="">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="processing">Processing</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+            </div>
+            
+            <div class="reset-requests-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Request ID</th>
+                            <th>Client Email</th>
+                            <th>Client Name</th>
+                            <th>Request Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resetRequestsTable">
+                        <tr><td colspan="6" class="empty-table">Loading password reset requests...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+    
+    contentArea.appendChild(passwordResetSection);
+    
+    // Add password reset button to sidebar
+    const sidebarMenu = document.querySelector('.admin-menu');
+    const passwordResetButton = document.createElement('button');
+    passwordResetButton.className = 'admin-btn';
+    passwordResetButton.onclick = () => showAdminSection('passwordReset');
+    passwordResetButton.innerHTML = '<i class="fas fa-key"></i> Password Reset';
+    sidebarMenu.appendChild(passwordResetButton);
+}
+
+function filterResetRequests() {
+    const searchTerm = document.getElementById('resetSearch')?.value.toLowerCase() || '';
+    const statusFilter = document.getElementById('resetStatusFilter')?.value || '';
+    
+    const requests = JSON.parse(localStorage.getItem('passwordResetRequests') || '[]');
+    
+    const filteredRequests = requests.filter(request => {
+        const matchesSearch = !searchTerm || 
+            request.email.toLowerCase().includes(searchTerm) ||
+            (request.username && request.username.toLowerCase().includes(searchTerm));
+        
+        const matchesStatus = !statusFilter || request.status === statusFilter;
+        
+        return matchesSearch && matchesStatus;
+    });
+    
+    displayResetRequests(filteredRequests);
+}
+
+function viewResetRequest(requestId) {
+    const requests = JSON.parse(localStorage.getItem('passwordResetRequests') || '[]');
+    const request = requests.find(r => r.id === requestId);
+    
+    if (!request) return;
+    
+    const modalBody = document.getElementById('adminTicketModalBody');
+    modalBody.innerHTML = `
+        <div class="reset-request-detail">
+            <div class="request-info">
+                <div class="info-item">
+                    <label>Request ID:</label>
+                    <span>${request.id}</span>
+                </div>
+                <div class="info-item">
+                    <label>Client Email:</label>
+                    <span>${request.email}</span>
+                </div>
+                <div class="info-item">
+                    <label>Client Name:</label>
+                    <span>${request.username || 'Not available'}</span>
+                </div>
+                <div class="info-item">
+                    <label>Request Date:</label>
+                    <span>${new Date(request.requestedAt).toLocaleString()}</span>
+                </div>
+                <div class="info-item">
+                    <label>Status:</label>
+                    <span class="status-badge ${request.status === 'pending' ? 'status-pending' : request.status === 'processing' ? 'status-processing' : request.status === 'completed' ? 'status-completed' : 'status-cancelled'}">${request.status}</span>
+                </div>
+                <div class="info-item">
+                    <label>IP Address:</label>
+                    <span>${request.ip || 'Not recorded'}</span>
+                </div>
+                <div class="info-item">
+                    <label>User Agent:</label>
+                    <span style="font-size: 12px; color: #666;">${request.userAgent || 'Not recorded'}</span>
+                </div>
+            </div>
+            
+            <div class="reset-actions">
+                <h4>Reset Instructions</h4>
+                <div class="form-group">
+                    <label for="resetInstructions">Instructions to send to client:</label>
+                    <textarea id="resetInstructions" rows="4" placeholder="Dear ${request.username || 'Customer'},
+
+We have received your password reset request. Here are your new credentials:
+
+Username: ${request.username || request.email}
+Password: [Generate a temporary password here]
+
+Please login with these credentials and change your password immediately.
+
+Best regards,
+Wig Hub Support"></textarea>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" onclick="closeResetModal()">
+                        Cancel
+                    </button>
+                    <button class="btn btn-danger" onclick="markResetCancelled('${request.id}')">
+                        Mark as Cancelled
+                    </button>
+                    <button class="btn btn-primary" onclick="sendResetInstructions('${request.id}')">
+                        <i class="fas fa-paper-plane"></i> Send Instructions
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('adminTicketModal').classList.add('active');
+}
+
+function sendResetInstructions(requestId) {
+    const requests = JSON.parse(localStorage.getItem('passwordResetRequests') || '[]');
+    const requestIndex = requests.findIndex(r => r.id === requestId);
+    
+    if (requestIndex === -1) return;
+    
+    const instructions = document.getElementById('resetInstructions').value;
+    
+    // Update request status
+    requests[requestIndex].status = 'processing';
+    requests[requestIndex].processedAt = new Date().toISOString();
+    requests[requestIndex].processedBy = document.getElementById('adminName').textContent;
+    requests[requestIndex].instructionsSent = instructions;
+    
+    // Save updated requests
+    localStorage.setItem('passwordResetRequests', JSON.stringify(requests));
+    
+    // Show success message
+    alert(`Instructions prepared for ${requests[requestIndex].email}\n\nNote: In a real application, this would trigger an email to be sent.\n\nInstructions:\n${instructions}`);
+    
+    // Close modal and refresh
+    closeResetModal();
+    loadResetRequests();
+}
+
+function markResetCancelled(requestId) {
+    if (!confirm('Mark this request as cancelled?')) return;
+    
+    const requests = JSON.parse(localStorage.getItem('passwordResetRequests') || '[]');
+    const requestIndex = requests.findIndex(r => r.id === requestId);
+    
+    if (requestIndex === -1) return;
+    
+    requests[requestIndex].status = 'cancelled';
+    requests[requestIndex].processedAt = new Date().toISOString();
+    requests[requestIndex].processedBy = document.getElementById('adminName').textContent;
+    
+    localStorage.setItem('passwordResetRequests', JSON.stringify(requests));
+    
+    alert('Request marked as cancelled');
+    loadResetRequests();
+}
+
+function closeResetModal() {
+    document.getElementById('adminTicketModal').classList.remove('active');
+}
+
+// ===== ADMIN NOTIFICATION FUNCTION =====
+function showAdminNotification(message, type = 'success') {
+    const notification = document.createElement('div');
+    notification.className = `admin-notification ${type}`;
+    notification.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        background: ${type === 'success' ? '#d4edda' : type === 'error' ? '#f8d7da' : '#d1ecf1'};
+        color: ${type === 'success' ? '#155724' : type === 'error' ? '#721c24' : '#0c5465'};
+        border: 1px solid ${type === 'success' ? '#c3e6cb' : type === 'error' ? '#f5c6cb' : '#bee5eb'};
+        border-radius: 8px;
+        z-index: 10000;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        animation: slideIn 0.3s ease;
+        font-weight: 500;
+    `;
+    
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+// ===== EXISTING FUNCTIONS (Keep these as they are) =====
+
+function updateImagePreview(imageUrl) {
+    const preview = document.getElementById('imagePreview');
+    if (!preview) return;
+    
+    if (imageUrl) {
+        preview.innerHTML = `
+            <img src="${imageUrl}" alt="Preview" style="max-width: 200px; max-height: 200px; border-radius: 8px;">
+            <p style="margin-top: 10px; color: #666;">Image Preview</p>
+        `;
+    } else {
+        preview.innerHTML = `<p>No image selected</p>`;
+    }
+}
+
+function loadStoreConfig() {
+    let config = JSON.parse(localStorage.getItem('wigStoreConfig') || '{}');
+    
+    config = {
+        taxRate: config.taxRate || 8,
+        shippingFee: config.shippingFee || 9.99,
+        freeShippingThreshold: config.freeShippingThreshold || 100,
+        ...config
+    };
+    
+    if (document.getElementById('taxRate')) {
+        document.getElementById('taxRate').value = config.taxRate;
+    }
+    if (document.getElementById('shippingFee')) {
+        document.getElementById('shippingFee').value = config.shippingFee;
+    }
+    if (document.getElementById('freeShippingThreshold')) {
+        document.getElementById('freeShippingThreshold').value = config.freeShippingThreshold;
+    }
+    
+    return config;
+}
+
+function saveStoreConfig() {
+    const taxRate = parseFloat(document.getElementById('taxRate').value);
+    const shippingFee = parseFloat(document.getElementById('shippingFee').value);
+    const freeShippingThreshold = parseFloat(document.getElementById('freeShippingThreshold').value);
+    
+    const config = {
+        taxRate,
+        shippingFee,
+        freeShippingThreshold,
+        updatedAt: new Date().toISOString()
+    };
+    
+    localStorage.setItem('wigStoreConfig', JSON.stringify(config));
+    showAdminNotification('✅ Store configuration saved successfully!', 'success');
+}
+
+function generateTicketId() {
+    const ticketsKey = 'wigSupportTickets';
+    const ticketsJSON = localStorage.getItem(ticketsKey);
+    let tickets = [];
+    
+    if (ticketsJSON) {
+        try {
+            tickets = JSON.parse(ticketsJSON);
+        } catch (e) {
+            tickets = [];
+        }
+    }
+    
+    let maxId = 0;
+    tickets.forEach(ticket => {
+        if (ticket.id && ticket.id.startsWith('TKT')) {
+            const num = parseInt(ticket.id.replace('TKT', ''));
+            if (!isNaN(num) && num > maxId) {
+                maxId = num;
+            }
+        }
+    });
+    
+    const nextId = maxId + 1;
+    return 'TKT' + nextId.toString().padStart(4, '0');
+}
+
+function generateOrderIdForAdmin() {
+    let allOrders = [];
+    
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith('orders_')) {
+            const ordersJSON = localStorage.getItem(key);
+            if (ordersJSON) {
+                try {
+                    const userOrders = JSON.parse(ordersJSON);
+                    allOrders = allOrders.concat(userOrders);
+                } catch (e) {
+                    console.error('Error parsing orders:', e);
+                }
+            }
+        }
+    }
+    
+    let maxId = 0;
+    allOrders.forEach(order => {
+        if (order.id && order.id.startsWith('ORD')) {
+            const num = parseInt(order.id.replace('ORD', ''));
+            if (!isNaN(num) && num > maxId) {
+                maxId = num;
+            }
+        }
+    });
+    
+    const nextId = maxId + 1;
+    return 'ORD' + nextId.toString().padStart(4, '0');
+}
+
+function optimizeDataURL(dataUrl) {
+    if (dataUrl.length > 50000) {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width * 0.5;
+                canvas.height = img.height * 0.5;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                resolve(canvas.toDataURL('image/jpeg', 0.4));
+            };
+            img.src = dataUrl;
+        });
+    }
+    return Promise.resolve(dataUrl);
+}
+
+function loadSettings() {
+    loadStoreConfig();
+}
+
+function loadRecentProducts() {
+    const recentProductsContainer = document.getElementById('recentProducts');
+    if (!recentProductsContainer) return;
+    
+    const recentProducts = [...allProducts]
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 5);
+    
+    if (recentProducts.length === 0) {
+        recentProductsContainer.innerHTML = `
+            <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                <p>No products yet. Add your first product!</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '<div style="display: flex; flex-direction: column; gap: 15px;">';
+    recentProducts.forEach(product => {
+        html += `
+            <div style="display: flex; align-items: center; gap: 15px; padding: 15px; 
+                        background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); cursor: pointer;" 
+                        onclick="viewProduct(${product.id})">
+                <img src="${product.image || 'https://via.placeholder.com/50x50'}" 
+                     alt="${product.name}" 
+                     style="width: 50px; height: 50px; border-radius: 8px; object-fit: cover;">
+                <div style="flex: 1;">
+                    <div style="font-weight: 600; margin-bottom: 5px;">${product.name}</div>
+                    <div style="font-size: 14px; color: #666;">${product.category} • $${product.price.toFixed(2)}</div>
+                </div>
+                <div style="font-size: 14px; color: #666;">
+                    Stock: ${product.stock}
+                </div>
+            </div>
+        `;
+    });
+    html += '</div>';
+    
+    recentProductsContainer.innerHTML = html;
+}
+
+function loadSampleProducts() {
+    const sampleProducts = [
+        {
+            id: "WIG001",
+            name: "Brazilian Straight Wig",
+            category: "Brazilian",
+            price: 89.99,
+            stock: 15,
+            description: "Premium Brazilian straight hair wig with natural look and feel.",
+            length: "22-24 inches",
+            color: "Natural Black",
+            image: "https://images.unsplash.com/photo-1522338242990-e923b56a8c8d?w=400&h=400&fit=crop",
+            active: true,
+            createdAt: new Date().toISOString()
+        },
+        {
+            id: "WIG002",
+            name: "Peruvian Curly Wig",
+            category: "Peruvian",
+            price: 109.99,
+            stock: 8,
+            description: "Luxurious Peruvian curly wig with voluminous curls.",
+            length: "20-22 inches",
+            color: "Dark Brown",
+            image: "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400&h=400&fit=crop",
+            active: true,
+            createdAt: new Date().toISOString()
+        },
+        {
+            id: "WIG003",
+            name: "Malaysian Body Wave",
+            category: "Malaysian",
+            price: 99.99,
+            stock: 12,
+            description: "Silky Malaysian body wave wig with beautiful texture.",
+            length: "24-26 inches",
+            color: "Honey Blonde",
+            image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=400&fit=crop",
+            active: true,
+            createdAt: new Date().toISOString()
+        },
+        {
+            id: "WIG004",
+            name: "Synthetic Short Bob",
+            category: "Synthetic",
+            price: 49.99,
+            stock: 25,
+            description: "Easy-care synthetic short bob wig for daily wear.",
+            length: "12-14 inches",
+            color: "Jet Black",
+            image: "https://images.unsplash.com/photo-1599351431440-56e8b8f07e4c?w=400&h=400&fit=crop",
+            active: true,
+            createdAt: new Date().toISOString()
+        }
+    ];
+    
+    allProducts = sampleProducts;
+    saveProducts();
+    showAdminNotification('✅ Sample products loaded successfully!', 'success');
+    showAdminSection('dashboard');
+}
+
+function exportProducts() {
+    const dataStr = JSON.stringify(allProducts, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileDefaultName = 'wighub-products.json';
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+    
+    showAdminNotification('✅ Products exported successfully!', 'success');
+}
+
+function createBackup() {
+    const backup = {
+        products: allProducts,
+        clients: allClients,
+        orders: allOrders,
+        storeConfig: JSON.parse(localStorage.getItem('wigStoreConfig') || '{}'),
+        backupDate: new Date().toISOString()
+    };
+    
+    const dataStr = JSON.stringify(backup, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileDefaultName = `wighub-backup-${new Date().toISOString().split('T')[0]}.json`;
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+    
+    showAdminNotification('✅ Backup created successfully!', 'success');
+}
+
+function clearAllData() {
+    if (!confirm('Are you sure you want to clear ALL data? This cannot be undone!')) {
+        return;
+    }
+    
+    localStorage.removeItem('wigProducts');
+    localStorage.removeItem('wigClients');
+    localStorage.removeItem('wigAdmins');
+    localStorage.removeItem('wigSupportTickets');
+    localStorage.removeItem('wigStoreConfig');
+    localStorage.removeItem('passwordResetRequests');
+    
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith('orders_') || key.startsWith('cart_') || key.startsWith('wishlist_') || key.startsWith('tickets_')) {
+            localStorage.removeItem(key);
+        }
+    }
+    
+    loadProducts();
+    loadClients();
+    loadOrders();
+    
+    showAdminNotification('✅ All data cleared successfully!', 'success');
+    showAdminSection('dashboard');
+}
+
+function logoutAdmin() {
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminUser');
+    window.location.href = 'admin-login.html';
+}
+
+// ===== EXISTING FUNCTIONS CONTINUED =====
+
+// Filter products
+function filterProducts() {
+    const searchTerm = document.getElementById('adminSearchInput').value.toLowerCase();
+    const category = document.getElementById('adminCategoryFilter').value;
+    
+    filteredProducts = allProducts.filter(product => {
+        const matchesSearch = !searchTerm || 
+            product.name.toLowerCase().includes(searchTerm) ||
+            product.description.toLowerCase().includes(searchTerm);
+        
+        const matchesCategory = !category || product.category === category;
+        
+        return matchesSearch && matchesCategory;
+    });
+    
+    loadProductsTable();
+}
+
+// Filter customers
+function filterCustomers() {
+    const searchTerm = document.getElementById('customerSearchInput').value.toLowerCase();
+    const tableBody = document.getElementById('adminCustomersTable');
+    
+    if (!tableBody || !searchTerm) {
+        loadCustomersTable();
+        return;
+    }
+    
+    const filteredClients = allClients.filter(client => 
+        (client.username && client.username.toLowerCase().includes(searchTerm)) ||
+        (client.email && client.email.toLowerCase().includes(searchTerm))
+    );
+    
+    if (filteredClients.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="7" class="empty-table">
+                    No customers found matching "${searchTerm}"
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    let html = '';
+    filteredClients.forEach((client) => {
+        // Get client orders
+        const ordersKey = `orders_${client.email}`;
+        const clientOrders = JSON.parse(localStorage.getItem(ordersKey) || '[]');
+        const orderCount = clientOrders.length;
+        
+        const totalSpent = clientOrders.reduce((sum, order) => sum + (order.total || 0), 0);
+        
+        // Format join date
+        const joinDate = new Date(client.createdAt || new Date());
+        const formattedDate = joinDate.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+        
+        html += `
+            <tr>
+                <td><strong>#${client.id}</strong></td>
+                <td>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div class="customer-avatar" onclick="viewCustomerDetails('${client.email}')" 
+                             style="cursor: pointer; width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                                    display: flex; align-items: center; justify-content: center; color: white;">
+                            ${client.username ? client.username.charAt(0).toUpperCase() : 'C'}
+                        </div>
+                        <div>
+                            <strong style="cursor: pointer;" onclick="viewCustomerDetails('${client.email}')">${client.username || 'Unknown'}</strong><br>
+                            <small>${client.email || 'No email'}</small>
+                        </div>
+                    </div>
+                </td>
+                <td>${formattedDate}</td>
+                <td>${orderCount}</td>
+                <td>$${totalSpent.toFixed(2)}</td>
+                <td>
+                    <span class="status-badge active" style="padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; background: #d4edda; color: #155724;">
+                        ${client.status || 'Active'}
+                    </span>
+                </td>
+                <td>
+                    <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                        <button class="action-btn view" onclick="viewCustomerDetails('${client.email}')"
+                                title="View Details" style="background: #2ecc71; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="action-btn edit" onclick="editClient('${client.email}')" 
+                                title="Edit Client" style="background: #3498db; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn delete" onclick="deleteClient(${client.id})"
+                                title="Delete Client" style="background: #e74c3c; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
@@ -495,674 +1753,6 @@ function createCustomersSection() {
     customersButton.onclick = () => showAdminSection('customers');
     customersButton.innerHTML = '<i class="fas fa-users"></i> Customers';
     sidebarMenu.appendChild(customersButton);
-}
-
-// Filter products
-function filterProducts() {
-    const searchTerm = document.getElementById('adminSearchInput').value.toLowerCase();
-    const category = document.getElementById('adminCategoryFilter').value;
-    
-    filteredProducts = allProducts.filter(product => {
-        const matchesSearch = !searchTerm || 
-            product.name.toLowerCase().includes(searchTerm) ||
-            product.description.toLowerCase().includes(searchTerm);
-        
-        const matchesCategory = !category || product.category === category;
-        
-        return matchesSearch && matchesCategory;
-    });
-    
-    loadProductsTable();
-}
-
-// Filter customers
-function filterCustomers() {
-    const searchTerm = document.getElementById('customerSearchInput').value.toLowerCase();
-    const tableBody = document.getElementById('adminCustomersTable');
-    
-    if (!tableBody || !searchTerm) {
-        loadCustomersTable();
-        return;
-    }
-    
-    const filteredClients = allClients.filter(client => 
-        (client.username && client.username.toLowerCase().includes(searchTerm)) ||
-        (client.email && client.email.toLowerCase().includes(searchTerm))
-    );
-    
-    if (filteredClients.length === 0) {
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="7" class="empty-table">
-                    No customers found matching "${searchTerm}"
-                </td>
-            </tr>
-        `;
-        return;
-    }
-    
-    let html = '';
-    filteredClients.forEach((client) => {
-        // Get client orders
-        const ordersKey = `orders_${client.email}`;
-        const clientOrders = JSON.parse(localStorage.getItem(ordersKey) || '[]');
-        const orderCount = clientOrders.length;
-        
-        const totalSpent = clientOrders.reduce((sum, order) => sum + (order.total || 0), 0);
-        
-        // Format join date
-        const joinDate = new Date(client.createdAt || new Date());
-        const formattedDate = joinDate.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        });
-        
-        html += `
-            <tr>
-                <td><strong>#${client.id}</strong></td>
-                <td>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <div class="customer-avatar" onclick="viewCustomerDetails('${client.email}')" 
-                             style="cursor: pointer; width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-                                    display: flex; align-items: center; justify-content: center; color: white;">
-                            ${client.username ? client.username.charAt(0).toUpperCase() : 'C'}
-                        </div>
-                        <div>
-                            <strong style="cursor: pointer;" onclick="viewCustomerDetails('${client.email}')">${client.username || 'Unknown'}</strong><br>
-                            <small>${client.email || 'No email'}</small>
-                        </div>
-                    </div>
-                </td>
-                <td>${formattedDate}</td>
-                <td>${orderCount}</td>
-                <td>$${totalSpent.toFixed(2)}</td>
-                <td>
-                    <span class="status-badge active" style="padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; background: #d4edda; color: #155724;">
-                        ${client.status || 'Active'}
-                    </span>
-                </td>
-                <td>
-                    <div style="display: flex; gap: 5px; flex-wrap: wrap;">
-                        <button class="action-btn view" onclick="viewCustomerDetails('${client.email}')"
-                                title="View Details" style="background: #2ecc71; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="action-btn edit" onclick="editClient('${client.email}')" 
-                                title="Edit Client" style="background: #3498db; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="action-btn delete" onclick="deleteClient(${client.id})"
-                                title="Delete Client" style="background: #e74c3c; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        `;
-    });
-    
-    tableBody.innerHTML = html;
-}
-
-// Update image preview
-function updateImagePreview(imageUrl) {
-    const preview = document.getElementById('imagePreview');
-    if (!preview) return;
-    
-    if (imageUrl) {
-        preview.innerHTML = `
-            <img src="${imageUrl}" alt="Preview" style="max-width: 200px; max-height: 200px; border-radius: 8px;">
-            <p style="margin-top: 10px; color: #666;">Image Preview</p>
-        `;
-    } else {
-        preview.innerHTML = `<p>No image selected</p>`;
-    }
-}
-
-// ===== STORE CONFIGURATION =====
-function loadStoreConfig() {
-    let config = JSON.parse(localStorage.getItem('wigStoreConfig') || '{}');
-    
-    config = {
-        taxRate: config.taxRate || 8,
-        shippingFee: config.shippingFee || 9.99,
-        freeShippingThreshold: config.freeShippingThreshold || 100,
-        ...config
-    };
-    
-    if (document.getElementById('taxRate')) {
-        document.getElementById('taxRate').value = config.taxRate;
-    }
-    if (document.getElementById('shippingFee')) {
-        document.getElementById('shippingFee').value = config.shippingFee;
-    }
-    if (document.getElementById('freeShippingThreshold')) {
-        document.getElementById('freeShippingThreshold').value = config.freeShippingThreshold;
-    }
-    
-    return config;
-}
-
-function saveStoreConfig() {
-    const taxRate = parseFloat(document.getElementById('taxRate').value);
-    const shippingFee = parseFloat(document.getElementById('shippingFee').value);
-    const freeShippingThreshold = parseFloat(document.getElementById('freeShippingThreshold').value);
-    
-    const config = {
-        taxRate,
-        shippingFee,
-        freeShippingThreshold,
-        updatedAt: new Date().toISOString()
-    };
-    
-    localStorage.setItem('wigStoreConfig', JSON.stringify(config));
-    alert('✅ Store configuration saved successfully!');
-}
-
-// ===== TICKET ID GENERATOR =====
-function generateTicketId() {
-    const ticketsKey = 'wigSupportTickets';
-    const ticketsJSON = localStorage.getItem(ticketsKey);
-    let tickets = [];
-    
-    if (ticketsJSON) {
-        try {
-            tickets = JSON.parse(ticketsJSON);
-        } catch (e) {
-            tickets = [];
-        }
-    }
-    
-    let maxId = 0;
-    tickets.forEach(ticket => {
-        if (ticket.id && ticket.id.startsWith('TKT')) {
-            const num = parseInt(ticket.id.replace('TKT', ''));
-            if (!isNaN(num) && num > maxId) {
-                maxId = num;
-            }
-        }
-    });
-    
-    const nextId = maxId + 1;
-    return 'TKT' + nextId.toString().padStart(4, '0');
-}
-
-// ===== ORDER ID GENERATOR (For Admin) =====
-function generateOrderIdForAdmin() {
-    let allOrders = [];
-    
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key.startsWith('orders_')) {
-            const ordersJSON = localStorage.getItem(key);
-            if (ordersJSON) {
-                try {
-                    const userOrders = JSON.parse(ordersJSON);
-                    allOrders = allOrders.concat(userOrders);
-                } catch (e) {
-                    console.error('Error parsing orders:', e);
-                }
-            }
-        }
-    }
-    
-    let maxId = 0;
-    allOrders.forEach(order => {
-        if (order.id && order.id.startsWith('ORD')) {
-            const num = parseInt(order.id.replace('ORD', ''));
-            if (!isNaN(num) && num > maxId) {
-                maxId = num;
-            }
-        }
-    });
-    
-    const nextId = maxId + 1;
-    return 'ORD' + nextId.toString().padStart(4, '0');
-}
-
-// ===== IMAGE OPTIMIZATION =====
-function optimizeDataURL(dataUrl) {
-    if (dataUrl.length > 50000) {
-        return new Promise((resolve) => {
-            const img = new Image();
-            img.onload = function() {
-                const canvas = document.createElement('canvas');
-                canvas.width = img.width * 0.5;
-                canvas.height = img.height * 0.5;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                resolve(canvas.toDataURL('image/jpeg', 0.4));
-            };
-            img.src = dataUrl;
-        });
-    }
-    return Promise.resolve(dataUrl);
-}
-
-// Update loadSettings function
-function loadSettings() {
-    loadStoreConfig(); // Load store configuration
-}
-
-// Add new product
-function addProduct() {
-    // Get form values
-    const name = document.getElementById('productName').value.trim();
-    const category = document.getElementById('productCategory').value;
-    const price = parseFloat(document.getElementById('productPrice').value);
-    const stock = parseInt(document.getElementById('productStock').value);
-    const description = document.getElementById('productDescription').value.trim();
-    const length = document.getElementById('productLength').value.trim();
-    const color = document.getElementById('productColor').value.trim();
-    const image = document.getElementById('productImage').value.trim();
-    
-    // Validate
-    if (!name || !category || isNaN(price) || isNaN(stock) || !description) {
-        alert('Please fill in all required fields (Name, Category, Price, Stock, Description)');
-        return;
-    }
-    
-    // Check if image is a data URL (too long for localStorage)
-    let finalImage = image || 'https://via.placeholder.com/400x400?text=Wig+Image';
-    
-    // If it's a data URL and too long, compress or convert it
-    if (image && image.startsWith('data:image') && image.length > 100000) {
-        alert('Image is too large. Please use a smaller image or use image URL instead.');
-        return;
-    }
-    
-    // Create new product
-    const newProduct = {
-        id: allProducts.length > 0 ? Math.max(...allProducts.map(p => p.id)) + 1 : 1,
-        name,
-        category,
-        price,
-        stock,
-        description,
-        length: length || 'Not specified',
-        color: color || 'Natural',
-        image: finalImage,
-        active: true,
-        createdAt: new Date().toISOString()
-    };
-    
-    // Add to products
-    allProducts.push(newProduct);
-    saveProducts();
-    
-    // Clear form
-    clearProductForm();
-    
-    // Show success and switch to products section
-    alert('Product added successfully!');
-    showAdminSection('products');
-}
-
-// Clear product form
-function clearProductForm() {
-    document.getElementById('productName').value = '';
-    document.getElementById('productCategory').value = '';
-    document.getElementById('productPrice').value = '';
-    document.getElementById('productStock').value = '';
-    document.getElementById('productDescription').value = '';
-    document.getElementById('productLength').value = '';
-    document.getElementById('productColor').value = '';
-    document.getElementById('productImage').value = '';
-    // Add this line to clear file input
-    if (document.getElementById('imageFileInput')) {
-        document.getElementById('imageFileInput').value = '';
-    }
-    updateImagePreview('');
-}
-
-// Edit product
-function editProduct(productId) {
-    const product = allProducts.find(p => p.id === productId);
-    if (!product) return;
-    
-    // Fill the form with product data
-    document.getElementById('productName').value = product.name;
-    document.getElementById('productCategory').value = product.category;
-    document.getElementById('productPrice').value = product.price;
-    document.getElementById('productStock').value = product.stock;
-    document.getElementById('productDescription').value = product.description;
-    document.getElementById('productLength').value = product.length;
-    document.getElementById('productColor').value = product.color;
-    document.getElementById('productImage').value = product.image;
-    
-    updateImagePreview(product.image);
-    
-    // Change form to edit mode
-    const formActions = document.querySelector('.form-actions');
-    if (formActions) {
-        formActions.innerHTML = `
-            <button type="button" class="btn btn-secondary" onclick="clearProductForm()">
-                Cancel
-            </button>
-            <button type="button" class="btn btn-danger" onclick="deleteProduct(${product.id})">
-                Delete Product
-            </button>
-            <button type="button" class="btn btn-primary" onclick="updateProduct(${product.id})">
-                Update Product
-            </button>
-        `;
-    }
-    
-    // Show add product section
-    showAdminSection('addProduct');
-}
-
-// Update product
-function updateProduct(productId) {
-    const productIndex = allProducts.findIndex(p => p.id === productId);
-    if (productIndex === -1) return;
-    
-    // Get form values
-    const name = document.getElementById('productName').value.trim();
-    const category = document.getElementById('productCategory').value;
-    const price = parseFloat(document.getElementById('productPrice').value);
-    const stock = parseInt(document.getElementById('productStock').value);
-    const description = document.getElementById('productDescription').value.trim();
-    const length = document.getElementById('productLength').value.trim();
-    const color = document.getElementById('productColor').value.trim();
-    const image = document.getElementById('productImage').value.trim();
-    
-    // Validate
-    if (!name || !category || isNaN(price) || isNaN(stock) || !description) {
-        alert('Please fill in all required fields');
-        return;
-    }
-    
-    // Update product
-    allProducts[productIndex] = {
-        ...allProducts[productIndex],
-        name,
-        category,
-        price,
-        stock,
-        description,
-        length: length || 'Not specified',
-        color: color || 'Natural',
-        image: image || 'https://via.placeholder.com/400x400?text=Wig+Image',
-        updatedAt: new Date().toISOString()
-    };
-    
-    saveProducts();
-    clearProductForm();
-    
-    // Reset form actions
-    const formActions = document.querySelector('.form-actions');
-    if (formActions) {
-        formActions.innerHTML = `
-            <button type="button" class="btn btn-secondary" onclick="clearProductForm()">
-                Clear Form
-            </button>
-            <button type="button" class="btn btn-primary" onclick="addProduct()">
-                Add Product
-            </button>
-        `;
-    }
-    
-    alert('Product updated successfully!');
-    showAdminSection('products');
-}
-
-// Delete product
-function deleteProduct(productId) {
-    if (!confirm('Are you sure you want to delete this product?')) {
-        return;
-    }
-    
-    allProducts = allProducts.filter(p => p.id !== productId);
-    saveProducts();
-    
-    alert('Product deleted successfully!');
-    showAdminSection('products');
-}
-
-// Load orders table - UPDATED with sequential IDs
-function loadOrdersTable() {
-    const tableBody = document.getElementById('adminOrdersTable');
-    if (!tableBody) return;
-    
-    if (allOrders.length === 0) {
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="5" class="empty-table">No orders yet</td>
-            </tr>
-        `;
-        return;
-    }
-    
-    // Sort orders by date (newest first)
-    const sortedOrders = [...allOrders].sort((a, b) => 
-        new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt)
-    );
-    
-    let html = '';
-    sortedOrders.forEach((order) => {
-        const orderDate = new Date(order.date || order.createdAt);
-        const formattedDate = orderDate.toLocaleDateString();
-        const formattedTime = orderDate.toLocaleTimeString();
-        
-        let statusClass = 'pending';
-        let statusText = 'Pending';
-        if (order.status === 'delivered') {
-            statusClass = 'delivered';
-            statusText = 'Delivered';
-        } else if (order.status === 'processing') {
-            statusClass = 'processing';
-            statusText = 'Processing';
-        } else if (order.status === 'shipped') {
-            statusClass = 'shipped';
-            statusText = 'Shipped';
-        }
-        
-        const customerName = order.customer ? 
-            order.customer.username || order.customer.email.split('@')[0] : 
-            'Unknown Customer';
-        
-        html += `
-            <tr>
-                <td><strong>${order.id || generateOrderIdForAdmin()}</strong></td>
-                <td>${customerName}</td>
-                <td>${formattedDate} ${formattedTime}</td>
-                <td>$${(order.total || 0).toFixed(2)}</td>
-                <td>
-                    <span class="status-badge ${statusClass}" 
-                          style="padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
-                                 background: ${statusClass === 'delivered' ? '#d4edda' : statusClass === 'processing' ? '#d1ecf1' : statusClass === 'shipped' ? '#cce5ff' : '#fff3cd'};
-                                 color: ${statusClass === 'delivered' ? '#155724' : statusClass === 'processing' ? '#0c5460' : statusClass === 'shipped' ? '#004085' : '#856404'}">
-                        ${statusText}
-                    </span>
-                </td>
-            </tr>
-        `;
-    });
-    
-    tableBody.innerHTML = html;
-}
-
-// Load recent products for dashboard
-function loadRecentProducts() {
-    const recentProductsContainer = document.getElementById('recentProducts');
-    if (!recentProductsContainer) return;
-    
-    // Get 5 most recent products
-    const recentProducts = [...allProducts]
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-        .slice(0, 5);
-    
-    if (recentProducts.length === 0) {
-        recentProductsContainer.innerHTML = `
-            <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-                <p>No products yet. Add your first product!</p>
-            </div>
-        `;
-        return;
-    }
-    
-    let html = '<div style="display: flex; flex-direction: column; gap: 15px;">';
-    recentProducts.forEach(product => {
-        html += `
-            <div style="display: flex; align-items: center; gap: 15px; padding: 15px; 
-                        background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); cursor: pointer;" 
-                        onclick="viewProduct(${product.id})">
-                <img src="${product.image || 'https://via.placeholder.com/50x50'}" 
-                     alt="${product.name}" 
-                     style="width: 50px; height: 50px; border-radius: 8px; object-fit: cover;">
-                <div style="flex: 1;">
-                    <div style="font-weight: 600; margin-bottom: 5px;">${product.name}</div>
-                    <div style="font-size: 14px; color: #666;">${product.category} • $${product.price.toFixed(2)}</div>
-                </div>
-                <div style="font-size: 14px; color: #666;">
-                    Stock: ${product.stock}
-                </div>
-            </div>
-        `;
-    });
-    html += '</div>';
-    
-    recentProductsContainer.innerHTML = html;
-}
-
-// Load sample products
-function loadSampleProducts() {
-    const sampleProducts = [
-        {
-            id: 1,
-            name: "Brazilian Straight Wig",
-            category: "Brazilian",
-            price: 89.99,
-            stock: 15,
-            description: "Premium Brazilian straight hair wig with natural look and feel.",
-            length: "22-24 inches",
-            color: "Natural Black",
-            image: "https://images.unsplash.com/photo-1522338242990-e923b56a8c8d?w=400&h=400&fit=crop",
-            active: true,
-            createdAt: new Date().toISOString()
-        },
-        {
-            id: 2,
-            name: "Peruvian Curly Wig",
-            category: "Peruvian",
-            price: 109.99,
-            stock: 8,
-            description: "Luxurious Peruvian curly wig with voluminous curls.",
-            length: "20-22 inches",
-            color: "Dark Brown",
-            image: "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400&h=400&fit=crop",
-            active: true,
-            createdAt: new Date().toISOString()
-        },
-        {
-            id: 3,
-            name: "Malaysian Body Wave",
-            category: "Malaysian",
-            price: 99.99,
-            stock: 12,
-            description: "Silky Malaysian body wave wig with beautiful texture.",
-            length: "24-26 inches",
-            color: "Honey Blonde",
-            image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=400&fit=crop",
-            active: true,
-            createdAt: new Date().toISOString()
-        },
-        {
-            id: 4,
-            name: "Synthetic Short Bob",
-            category: "Synthetic",
-            price: 49.99,
-            stock: 25,
-            description: "Easy-care synthetic short bob wig for daily wear.",
-            length: "12-14 inches",
-            color: "Jet Black",
-            image: "https://images.unsplash.com/photo-1599351431440-56e8b8f07e4c?w=400&h=400&fit=crop",
-            active: true,
-            createdAt: new Date().toISOString()
-        }
-    ];
-    
-    allProducts = sampleProducts;
-    saveProducts();
-    alert('Sample products loaded successfully!');
-    showAdminSection('dashboard');
-}
-
-// Export products
-function exportProducts() {
-    const dataStr = JSON.stringify(allProducts, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    
-    const exportFileDefaultName = 'wighub-products.json';
-    
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
-    
-    alert('Products exported successfully!');
-}
-
-// Create backup
-function createBackup() {
-    const backup = {
-        products: allProducts,
-        clients: allClients,
-        orders: allOrders,
-        storeConfig: JSON.parse(localStorage.getItem('wigStoreConfig') || '{}'),
-        backupDate: new Date().toISOString()
-    };
-    
-    const dataStr = JSON.stringify(backup, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    
-    const exportFileDefaultName = `wighub-backup-${new Date().toISOString().split('T')[0]}.json`;
-    
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
-    
-    alert('Backup created successfully!');
-}
-
-// Clear all data
-function clearAllData() {
-    if (!confirm('Are you sure you want to clear ALL data? This cannot be undone!')) {
-        return;
-    }
-    
-    // Clear all WigHub data
-    localStorage.removeItem('wigProducts');
-    localStorage.removeItem('wigClients');
-    localStorage.removeItem('wigAdmins');
-    localStorage.removeItem('wigSupportTickets');
-    localStorage.removeItem('wigStoreConfig');
-    
-    // Clear all order-related data
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key.startsWith('orders_') || key.startsWith('cart_') || key.startsWith('wishlist_') || key.startsWith('tickets_')) {
-            localStorage.removeItem(key);
-        }
-    }
-    
-    // Reload data
-    loadProducts();
-    loadClients();
-    loadOrders();
-    
-    alert('All data cleared successfully!');
-    showAdminSection('dashboard');
-}
-
-// Logout admin
-function logoutAdmin() {
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('adminUser');
-    window.location.href = 'admin-login.html';
 }
 
 // ===== ADMIN MANAGEMENT FUNCTIONS =====
@@ -1348,7 +1938,7 @@ function deleteAdmin(adminId) {
 
 // ===== PRODUCT VIEW MODAL =====
 function viewProduct(productId) {
-    const product = allProducts.find(p => p.id === productId);
+    const product = allProducts.find(p => p.id == productId);
     if (!product) return;
     
     const modalHTML = `
@@ -1377,7 +1967,7 @@ function viewProduct(productId) {
                     <div class="customer-details-grid">
                         <div class="detail-row">
                             <span class="detail-label">Product ID:</span>
-                            <span class="detail-value">#${product.id}</span>
+                            <span class="detail-value">${product.id}</span>
                         </div>
                         <div class="detail-row">
                             <span class="detail-label">Category:</span>
@@ -1586,7 +2176,7 @@ function deleteClient(clientId) {
     loadCustomersTable();
     
     // Show success message
-    showNotification('✅ Customer deleted successfully!', 'success');
+    showAdminNotification('✅ Customer deleted successfully!', 'success');
 }
 
 // ===== CUSTOMER EDIT FUNCTION =====
@@ -1651,7 +2241,7 @@ function saveClientEdit(clientId) {
     const status = document.getElementById('editClientStatus').value;
     
     if (!username || !email) {
-        showNotification('Username and email are required', 'error');
+        showAdminNotification('Username and email are required', 'error');
         return;
     }
     
@@ -1661,7 +2251,7 @@ function saveClientEdit(clientId) {
             index !== clientIndex && client.email === email
         );
         if (emailExists) {
-            showNotification('Email already exists. Please use a different email.', 'error');
+            showAdminNotification('Email already exists. Please use a different email.', 'error');
             return;
         }
     }
@@ -1684,7 +2274,7 @@ function saveClientEdit(clientId) {
     closeModal('editClientModal');
     loadCustomersTable();
     
-    showNotification('✅ Customer updated successfully!', 'success');
+    showAdminNotification('✅ Customer updated successfully!', 'success');
 }
 
 function closeModal(modalId) {
@@ -1987,7 +2577,7 @@ function handleImageUpload(file) {
                     // Save to localStorage for persistence
                     saveUploadedImages();
 
-                    showNotification('✅ Image uploaded successfully!', 'success');
+                    showAdminNotification('✅ Image uploaded successfully!', 'success');
                 })
                 .catch(error => {
                     console.error('Compression failed, using original:', error);
@@ -2019,7 +2609,7 @@ function handleImageUpload(file) {
                         // Save to localStorage for persistence
                         saveUploadedImages();
 
-                        showNotification('✅ Image uploaded successfully!', 'success');
+                        showAdminNotification('✅ Image uploaded successfully!', 'success');
                     };
                     reader.readAsDataURL(file);
                 });
@@ -2113,11 +2703,11 @@ function switchCamera() {
     if (currentCamera === 'user') {
         // Switch to rear camera
         startCamera('environment');
-        showNotification('Switched to rear camera', 'info');
+        showAdminNotification('Switched to rear camera', 'info');
     } else {
         // Switch to front camera
         startCamera('user');
-        showNotification('Switched to front camera', 'info');
+        showAdminNotification('Switched to front camera', 'info');
     }
 }
 
@@ -2177,7 +2767,7 @@ function capturePhoto() {
                 document.getElementById('productImage').value = optimizedDataUrl;
                 saveUploadedImages();
                 closeCamera();
-                showNotification('✅ Photo captured successfully!', 'success');
+                showAdminNotification('✅ Photo captured successfully!', 'success');
             });
     }, 100); // Small delay for flash effect
 }
@@ -2201,7 +2791,7 @@ function pasteImage() {
     // Focus on the page to enable paste
     document.body.focus();
     
-    showNotification('📋 Press Ctrl+V (Cmd+V on Mac) to paste an image', 'info');
+    showAdminNotification('📋 Press Ctrl+V (Cmd+V on Mac) to paste an image', 'info');
 }
 
 // Save uploaded images to localStorage
@@ -2263,7 +2853,7 @@ function selectRecentImage(dataUrl) {
     // Select recent image
     document.getElementById('productImage').value = dataUrl;
     updateImagePreview(dataUrl);
-    showNotification('✅ Image selected', 'success');
+    showAdminNotification('✅ Image selected', 'success');
 }
 
 // Remove uploaded image
@@ -2272,7 +2862,7 @@ function removeUploadedImage(imageId) {
         uploadedImages = uploadedImages.filter(img => img.id !== imageId);
         saveUploadedImages();
         displayRecentImages();
-        showNotification('Image removed', 'info');
+        showAdminNotification('Image removed', 'info');
     }
 }
 
@@ -2788,7 +3378,7 @@ function convertToCSV(tickets) {
 function refreshTickets() {
     const tickets = loadAdminTickets();
     displayAdminTickets(tickets);
-    showNotification('✅ Tickets refreshed!', 'success');
+    showAdminNotification('✅ Tickets refreshed!', 'success');
 }
 
 // Helper functions for admin
@@ -2812,4 +3402,5 @@ function getAdminPriorityClass(priority) {
     };
     return priorityClasses[priority] || 'priority-medium';
 }
+
 
