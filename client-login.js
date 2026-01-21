@@ -378,13 +378,45 @@ document.querySelectorAll('.social-btn').forEach(button => {
     });
 });
 
-// Forgot Password Link
+// Update the forgot password link event listener
 document.querySelector('.forgot-link').addEventListener('click', function(e) {
     e.preventDefault();
+    
     const email = prompt('Please enter your email address to reset password:');
-    if (email) {
-        showSuccess(`Password reset instructions have been sent to ${email}`);
+    if (!email) return;
+    
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        alert('Please enter a valid email address');
+        return;
     }
+    
+    // Check if email exists in clients
+    const clients = JSON.parse(localStorage.getItem('wigClients') || '[]');
+    const client = clients.find(c => c.email.toLowerCase() === email.toLowerCase());
+    
+    if (!client) {
+        alert('No account found with that email address');
+        return;
+    }
+    
+    // Create reset request
+    const requests = JSON.parse(localStorage.getItem('passwordResetRequests') || '[]');
+    const newRequest = {
+        id: 'RESET-' + Date.now(),
+        email: email,
+        username: client.username,
+        requestedAt: new Date().toISOString(),
+        status: 'pending',
+        ip: '127.0.0.1', // In real app, get from server
+        userAgent: navigator.userAgent
+    };
+    
+    requests.push(newRequest);
+    localStorage.setItem('passwordResetRequests', JSON.stringify(requests));
+    
+    alert(`Password reset request submitted for ${email}. Our support team will contact you shortly.`);
 });
 
 // Terms Links
