@@ -48,31 +48,7 @@ function displayProducts(products) {
     
     if (products.length === 0) {
         // Show message and button to go to admin
-        /*
-        productsGrid.innerHTML = `
-            <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px;">
-                <i class="fas fa-wig" style="font-size: 60px; color: #dee2e6; margin-bottom: 20px;"></i>
-                <h3 style="margin-bottom: 10px; color: #333;">No Products Available</h3>
-                <p style="margin-bottom: 20px; color: #666;">Products will appear here once added by admin.</p>
-                <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
-                    <a href="admin-login.html" class="btn" style="padding: 12px 24px; background: #667eea; color: white; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
-                        <i class="fas fa-user-shield"></i> Go to Admin
-                    </a>
-                    <button class="btn" onclick="loadSampleProducts(); setTimeout(loadFeaturedProducts, 500);" style="padding: 12px 24px; background: #28a745; color: white; border-radius: 8px; border: none; display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
-                        <i class="fas fa-database"></i> Load Sample Products
-                    </button>
-                    <a href="client-login.html?tab=signup" class="btn" style="padding: 12px 24px; background: #ff69b4; color: white; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
-                        <i class="fas fa-user-plus"></i> Sign Up Now
-                    </a>
-                </div>
-                <p style="margin-top: 30px; color: #888; font-size: 14px;">
-                    <i class="fas fa-info-circle"></i> Admin can add products in the Admin Dashboard
-                </p>
-            </div>
-            */
-        `;
-        return;
-    }
+        
     
     let html = '';
     products.forEach(product => {
@@ -429,3 +405,4 @@ function adminLogout() {
     window.location.href = 'index.html';
 
 }
+
