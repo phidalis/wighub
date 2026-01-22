@@ -3508,3 +3508,173 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// ============================================
+// DEVICE UNBLOCKING - MINIMAL VERSION
+// Add to the END of your admin-dashboard.js file
+// ============================================
+
+// 1. First, add this line to your existing showAdminSection function:
+// Find this function and add the 'unblockDevices' case:
+
+/*
+function showAdminSection(sectionName) {
+    // ... your existing code ...
+    
+    // ADD THIS:
+    if (sectionName === 'unblockDevices') {
+        loadBlockedDevices();
+    }
+}
+*/
+
+// 2. Copy ONLY these functions to the END of your file:
+
+// Load blocked devices
+function loadBlockedDevices() {
+    console.log('Loading blocked devices...');
+    
+    const blockedDevices = [];
+    const now = Date.now();
+    
+    // Find all admin blocks
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith('admin_block_')) {
+            try {
+                const data = JSON.parse(localStorage.getItem(key));
+                if (data && data.blockedUntil) {
+                    blockedDevices.push({
+                        key: key,
+                        deviceId: key.replace('admin_block_', ''),
+                        data: data
+                    });
+                }
+            } catch (e) {
+                console.warn('Error reading block:', key);
+            }
+        }
+    }
+    
+    // Update table
+    updateBlockedDevicesTable(blockedDevices, now);
+}
+
+// Update the table
+function updateBlockedDevicesTable(devices, now) {
+    const table = document.getElementById('blockedDevicesTable');
+    if (!table) return;
+    
+    if (devices.length === 0) {
+        table.innerHTML = '<tr><td colspan="7" style="padding: 40px; text-align: center; color: #999;">No blocked devices found</td></tr>';
+        return;
+    }
+    
+    let html = '';
+    devices.forEach(device => {
+        const deviceId = device.deviceId;
+        const data = device.data;
+        
+        // Calculate time left
+        const timeLeft = data.blockedUntil - now;
+        const minutesLeft = Math.ceil(timeLeft / 60000);
+        const hours = Math.floor(minutesLeft / 60);
+        const minutes = minutesLeft % 60;
+        
+        // Status
+        let status = 'Active';
+        let statusColor = '#ffd166';
+        if (timeLeft <= 0) {
+            status = 'Expired';
+            statusColor = '#06d6a0';
+        }
+        
+        html += `
+            <tr>
+                <td>
+                    <div style="font-family: monospace; background: #f1f3f4; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
+                        ${deviceId.substring(0, 12)}...
+                    </div>
+                </td>
+                <td>${new Date(data.blockedAt).toLocaleDateString()}</td>
+                <td>${new Date(data.blockedUntil).toLocaleDateString()}</td>
+                <td>${timeLeft > 0 ? `${hours}h ${minutes}m` : '0h 0m'}</td>
+                <td>${data.reason || 'Multiple failed attempts'}</td>
+                <td>
+                    <span style="background: ${statusColor}; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px;">
+                        ${status}
+                    </span>
+                </td>
+                <td>
+                    <button onclick="unblockSingleDevice('${device.key}', '${deviceId}')" 
+                            style="background: #06d6a0; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-right: 5px;">
+                        <i class="fas fa-unlock"></i> Unblock
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+    
+    table.innerHTML = html;
+}
+
+// Unblock a single device
+function unblockSingleDevice(key, deviceId) {
+    if (confirm(`Unblock device ${deviceId.substring(0, 10)}...?`)) {
+        localStorage.removeItem(key);
+        
+        // Also remove attempts
+        const attemptsKey = `admin_attempts_${deviceId}`;
+        localStorage.removeItem(attemptsKey);
+        
+        alert('Device unblocked successfully!');
+        loadBlockedDevices();
+    }
+}
+
+// Unblock all devices
+function unblockAllDevices() {
+    if (confirm('Unblock ALL devices? This will allow all blocked devices to login.')) {
+        let count = 0;
+        
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith('admin_block_')) {
+                localStorage.removeItem(key);
+                count++;
+            }
+        }
+        
+        alert(`Unblocked ${count} devices`);
+        loadBlockedDevices();
+    }
+}
+
+// Simple filter
+function filterDevices() {
+    const search = document.getElementById('deviceSearch')?.value.toLowerCase() || '';
+    const rows = document.querySelectorAll('#blockedDevicesTable tr');
+    
+    rows.forEach(row => {
+        if (row.querySelector('td[colspan]')) return; // Skip empty row
+        
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(search) ? '' : 'none';
+    });
+}
+
+// Test function (optional)
+function createTestBlock() {
+    const testId = 'test_' + Date.now();
+    const testBlock = {
+        deviceId: testId,
+        blockedAt: Date.now(),
+        blockedUntil: Date.now() + 3600000,
+        reason: 'Test block',
+        deviceInfo: { platform: 'Test' }
+    };
+    
+    localStorage.setItem(`admin_block_${testId}`, JSON.stringify(testBlock));
+    alert('Test block created. Refresh to see it.');
+    loadBlockedDevices();
+}
+
