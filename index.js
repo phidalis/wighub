@@ -48,6 +48,7 @@ function displayProducts(products) {
     
     if (products.length === 0) {
         // Show message and button to go to admin
+        /*
         productsGrid.innerHTML = `
             <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px;">
                 <i class="fas fa-wig" style="font-size: 60px; color: #dee2e6; margin-bottom: 20px;"></i>
@@ -68,6 +69,7 @@ function displayProducts(products) {
                     <i class="fas fa-info-circle"></i> Admin can add products in the Admin Dashboard
                 </p>
             </div>
+            */
         `;
         return;
     }
@@ -425,4 +427,5 @@ function adminLogout() {
     localStorage.removeItem('adminToken');
     localStorage.removeItem('adminUser');
     window.location.href = 'index.html';
+
 }
