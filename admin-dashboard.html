@@ -59,6 +59,9 @@
                     <button class="admin-btn" onclick="showAdminSection('passwordReset')">
                         <i class="fas fa-key"></i> Password Reset Requests
                     </button>
+                    <button class="admin-btn" onclick="showAdminSection('unblockDevices')">
+                    <i class="fas fa-unlock-alt"></i> Device Unblocking
+                    </button>
                 </div>
                 
                 <div class="admin-status">
@@ -643,6 +646,101 @@
                         </div>
                     </div>
                 </section>
+
+                 <!-- Device Unblocking Section -->
+<section id="unblockDevicesSection" class="admin-section">
+    <div class="section-header">
+        <h2><i class="fas fa-unlock-alt"></i> Device Unblocking Management</h2>
+        <div class="search-filter">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="deviceSearch" placeholder="Search by device ID or IP..." onkeyup="filterBlockedDevices()">
+            </div>
+            <select id="deviceBlockTypeFilter" onchange="filterBlockedDevices()">
+                <option value="">All Block Types</option>
+                <option value="admin">Admin Login</option>
+                <option value="client">Client Login</option>
+                <option value="both">Both</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="unblock-devices-container">
+        <div class="unblock-stats">
+            <div class="stat-card">
+                <div class="stat-icon admin">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="adminBlocksCount">0</h3>
+                    <p>Admin Blocks</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon client">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="clientBlocksCount">0</h3>
+                    <p>Client Blocks</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon total">
+                    <i class="fas fa-ban"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="totalBlocksCount">0</h3>
+                    <p>Total Blocks</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon auto">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="autoUnblockCount">0</h3>
+                    <p>Auto-unblocking</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="blocked-devices-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Device ID</th>
+                        <th>Block Type</th>
+                        <th>Blocked At</th>
+                        <th>Auto-unblock At</th>
+                        <th>Reason</th>
+                        <th>Device Info</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="blockedDevicesTable">
+                    <tr><td colspan="8" class="empty-table">No devices currently blocked</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="unblock-actions">
+            <button class="btn btn-primary" onclick="clearAllBlocks()">
+                <i class="fas fa-broom"></i> Clear All Blocks
+            </button>
+            <button class="btn btn-secondary" onclick="refreshBlockList()">
+                <i class="fas fa-sync-alt"></i> Refresh List
+            </button>
+            <button class="btn btn-danger" onclick="clearAllSecurityData()">
+                <i class="fas fa-trash-alt"></i> Clear All Security Data
+            </button>
+            <button class="btn btn-info" onclick="testBlockingSystem()">
+                <i class="fas fa-vial"></i> Test Blocking System
+            </button>
+        </div>
+    </div>
+</section>
             </div>
         </main>
 
@@ -668,4 +766,3 @@
     <script src="admin-dashboard.js"></script>
 </body>
 </html>
-
