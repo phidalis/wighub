@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wig Hub - Admin Login</title>
+    <link rel="stylesheet" href="admin-dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Device Block Overlay Styles */
+        #deviceBlockOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        
+        .block-content {
+            background: linear-gradient(135deg, #ff4757, #ff3838);
+            padding: 40px;
+            border-radius: 15px;
+            max-width: 500px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 20px 40px rgba(255, 56, 56, 0.4); }
+            50% { box-shadow: 0 20px 60px rgba(255, 56, 56, 0.6); }
+            100% { box-shadow: 0 20px 40px rgba(255, 56, 56, 0.4); }
+        }
+        
+        .countdown-box {
+            background: rgba(255,255,255,0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 25px 0;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+        
+        .countdown-time {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .device-id {
+            font-family: monospace;
+            background: rgba(0,0,0,0.3);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        
+        .login-form.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+            position: relative;
+        }
+        
+        .login-form.disabled::after {
+            content: "🔒 Device Temporarily Blocked";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 71, 87, 0.9);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-weight: bold;
+            z-index: 10;
+        }
+        
+        .contact-admin {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        
+        .contact-admin a {
+            color: white;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <h1><i class="fas fa-crown"></i> WIG HUB ADMIN</h1>
+                <p>Administrator Login Panel</p>
+            </div>
+            
+            <form id="adminLoginForm" class="login-form">
+                <div class="form-group">
+                    <label for="adminEmail">
+                        <i class="fas fa-envelope"></i> Email Address
+                    </label>
+                    <input type="email" id="adminEmail" placeholder="phidaliskipyego@gmail.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="adminPassword">
+                        <i class="fas fa-lock"></i> Password
+                    </label>
+                    <input type="password" id="adminPassword" placeholder="Enter password" required>
+                </div>
+                
+                <div class="form-options">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="rememberMe">
+                        Remember me
+                    </label>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-login">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+                
+                <div class="attempts-counter" id="attemptsCounter" style="display: none; margin-top: 15px; padding: 10px; background: #fff3cd; border-radius: 5px; color: #856404; font-size: 14px;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span id="attemptsText"></span>
+                </div>
+                
+                <div class="login-footer">
+                    <p><strong>Default Admin Credentials:</strong></p>
+                    <p><strong>Email:</strong> phidaliskipyego@gmail.com</p>
+                    <p><strong>Password:</strong> Phid@3630</p>
+                </div>
+            </form>
+            
+            <div class="login-note">
+                <p><i class="fas fa-info-circle"></i> Contact: phidaliskipyego@gmail.com | Phone: 0768832415</p>
+            </div>
+        </div>
+        
+        <div class="login-sidebar">
+            <div class="sidebar-content">
+                <h2><i class="fas fa-shield-alt"></i> Admin Features</h2>
+                <ul class="features-list">
+                    <li><i class="fas fa-check-circle"></i> Add/Edit Products</li>
+                    <li><i class="fas fa-check-circle"></i> Manage Inventory</li>
+                    <li><i class="fas fa-check-circle"></i> View Orders</li>
+                    <li><i class="fas fa-check-circle"></i> Track Sales</li>
+                    <li><i class="fas fa-check-circle"></i> Manage Users</li>
+                    <li><i class="fas fa-check-circle"></i> Admin Management</li>
+                </ul>
+                
+                <div class="quick-links">
+                    <button class="btn btn-secondary" onclick="window.location.href='index.html'">
+                        <i class="fas fa-store"></i> View Client Store
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // ============================================
+        // DEVICE BLOCKING SYSTEM FOR ADMIN LOGIN
+        // ============================================
+        
+        const MAX_ADMIN_ATTEMPTS = 3;
+        const BLOCK_DURATION = 60 * 60 * 1000; // 1 hour
+        
+        // Device fingerprinting - creates unique ID for each device
+        function getDeviceId() {
+            // Collect device/browser information that's consistent across browsers
+            const components = {
+                platform: navigator.platform,
+                language: navigator.language,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                screen: `${screen.width}x${screen.height}`,
+                colorDepth: screen.colorDepth,
+                hardwareConcurrency: navigator.hardwareConcurrency || 'unknown',
+                maxTouchPoints: navigator.maxTouchPoints || 0,
+                deviceMemory: navigator.deviceMemory || 'unknown'
+            };
+            
+            // Create a hash from the components
+            const dataString = JSON.stringify(components);
+            let hash = 0;
+            
+            for (let i = 0; i < dataString.length; i++) {
+                const char = dataString.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash; // Convert to 32-bit integer
+            }
+            
+            return 'admin_device_' + Math.abs(hash).toString(36);
+        }
+        
+        // Track failed login attempts
+        function trackFailedAdminLogin() {
+            const deviceId = getDeviceId();
+            const now = Date.now();
+            
+            // Get existing attempts
+            const attemptsKey = `admin_attempts_${deviceId}`;
+            let attempts = JSON.parse(localStorage.getItem(attemptsKey) || '[]');
+            
+            // Filter out old attempts (older than 24 hours)
+            const oneDayAgo = now - (24 * 60 * 60 * 1000);
+            attempts = attempts.filter(time => time > oneDayAgo);
+            
+            // Add current attempt
+            attempts.push(now);
+            localStorage.setItem(attemptsKey, JSON.stringify(attempts));
+            
+            console.log(`Failed attempt ${attempts.length} of ${MAX_ADMIN_ATTEMPTS} for device: ${deviceId}`);
+            
+            // Check if should block
+            if (attempts.length >= MAX_ADMIN_ATTEMPTS) {
+                blockAdminDevice(deviceId);
+                return {
+                    blocked: true,
+                    attemptsLeft: 0,
+                    attempts: attempts.length,
+                    blockedUntil: now + BLOCK_DURATION
+                };
+            }
+            
+            return {
+                blocked: false,
+                attemptsLeft: MAX_ADMIN_ATTEMPTS - attempts.length,
+                attempts: attempts.length
+            };
+        }
+        
+        // Block device
+        function blockAdminDevice(deviceId) {
+            const blockKey = `admin_block_${deviceId}`;
+            const blockData = {
+                deviceId: deviceId,
+                blockedAt: Date.now(),
+                blockedUntil: Date.now() + BLOCK_DURATION,
+                reason: 'too_many_failed_admin_logins',
+                deviceInfo: {
+                    platform: navigator.platform,
+                    screen: `${screen.width}x${screen.height}`,
+                    userAgent: navigator.userAgent.substring(0, 100),
+                    timestamp: new Date().toISOString()
+                }
+            };
+            
+            localStorage.setItem(blockKey, JSON.stringify(blockData));
+            
+            console.log(`Device blocked: ${deviceId} until ${new Date(blockData.blockedUntil).toLocaleTimeString()}`);
+            
+            // Set auto-unblock
+            setTimeout(() => {
+                localStorage.removeItem(blockKey);
+                localStorage.removeItem(`admin_attempts_${deviceId}`);
+                console.log(`Auto-unblocked device: ${deviceId}`);
+            }, BLOCK_DURATION);
+            
+            // Show block UI
+            showAdminBlockUI(deviceId, blockData.blockedUntil);
+        }
+        
+        // Check if device is blocked
+        function isAdminDeviceBlocked() {
+            const deviceId = getDeviceId();
+            const blockKey = `admin_block_${deviceId}`;
+            const blockData = localStorage.getItem(blockKey);
+            
+            if (!blockData) return false;
+            
+            const block = JSON.parse(blockData);
+            const now = Date.now();
+            
+            if (now < block.blockedUntil) {
+                return {
+                    blocked: true,
+                    deviceId: deviceId,
+                    blockedUntil: block.blockedUntil,
+                    minutesLeft: Math.ceil((block.blockedUntil - now) / 60000)
+                };
+            }
+            
+            // Block expired, clean up
+            localStorage.removeItem(blockKey);
+            localStorage.removeItem(`admin_attempts_${deviceId}`);
+            return false;
+        }
+        
+        // Reset attempts (call on successful login)
+        function resetAdminLoginAttempts() {
+            const deviceId = getDeviceId();
+            localStorage.removeItem(`admin_attempts_${deviceId}`);
+            localStorage.removeItem(`admin_block_${deviceId}`);
+            console.log('Admin login attempts reset for device:', deviceId);
+        }
+        
+        // Show block UI (WITHOUT UNBLOCK BUTTON)
+        function showAdminBlockUI(deviceId, blockedUntil) {
+            // Remove any existing overlay
+            const existingOverlay = document.getElementById('deviceBlockOverlay');
+            if (existingOverlay) existingOverlay.remove();
+            
+            // Calculate minutes left
+            const now = Date.now();
+            const minutesLeft = Math.ceil((blockedUntil - now) / 60000);
+            
+            // Create overlay
+            const overlay = document.createElement('div');
+            overlay.id = 'deviceBlockOverlay';
+            overlay.innerHTML = `
+                <div class="block-content">
+                    <div style="font-size: 60px; margin-bottom: 20px;">🔒</div>
+                    <h2 style="margin: 0 0 15px 0; color: white;">ADMIN ACCESS BLOCKED</h2>
+                    <p style="font-size: 18px; margin-bottom: 10px; opacity: 0.9;">
+                        Too many failed login attempts detected from this device.
+                    </p>
+                    
+                    <div class="countdown-box">
+                        <div style="font-size: 14px; opacity: 0.8;">Time remaining:</div>
+                        <div class="countdown-time" id="countdownTime">${minutesLeft}</div>
+                        <div style="font-size: 14px; opacity: 0.8;">minutes</div>
+                    </div>
+                    
+                    <p style="font-size: 14px; opacity: 0.8; margin-bottom: 10px;">
+                        This block applies to <strong>all browsers</strong> on this device.
+                    </p>
+                    
+                    <div class="device-id">
+                        Device ID: ${deviceId.substring(0, 12)}...
+                    </div>
+                    
+                    <div class="contact-admin">
+                        <i class="fas fa-info-circle"></i> 
+                        Device unblocking is only available from the Admin Dashboard.
+                        <br>Contact another administrator to unblock this device.
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+            
+            // Start countdown timer
+            startCountdownTimer(blockedUntil);
+            
+            // Disable login form
+            const loginForm = document.getElementById('adminLoginForm');
+            if (loginForm) {
+                loginForm.classList.add('disabled');
+            }
+        }
+        
+        // Start countdown timer
+        function startCountdownTimer(blockedUntil) {
+            const updateCountdown = () => {
+                const now = Date.now();
+                const minutesLeft = Math.ceil((blockedUntil - now) / 60000);
+                
+                if (minutesLeft <= 0) {
+                    // Unblock device
+                    const deviceId = getDeviceId();
+                    localStorage.removeItem(`admin_block_${deviceId}`);
+                    localStorage.removeItem(`admin_attempts_${deviceId}`);
+                    
+                    // Remove overlay and reload
+                    const overlay = document.getElementById('deviceBlockOverlay');
+                    if (overlay) overlay.remove();
+                    
+                    const loginForm = document.getElementById('adminLoginForm');
+                    if (loginForm) loginForm.classList.remove('disabled');
+                    
+                    location.reload();
+                    return;
+                }
+                
+                const countdownEl = document.getElementById('countdownTime');
+                if (countdownEl) {
+                    countdownEl.textContent = minutesLeft;
+                }
+            };
+            
+            // Update immediately
+            updateCountdown();
+            
+            // Update every minute
+            const timer = setInterval(updateCountdown, 60000);
+            
+            // Store timer for cleanup
+            window.adminBlockTimer = timer;
+        }
+        
+        // Show attempts counter
+        function showAttemptsCounter(attemptsLeft, attempts) {
+            const counter = document.getElementById('attemptsCounter');
+            const text = document.getElementById('attemptsText');
+            
+            if (attemptsLeft > 0) {
+                counter.style.display = 'block';
+                text.textContent = `${attempts} failed attempt(s). ${attemptsLeft} attempt(s) remaining before device is blocked for 1 hour.`;
+            } else {
+                counter.style.display = 'none';
+            }
+        }
+        
+        // Hide attempts counter
+        function hideAttemptsCounter() {
+            const counter = document.getElementById('attemptsCounter');
+            counter.style.display = 'none';
+        }
+        
+        // ============================================
+        // MAIN LOGIN FORM HANDLER - UPDATED VERSION
+        // ============================================
+        
+        document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            console.log('Admin login attempt started...');
+            
+            // Check if device is blocked
+            const blockCheck = isAdminDeviceBlocked();
+            if (blockCheck) {
+                alert(`This device is temporarily blocked. Please try again in ${blockCheck.minutesLeft} minutes.`);
+                showAdminBlockUI(blockCheck.deviceId, blockCheck.blockedUntil);
+                return;
+            }
+            
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
+            
+            // Load admins from localStorage
+            let admins = [];
+            try {
+                const adminsJSON = localStorage.getItem('wigAdmins');
+                if (adminsJSON) {
+                    admins = JSON.parse(adminsJSON);
+                }
+            } catch (e) {
+                console.error('Error loading admins:', e);
+                admins = [];
+            }
+            
+            // If no admins exist, create default admin structure
+            if (admins.length === 0) {
+                console.log('No admins found, creating default admin...');
+                const defaultAdmin = {
+                    id: 1,
+                    name: 'System Administrator',
+                    email: 'phidaliskipyego@gmail.com',
+                    password: 'Phid@3630',
+                    role: 'super_admin',
+                    createdAt: new Date().toISOString(),
+                    isDefault: true
+                };
+                admins.push(defaultAdmin);
+                localStorage.setItem('wigAdmins', JSON.stringify(admins));
+                console.log('Default admin created successfully');
+            }
+            
+            // Find admin with matching credentials
+            const admin = admins.find(a => a.email === email && a.password === password);
+            
+            if (admin) {
+                // RESET failed attempts on success
+                resetAdminLoginAttempts();
+                hideAttemptsCounter();
+                
+                // Set admin session
+                localStorage.setItem('adminToken', 'admin-' + Date.now());
+                localStorage.setItem('adminUser', JSON.stringify({
+                    email: admin.email,
+                    name: admin.name,
+                    role: admin.role
+                }));
+                
+                // If remember me is checked, save credentials
+                if (rememberMe) {
+                    localStorage.setItem('rememberedAdmin', email);
+                } else {
+                    localStorage.removeItem('rememberedAdmin');
+                }
+                
+                console.log('Admin login successful for:', email);
+                
+                // Add to security logs
+                addSecurityLog('ADMIN_LOGIN_SUCCESS', email, 'Admin login successful');
+                
+                // Redirect to admin dashboard
+                window.location.href = 'admin-dashboard.html';
+            } else {
+                // Track failed attempt
+                const result = trackFailedAdminLogin();
+                
+                // Show attempts counter
+                showAttemptsCounter(result.attemptsLeft, result.attempts);
+                
+                if (result.blocked) {
+                    // Device is now blocked
+                    alert('Too many failed login attempts! This device is now BLOCKED for 1 hour.');
+                    
+                    // Add to security logs
+                    addSecurityLog('ADMIN_LOGIN_BLOCKED', email, 'Device blocked due to multiple failed attempts');
+                    
+                    // Show block UI
+                    showAdminBlockUI(getDeviceId(), result.blockedUntil);
+                } else {
+                    // Try default credentials as fallback
+                    if (email === 'phidaliskipyego@gmail.com' && password === 'Phid@3630') {
+                        // RESET attempts on success
+                        resetAdminLoginAttempts();
+                        hideAttemptsCounter();
+                        
+                        // Set admin session
+                        localStorage.setItem('adminToken', 'admin-' + Date.now());
+                        localStorage.setItem('adminUser', JSON.stringify({
+                            email: email,
+                            name: 'System Administrator',
+                            role: 'super_admin'
+                        }));
+                        
+                        // If remember me is checked, save credentials
+                        if (rememberMe) {
+                            localStorage.setItem('rememberedAdmin', email);
+                        }
+                        
+                        console.log('Admin login with default credentials successful');
+                        
+                        // Add to security logs
+                        addSecurityLog('ADMIN_LOGIN_SUCCESS', email, 'Default admin login successful');
+                        
+                        window.location.href = 'admin-dashboard.html';
+                    } else {
+                        // Show helpful error message
+                        const errorMessage = admins.length > 0 
+                            ? `Invalid email or password. ${result.attemptsLeft} attempt(s) remaining.`
+                            : 'Invalid credentials. Using default: phidaliskipyego@gmail.com / Phid@3630';
+                        
+                        alert(errorMessage);
+                        console.log('Admin login failed for:', email);
+                        
+                        // Add to security logs
+                        addSecurityLog('ADMIN_LOGIN_FAILED', email, 'Invalid credentials');
+                    }
+                }
+            }
+        });
+        
+        // Security logging function
+        function addSecurityLog(event, username, details) {
+            try {
+                const logs = JSON.parse(localStorage.getItem('admin_security_logs') || '[]');
+                
+                const logEntry = {
+                    id: 'LOG_' + Date.now(),
+                    event: event,
+                    username: username || 'unknown',
+                    details: details,
+                    timestamp: new Date().toISOString(),
+                    ip: '127.0.0.1', // In real app, get from server
+                    userAgent: navigator.userAgent.substring(0, 100),
+                    deviceId: getDeviceId().substring(0, 8)
+                };
+                
+                logs.push(logEntry);
+                
+                // Keep only last 100 logs
+                if (logs.length > 100) {
+                    logs.splice(0, logs.length - 100);
+                }
+                
+                localStorage.setItem('admin_security_logs', JSON.stringify(logs));
+                
+            } catch (error) {
+                console.error('Failed to log security event:', error);
+            }
+        }
+        
+        // Check block status on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Admin login page loaded');
+            
+            // Check if device is blocked
+            const blockCheck = isAdminDeviceBlocked();
+            if (blockCheck) {
+                console.log('Device is blocked, showing block UI');
+                showAdminBlockUI(blockCheck.deviceId, blockCheck.blockedUntil);
+            }
+            
+            // Auto-fill remembered admin
+            const rememberedAdmin = localStorage.getItem('rememberedAdmin');
+            if (rememberedAdmin) {
+                document.getElementById('adminEmail').value = rememberedAdmin;
+                document.getElementById('rememberMe').checked = true;
+            }
+            
+            // Initialize admins storage if not exists
+            if (!localStorage.getItem('wigAdmins')) {
+                console.log('Initializing admin storage...');
+                const defaultAdmins = [{
+                    id: 1,
+                    name: 'System Administrator',
+                    email: 'phidaliskipyego@gmail.com',
+                    password: 'Phid@3630',
+                    role: 'super_admin',
+                    createdAt: new Date().toISOString(),
+                    isDefault: true
+                }];
+                localStorage.setItem('wigAdmins', JSON.stringify(defaultAdmins));
+            }
+            
+            // Check for existing attempts
+            const deviceId = getDeviceId();
+            const attemptsKey = `admin_attempts_${deviceId}`;
+            const attempts = JSON.parse(localStorage.getItem(attemptsKey) || '[]');
+            
+            if (attempts.length > 0) {
+                const attemptsLeft = MAX_ADMIN_ATTEMPTS - attempts.length;
+                if (attemptsLeft > 0) {
+                    showAttemptsCounter(attemptsLeft, attempts.length);
+                }
+            }
+            
+            // Add debug info to console
+            console.log('Device ID:', deviceId);
+            console.log('Failed attempts:', attempts.length);
+        });
+        
+        // Export functions for debugging (keeping for console access only)
+        window.testDeviceBlocking = function() {
+            console.log('=== Device Blocking Test ===');
+            console.log('Device ID:', getDeviceId());
+            console.log('Is blocked:', isAdminDeviceBlocked());
+            
+            // Simulate failed attempts
+            for (let i = 0; i < 3; i++) {
+                const result = trackFailedAdminLogin();
+                console.log(`Attempt ${i + 1}:`, result);
+            }
+            
+            console.log('After 3 attempts, blocked:', isAdminDeviceBlocked());
+            alert('Test complete. Check console for details.');
+        };
+        
+        window.getDeviceId = getDeviceId;
+    </script>
