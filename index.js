@@ -695,11 +695,12 @@ function goToSlide(index) {
 function startSlideShow() {
     slideInterval = setInterval(() => {
         changeSlide(1);
-    }, 5000); // Change every 5 seconds
+    }, 2000); // Change every 2 seconds
 }
 
 // Reset interval (call when manually changing slides)
 function resetSlideInterval() {
     clearInterval(slideInterval);
     startSlideShow();
+
 }
