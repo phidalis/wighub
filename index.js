@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setupScrollToTop();
     initHeroCarousel();
     setupLoadingStates();
+    initCartBadge(); // Added this line to initialize cart badge
     
     // Initialize filter on page load
     setTimeout(() => {
@@ -822,11 +823,17 @@ let heroImages = [];
 
 // Initialize carousel
 function initHeroCarousel() {
+    // Load images from localStorage
     heroImages = JSON.parse(localStorage.getItem('wigHeroImages') || '[]');
+    
+    // Filter only active images
     heroImages = heroImages.filter(img => img.status === 'active');
+    
+    // Sort by order
     heroImages.sort((a, b) => a.order - b.order);
     
     if (heroImages.length === 0) {
+        // Use default fallback images
         heroImages = [
             {
                 image: 'https://images.unsplash.com/photo-1522338242990-8c5a7f015b8d?w=1920&h=800&fit=crop',
@@ -850,6 +857,7 @@ function initHeroCarousel() {
     startSlideShow();
 }
 
+// Create carousel slides
 function createCarouselSlides() {
     const slidesContainer = document.getElementById('heroSlides');
     const dotsContainer = document.getElementById('carouselDots');
@@ -865,87 +873,77 @@ function createCarouselSlides() {
                 <div class="slide-content">
                     <h1>${img.title || 'Find Your Perfect Wig'}</h1>
                     <p>${img.subtitle || 'Premium quality wigs at affordable prices'}</p>
-                    <a href="client-login.html?tab=signup" class="cta-button" onclick="event.stopPropagation();">Start Shopping</a>
+                    <a href="client-login.html?tab=signup" class="cta-button">Start Shopping</a>
                 </div>
             </div>
         `;
         
-        dotsHtml += `<span class="dot ${index === 0 ? 'active' : ''}" onclick="goToSlide(${index}); event.stopPropagation();"></span>`;
+        dotsHtml += `<span class="dot ${index === 0 ? 'active' : ''}" onclick="goToSlide(${index})"></span>`;
     });
     
     slidesContainer.innerHTML = slidesHtml;
     if (dotsContainer) {
         dotsContainer.innerHTML = dotsHtml;
     }
-    
-    // Add click handlers to slides for navigation (optional)
-    document.querySelectorAll('.carousel-slide').forEach((slide, index) => {
-        slide.addEventListener('click', function(e) {
-            // Only navigate if not clicking on the CTA button
-            if (!e.target.closest('.cta-button')) {
-                window.location.href = 'client-login.html?tab=signup';
-            }
-        });
-    });
 }
 
+// Change slide (next/previous)
 function changeSlide(direction) {
     const slides = document.querySelectorAll('.carousel-slide');
     const dots = document.querySelectorAll('.dot');
     
     if (slides.length === 0) return;
     
+    // Remove active class from current slide
     slides[currentSlide].classList.remove('active');
     if (dots.length > 0) dots[currentSlide].classList.remove('active');
     
+    // Calculate new slide index
     currentSlide = (currentSlide + direction + slides.length) % slides.length;
     
+    // Add active class to new slide
     slides[currentSlide].classList.add('active');
     if (dots.length > 0) dots[currentSlide].classList.add('active');
     
+    // Reset interval
     resetSlideInterval();
 }
 
+// Go to specific slide
 function goToSlide(index) {
     const slides = document.querySelectorAll('.carousel-slide');
     const dots = document.querySelectorAll('.dot');
     
     if (slides.length === 0 || index === currentSlide) return;
     
+    // Remove active class from current slide
     slides[currentSlide].classList.remove('active');
     if (dots.length > 0) dots[currentSlide].classList.remove('active');
     
+    // Set new current slide
     currentSlide = index;
     
+    // Add active class to new slide
     slides[currentSlide].classList.add('active');
     if (dots.length > 0) dots[currentSlide].classList.add('active');
     
+    // Reset interval
     resetSlideInterval();
 }
 
+// Start automatic slideshow
 function startSlideShow() {
-    // Clear any existing interval
-    if (slideInterval) clearInterval(slideInterval);
-    
     slideInterval = setInterval(() => {
         changeSlide(1);
-    }, 3000); // EXACTLY 3 SECONDS as requested
+    }, 3000); // Changed from 2000 to 3000 (3 seconds) as per original working code
 }
 
+// Reset interval (call when manually changing slides)
 function resetSlideInterval() {
     clearInterval(slideInterval);
     startSlideShow();
 }
 
-// Make functions globally available
-window.changeSlide = changeSlide;
-window.goToSlide = goToSlide;
-window.showProductQuickView = showProductQuickView;
-window.closeQuickViewModal = closeQuickViewModal;
-window.buyNow = buyNow;
-window.loadSampleProducts = loadSampleProducts;
-window.filterHomeProducts = filterHomeProducts;
-window.scrollToTop = scrollToTop;
 // ===== CART FUNCTIONS FOR GUEST CHECKOUT =====
 
 // Guest cart key
@@ -1131,12 +1129,10 @@ function addToGuestCart(product) {
     updateCartBadge(totalItems);
 }
 
-// Initialize cart badge on page load
-document.addEventListener('DOMContentLoaded', function() {
-    // ... existing code ...
-    
-    // Initialize cart badge
+// Initialize cart badge function (replaces the second DOMContentLoaded)
+function initCartBadge() {
     const guestCart = JSON.parse(localStorage.getItem(GUEST_CART_KEY) || '[]');
     const totalItems = guestCart.reduce((sum, item) => sum + item.quantity, 0);
     updateCartBadge(totalItems);
-});
+}
+
