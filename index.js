@@ -21,12 +21,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Initialize data
 function initializeData() {
-    // Initialize products if not exist
-    if (!localStorage.getItem('wigProducts')) {
-        console.log('No products found, will show empty state');
-        localStorage.setItem('wigProducts', JSON.stringify([]));
-    }
-    
     // Initialize clients if not exist
     if (!localStorage.getItem('wigClients')) {
         localStorage.setItem('wigClients', JSON.stringify([]));
@@ -45,6 +39,9 @@ function initializeData() {
         }];
         localStorage.setItem('wigAdmins', JSON.stringify(defaultAdmins));
     }
+    
+    // AUTO-LOAD SAMPLE PRODUCTS IF NONE EXIST
+    ensureProductsExist();
 }
 
 // Load featured products with loading state
@@ -87,6 +84,16 @@ function showLoading() {
 
 function hideLoading() {
     // Loading will be replaced by displayProducts
+}
+// AUTO-LOAD SAMPLE PRODUCTS FUNCTION
+function ensureProductsExist() {
+    const products = localStorage.getItem('wigProducts');
+    
+    // If no products exist or products array is empty, load sample products
+    if (!products || JSON.parse(products).length === 0) {
+        console.log('No products found. Auto-loading sample products...');
+        loadSampleProducts(true); // true = silent mode (no notification)
+    }
 }
 
 // Display products on home page organized by category
@@ -674,7 +681,7 @@ function showNotification(message, type = 'success') {
 }
 
 // Load sample products
-function loadSampleProducts() {
+function loadSampleProducts(silent = false) {
     const sampleProducts = [
         {
             id: Date.now(),
@@ -682,13 +689,15 @@ function loadSampleProducts() {
             category: "Brazilian",
             price: 89.99,
             stock: 15,
-            description: "Premium Brazilian straight hair wig with natural look and feel. 100% human hair, can be styled with heat.",
+            description: "Premium Brazilian straight hair wig with natural look and feel. 100% human hair, can be styled with heat. Features a natural hairline and comfortable lace front.",
             length: "22-24 inches",
             color: "Natural Black",
             image: "https://images.unsplash.com/photo-1522338242990-8c5a7f015b8d?w=400&h=400&fit=crop",
             active: true,
             productType: "wig",
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
+            rating: 4.8,
+            reviews: 124
         },
         {
             id: Date.now() + 1,
@@ -696,37 +705,101 @@ function loadSampleProducts() {
             category: "Peruvian",
             price: 109.99,
             stock: 8,
-            description: "Luxurious Peruvian curly wig with voluminous curls. Lightweight and comfortable.",
+            description: "Luxurious Peruvian curly wig with voluminous curls. Lightweight and comfortable. Made from 100% virgin human hair, tangle-free and durable.",
             length: "20-22 inches",
             color: "Dark Brown",
             image: "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400&h=400&fit=crop",
             active: true,
             productType: "wig",
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
+            rating: 4.7,
+            reviews: 89
         },
         {
             id: Date.now() + 2,
+            name: "Malaysian Body Wave",
+            category: "Malaysian",
+            price: 99.99,
+            stock: 12,
+            description: "Silky Malaysian body wave wig with beautiful texture. Lightweight, breathable, and perfect for daily wear. Natural shine and movement.",
+            length: "24-26 inches",
+            color: "Honey Blonde",
+            image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=400&fit=crop",
+            active: true,
+            productType: "wig",
+            createdAt: new Date().toISOString(),
+            rating: 4.9,
+            reviews: 156
+        },
+        {
+            id: Date.now() + 3,
             name: "Hydrating Face Serum",
             category: "Skincare",
             price: 34.99,
             stock: 25,
-            description: "Deep hydrating serum with hyaluronic acid and vitamin C for radiant skin.",
+            description: "Deep hydrating serum with hyaluronic acid and vitamin C for radiant skin. Reduces fine lines and improves skin elasticity.",
             image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop",
             active: true,
             productType: "skincare",
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
+            rating: 4.6,
+            reviews: 67
         },
         {
-            id: Date.now() + 3,
-            name: "Rose Perfume",
-            category: "Fragrance",
-            price: 59.99,
+            id: Date.now() + 4,
+            name: "Argan Oil Hair Mask",
+            category: "Treatment",
+            price: 24.99,
+            stock: 30,
+            description: "Deep conditioning hair mask with argan oil for damaged hair. Repairs split ends and adds shine. Suitable for all hair types.",
+            image: "https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?w=400&h=400&fit=crop",
+            active: true,
+            productType: "haircare",
+            createdAt: new Date().toISOString(),
+            rating: 4.5,
+            reviews: 92
+        },
+        {
+            id: Date.now() + 5,
+            name: "Midnight Rose Perfume",
+            category: "Perfume",
+            price: 79.99,
             stock: 10,
-            description: "Elegant rose fragrance with long-lasting scent.",
-            image: "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=400&h=400&fit=crop",
+            description: "Elegant floral fragrance with hints of rose and vanilla. Long-lasting scent that evolves throughout the day. Perfect for evening wear.",
+            image: "https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop",
             active: true,
             productType: "fragrance",
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
+            rating: 4.8,
+            reviews: 43
+        },
+        {
+            id: Date.now() + 6,
+            name: "Matte Liquid Lipstick",
+            category: "Lipstick",
+            price: 19.99,
+            stock: 40,
+            description: "Long-lasting matte liquid lipstick in classic red. Transfer-resistant and comfortable on lips. Stays put for up to 8 hours.",
+            image: "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=400&h=400&fit=crop",
+            active: true,
+            productType: "makeup",
+            createdAt: new Date().toISOString(),
+            rating: 4.4,
+            reviews: 128
+        },
+        {
+            id: Date.now() + 7,
+            name: "Vitamin C Brightening Serum",
+            category: "Serum",
+            price: 34.99,
+            stock: 25,
+            description: "Brightening vitamin C serum for radiant skin. Reduces dark spots and evens skin tone. Lightweight and fast-absorbing.",
+            image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop",
+            active: true,
+            productType: "skincare",
+            createdAt: new Date().toISOString(),
+            rating: 4.7,
+            reviews: 56
         }
     ];
 
@@ -734,7 +807,12 @@ function loadSampleProducts() {
     console.log('✅ Sample products loaded:', sampleProducts.length);
     
     setTimeout(loadFeaturedProducts, 100);
-    showNotification('Sample products loaded successfully!', 'success');
+    
+    if (!silent) {
+        showNotification('Sample products loaded successfully!', 'success');
+    }
+    
+    return sampleProducts;
 }
 
 // ===== HERO CAROUSEL FUNCTIONS =====
@@ -787,18 +865,28 @@ function createCarouselSlides() {
                 <div class="slide-content">
                     <h1>${img.title || 'Find Your Perfect Wig'}</h1>
                     <p>${img.subtitle || 'Premium quality wigs at affordable prices'}</p>
-                    <a href="client-login.html?tab=signup" class="cta-button">Start Shopping</a>
+                    <a href="client-login.html?tab=signup" class="cta-button" onclick="event.stopPropagation();">Start Shopping</a>
                 </div>
             </div>
         `;
         
-        dotsHtml += `<span class="dot ${index === 0 ? 'active' : ''}" onclick="goToSlide(${index})"></span>`;
+        dotsHtml += `<span class="dot ${index === 0 ? 'active' : ''}" onclick="goToSlide(${index}); event.stopPropagation();"></span>`;
     });
     
     slidesContainer.innerHTML = slidesHtml;
     if (dotsContainer) {
         dotsContainer.innerHTML = dotsHtml;
     }
+    
+    // Add click handlers to slides for navigation (optional)
+    document.querySelectorAll('.carousel-slide').forEach((slide, index) => {
+        slide.addEventListener('click', function(e) {
+            // Only navigate if not clicking on the CTA button
+            if (!e.target.closest('.cta-button')) {
+                window.location.href = 'client-login.html?tab=signup';
+            }
+        });
+    });
 }
 
 function changeSlide(direction) {
@@ -841,7 +929,7 @@ function startSlideShow() {
     
     slideInterval = setInterval(() => {
         changeSlide(1);
-    }, 7000); // 7 seconds
+    }, 3000); // EXACTLY 3 SECONDS as requested
 }
 
 function resetSlideInterval() {
