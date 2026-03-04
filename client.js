@@ -1555,10 +1555,33 @@ function getStoreConfig() {
     };
 }
 
-// ===== ORDER ID GENERATOR =====
+// ===== ORDER ID GENERATOR - UNIQUE WITH YEAR/MONTH/DATE =====
 function generateOrderId() {
-    let allOrders = [];
+    // Get current date
+    const now = new Date();
+    const year = now.getFullYear().toString().slice(-2); // "26" for 2026
     
+    // Convert year digits to letters (0-9 to A-J)
+    const digitToLetter = {
+        '0': 'A', '1': 'B', '2': 'C', '3': 'D', '4': 'E',
+        '5': 'F', '6': 'G', '7': 'H', '8': 'I', '9': 'J'
+    };
+    
+    // Year code: "BF" for 2026 (B=2, F=6)
+    const yearCode = digitToLetter[year[0]] + digitToLetter[year[1]];
+    
+    // Month code: A=Jan, B=Feb, C=Mar, D=Apr, E=May, F=Jun, G=Jul, H=Aug, I=Sep, J=Oct, K=Nov, L=Dec
+    const monthLetters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
+    const monthCode = monthLetters[now.getMonth()]; // getMonth() returns 0-11
+    
+    // Day code: 2-digit day (01-31)
+    const dayCode = now.getDate().toString().padStart(2, '0');
+    
+    // Base ID prefix: BF + D + 04 = BFD04
+    const baseId = yearCode + monthCode + dayCode;
+    
+    // Get ALL existing orders from all users to check for duplicates
+    let allOrders = [];
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key.startsWith('orders_')) {
@@ -1574,20 +1597,27 @@ function generateOrderId() {
         }
     }
     
-    let maxId = 0;
+    // Add guest orders to check as well
+    const guestOrders = JSON.parse(localStorage.getItem('guestOrders') || '[]');
+    allOrders = allOrders.concat(guestOrders);
+    
+    // Find the highest sequential number for today
+    let maxSeq = 0;
     allOrders.forEach(order => {
-        if (order.id && order.id.startsWith('ORD')) {
-            const num = parseInt(order.id.replace('ORD', ''));
-            if (!isNaN(num) && num > maxId) {
-                maxId = num;
+        if (order.id && order.id.startsWith(baseId)) {
+            const seq = parseInt(order.id.substring(baseId.length));
+            if (!isNaN(seq) && seq > maxSeq) {
+                maxSeq = seq;
             }
         }
     });
     
-    const nextId = maxId + 1;
-    return 'ORD' + nextId.toString().padStart(4, '0');
+    // Next sequential number (0001-9999)
+    const seqNum = (maxSeq + 1).toString().padStart(4, '0');
+    
+    // Final ID: BFD040001
+    return baseId + seqNum;
 }
-
 // ===== TICKET ID GENERATOR =====
 function generateTicketId() {
     const clientUser = JSON.parse(localStorage.getItem('clientUser') || '{}');
@@ -3937,5 +3967,6 @@ function validateAndSubmit(formId, data, ruleset) {
     
     // If validation passes, proceed with submission
     return true;
+
 
 }
