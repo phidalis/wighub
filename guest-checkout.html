@@ -282,9 +282,59 @@
             const state = document.getElementById('state').value;
             const zip = document.getElementById('zip').value;
             
-            // Create guest order
+                // ===== GENERATE UNIQUE ORDER ID FOR GUEST =====
+            function generateGuestOrderId() {
+                const now = new Date();
+                const year = now.getFullYear().toString().slice(-2);
+                
+                // Convert digits to letters (0-9 to A-J)
+                const digitToLetter = {
+                    '0': 'A', '1': 'B', '2': 'C', '3': 'D', '4': 'E',
+                    '5': 'F', '6': 'G', '7': 'H', '8': 'I', '9': 'J'
+                };
+                
+                const yearCode = digitToLetter[year[0]] + digitToLetter[year[1]];
+                const monthLetters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
+                const monthCode = monthLetters[now.getMonth()];
+                const dayCode = now.getDate().toString().padStart(2, '0');
+                
+                const baseId = yearCode + monthCode + dayCode;
+                
+                // Check existing guest orders and regular orders
+                const guestOrders = JSON.parse(localStorage.getItem('guestOrders') || '[]');
+                
+                // Also check regular orders to ensure uniqueness across all
+                let allOrders = [...guestOrders];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key.startsWith('orders_')) {
+                        const ordersJSON = localStorage.getItem(key);
+                        if (ordersJSON) {
+                            try {
+                                const userOrders = JSON.parse(ordersJSON);
+                                allOrders = allOrders.concat(userOrders);
+                            } catch (e) {}
+                        }
+                    }
+                }
+                
+                let maxSeq = 0;
+                allOrders.forEach(order => {
+                    if (order.id && order.id.startsWith(baseId)) {
+                        const seq = parseInt(order.id.substring(baseId.length));
+                        if (!isNaN(seq) && seq > maxSeq) {
+                            maxSeq = seq;
+                        }
+                    }
+                });
+                
+                const seqNum = (maxSeq + 1).toString().padStart(4, '0');
+                return baseId + seqNum;
+            }
+            
+            // Create guest order with unique ID
             const order = {
-                id: 'ORD' + Date.now(),
+                id: generateGuestOrderId(),
                 date: new Date().toISOString(),
                 items: items,
                 subtotal: subtotal,
@@ -303,6 +353,8 @@
                     type: 'guest'
                 }
             };
+                                                                      
+         
             
             // Update stock for each item
             items.forEach(item => {
@@ -336,4 +388,5 @@
     });
 </script>
 </body>
+
 </html>
