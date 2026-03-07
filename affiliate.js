@@ -171,7 +171,7 @@ function getReferralCode() {
 function updateReferralLink() {
     const referralCode = getReferralCode();
     const baseUrl = window.location.origin + window.location.pathname.replace('affiliate.html', '');
-    const referralLink = `${baseUrl}index.html?ref=${referralCode}`;
+    const referralLink = `${baseUrl}client-login.html?ref=${referralCode}`;
     
     const linkInput = document.getElementById('referralLink');
     if (linkInput) {
@@ -978,4 +978,5 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Load withdrawal history
     loadWithdrawalHistory();
+
 });
