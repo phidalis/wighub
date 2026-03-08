@@ -657,14 +657,6 @@ document.querySelector('.forgot-link').addEventListener('click', function(e) {
     alert(`Password reset request submitted for ${email}. Our support team will contact you shortly.`);
 });
 
-// Terms Links
-document.querySelectorAll('.terms-link').forEach(link => {
-    link.addEventListener('click', function(e) {
-        e.preventDefault();
-        alert('Terms and Conditions:\n\n1. You must be at least 18 years old to use this service.\n2. All products are subject to availability.\n3. Returns are accepted within 30 days of purchase.\n4. We respect your privacy and will never share your information.\n\nBy using WigHub, you agree to these terms.');
-    });
-});
-
 // Auto-fill remembered user
 window.addEventListener('load', function() {
     const rememberedUser = localStorage.getItem('rememberedUser');
@@ -673,5 +665,6 @@ window.addEventListener('load', function() {
         document.getElementById('rememberMe').checked = true;
     }
 });
+
 
 
