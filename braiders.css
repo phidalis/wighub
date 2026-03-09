@@ -236,37 +236,10 @@ h1, h2, h3, h4 {
     min-width: 200px;
 }
 
-/* Braiders Grid - Desktop: 4 columns, Mobile: 2 columns */
 .braiders-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1.5rem;
-    margin: 2rem 0;
-}
-
-/* Tablet: 3 columns */
-@media (max-width: 1024px) {
-    .braiders-grid {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 1.2rem;
-    }
-}
-
-/* Mobile: 2 columns */
-@media (max-width: 768px) {
-    .braiders-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1rem;
-        padding: 0 0.5rem;
-    }
-}
-
-/* Small mobile: Still 2 columns but smaller gap */
-@media (max-width: 480px) {
-    .braiders-grid {
-        gap: 0.8rem;
-        padding: 0 0.3rem;
-    }
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
 }
 
 .braider-card {
@@ -281,9 +254,8 @@ h1, h2, h3, h4 {
     transform: translateY(-5px);
 }
 
-/* Optimized card styling for the grid */
 .braider-image {
-    height: 260px;
+    height: 250px;
     overflow: hidden;
 }
 
@@ -291,46 +263,33 @@ h1, h2, h3, h4 {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.3s ease;
-}
-
-.braider-image img:hover {
-    transform: scale(1.05);
 }
 
 .braider-info {
-    padding: 1rem;
+    padding: 1.5rem;
 }
 
 .braider-info h3 {
-    font-size: 1.1rem;
-    margin-bottom: 0.3rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    margin-bottom: 0.5rem;
 }
 
 .braider-info .location {
-    font-size: 0.85rem;
-    margin-bottom: 0.3rem;
-    display: flex;
-    align-items: center;
-    gap: 5px;
     color: var(--text-light);
+    margin-bottom: 0.5rem;
 }
 
 .braider-info .location i {
-    font-size: 0.8rem;
     color: var(--accent);
+    margin-right: 0.5rem;
 }
 
 .braider-info .speciality {
-    font-size: 0.75rem;
-    padding: 0.2rem 0.5rem;
     background: var(--background);
+    padding: 0.25rem 0.75rem;
     border-radius: 15px;
     display: inline-block;
-    margin: 0.3rem 0;
+    font-size: 0.9rem;
+    margin: 0.5rem 0;
 }
 
 .rating {
@@ -338,118 +297,19 @@ h1, h2, h3, h4 {
     margin: 0.5rem 0;
 }
 
-.braider-info .rating {
-    font-size: 0.8rem;
-    margin: 0.3rem 0;
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 5px;
-}
-
-.braider-info .rating i {
-    font-size: 0.8rem;
-}
-
-.braider-info .portfolio-count {
-    font-size: 0.75rem;
-    margin: 0.3rem 0;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    color: #666;
-}
-
-.braider-info .portfolio-count i {
-    color: var(--accent);
-    font-size: 0.75rem;
-}
-
 .view-profile-btn {
     background: var(--primary);
     color: var(--white);
     border: none;
-    padding: 0.4rem 0.8rem;
+    padding: 0.5rem 1rem;
     border-radius: 5px;
     cursor: pointer;
     width: 100%;
-    font-size: 0.8rem;
-    margin-top: 0.3rem;
     transition: background 0.3s;
 }
 
 .view-profile-btn:hover {
     background: var(--accent);
-}
-
-/* Responsive card adjustments */
-@media (max-width: 1024px) {
-    .braider-image {
-        height: 240px;
-    }
-    
-    .braider-info h3 {
-        font-size: 1rem;
-    }
-}
-
-@media (max-width: 768px) {
-    .braider-image {
-        height: 200px;
-    }
-    
-    .braider-info {
-        padding: 0.8rem;
-    }
-    
-    .braider-info h3 {
-        font-size: 0.95rem;
-    }
-    
-    .braider-info .location {
-        font-size: 0.8rem;
-    }
-    
-    .braider-info .speciality {
-        font-size: 0.7rem;
-    }
-    
-    .view-profile-btn {
-        padding: 0.3rem 0.6rem;
-        font-size: 0.75rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .braider-image {
-        height: 160px;
-    }
-    
-    .braider-info {
-        padding: 0.6rem;
-    }
-    
-    .braider-info h3 {
-        font-size: 0.85rem;
-    }
-    
-    .braider-info .location {
-        font-size: 0.7rem;
-    }
-    
-    .braider-info .speciality {
-        font-size: 0.65rem;
-        padding: 0.15rem 0.4rem;
-    }
-    
-    .braider-info .rating i {
-        font-size: 0.7rem;
-    }
-    
-    .view-profile-btn {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.7rem;
-    }
 }
 
 /* Profile Page Styles */
@@ -513,46 +373,23 @@ h1, h2, h3, h4 {
     box-shadow: var(--shadow);
 }
 
-/* Gallery Grid - Desktop: 4 columns, Mobile: 2 columns */
 .gallery-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1.2rem;
-    margin-top: 1.5rem;
-}
-
-/* Tablet: 3 columns */
-@media (max-width: 1024px) {
-    .gallery-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
-/* Mobile: 2 columns */
-@media (max-width: 768px) {
-    .gallery-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.8rem;
-    }
-}
-
-/* Small mobile: Still 2 columns */
-@media (max-width: 480px) {
-    .gallery-grid {
-        gap: 0.5rem;
-    }
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
 }
 
 .gallery-item {
     position: relative;
-    aspect-ratio: 1/1;
+    padding-bottom: 100%;
     overflow: hidden;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border-radius: 5px;
 }
 
 .gallery-item img,
 .gallery-item video {
+    position: absolute;
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -572,23 +409,6 @@ h1, h2, h3, h4 {
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-.gallery-caption {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: linear-gradient(transparent, rgba(0,0,0,0.7));
-    color: white;
-    padding: 10px;
-    font-size: 0.85rem;
-    transform: translateY(100%);
-    transition: transform 0.3s;
-}
-
-.gallery-item:hover .gallery-caption {
-    transform: translateY(0);
 }
 
 /* Features Section */
@@ -618,7 +438,7 @@ h1, h2, h3, h4 {
 /* Contact Section */
 .contact {
     background: linear-gradient(135deg, var(--primary), #2d2d2d);
-    color: blueviolet;
+    color: var(--white);
     padding: 4rem 2rem;
     text-align: center;
 }
@@ -634,7 +454,7 @@ h1, h2, h3, h4 {
 }
 
 .contact-info i {
-    color: blueviolet;
+    color: var(--accent);
     margin-right: 1rem;
 }
 
@@ -751,13 +571,13 @@ h1, h2, h3, h4 {
 }
 
 .table-responsive table {
-    min-width: 800px;
+    min-width: 800px; /* Forces scroll on mobile */
 }
 
 /* Mobile adjustments */
 @media (max-width: 768px) {
     .table-responsive table {
-        min-width: 600px;
+        min-width: 600px; /* Smaller minimum for mobile */
     }
     
     .admin-table th,
@@ -880,6 +700,50 @@ h1, h2, h3, h4 {
     border-radius: 5px;
 }
 
+/* Responsive Design */
+@media (max-width: 768px) {
+    .nav-menu {
+        display: none;
+    }
+    
+    .hero-content h1 {
+        font-size: 2rem;
+    }
+    
+    .profile-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .profile-header img {
+        margin: 0 auto;
+    }
+    
+    .profile-meta {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .filter-section {
+        flex-direction: column;
+    }
+    
+    .filter-section select {
+        width: 100%;
+    }
+    
+    .admin-container,
+    .dashboard-container {
+        flex-direction: column;
+    }
+    
+    .admin-sidebar,
+    .dashboard-sidebar {
+        width: 100%;
+    }
+}
+/* Add at the end of braiders.css */
+
 /* Button styles */
 .btn-approve { 
     background: #4CAF50; 
@@ -905,6 +769,20 @@ h1, h2, h3, h4 {
 }
 .btn-reject:hover { background: #f57c00; }
 
+/* Gallery responsive grid */
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+    .gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+}
+
 /* Loading state */
 .loading {
     text-align: center;
@@ -928,11 +806,15 @@ h1, h2, h3, h4 {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
-
 /* Additional mobile fixes */
 @media (max-width: 480px) {
     .table-responsive table {
         min-width: 500px;
+    }
+    
+    .gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 0.5rem;
     }
     
     .stat-card {
@@ -953,7 +835,6 @@ h1, h2, h3, h4 {
         gap: 2px;
     }
 }
-
 /* Additional fixes for better UX */
 .btn-small i {
     margin-right: 3px;
@@ -1010,6 +891,11 @@ h1, h2, h3, h4 {
     animation: spin 1s linear infinite;
 }
 
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
 /* Form validation styles */
 .form-group input:invalid,
 .form-group select:invalid {
@@ -1033,7 +919,7 @@ h1, h2, h3, h4 {
     margin-top: 5px;
 }
 
-/* ========== FIXED RATING DISPLAY STYLES ========== */
+/* ========== FIXED RATING DISPLAY STYLES - ADD AT THE END OF braiders.css ========== */
 
 /* Fix braider card rating display */
 .braider-card .rating {
@@ -1077,6 +963,33 @@ h1, h2, h3, h4 {
 .braider-card .portfolio-count i {
     color: var(--accent);
     font-size: 12px;
+}
+
+/* Fix braider card info section */
+.braider-card .braider-info {
+    padding: 1.2rem;
+}
+
+.braider-card .braider-info h3 {
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.braider-card .location {
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.braider-card .speciality {
+    font-size: 0.8rem;
+    margin-bottom: 8px;
+    display: inline-block;
 }
 
 /* Fix profile page rating display */
@@ -1506,49 +1419,41 @@ h1, h2, h3, h4 {
     background: #c2185b;
 }
 
-/* Responsive Design */
+/* Fix gallery items */
+.gallery-item {
+    position: relative;
+    aspect-ratio: 1/1;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.gallery-item img,
+.gallery-item video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.gallery-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.7));
+    color: white;
+    padding: 10px;
+    font-size: 0.85rem;
+    transform: translateY(100%);
+    transition: transform 0.3s;
+}
+
+.gallery-item:hover .gallery-caption {
+    transform: translateY(0);
+}
+
+/* Mobile responsive fixes */
 @media (max-width: 768px) {
-    .nav-menu {
-        display: none;
-    }
-    
-    .hero-content h1 {
-        font-size: 2rem;
-    }
-    
-    .profile-header {
-        flex-direction: column;
-        text-align: center;
-    }
-    
-    .profile-header img {
-        margin: 0 auto;
-    }
-    
-    .profile-meta {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    
-    .filter-section {
-        flex-direction: column;
-    }
-    
-    .filter-section select {
-        width: 100%;
-    }
-    
-    .admin-container,
-    .dashboard-container {
-        flex-direction: column;
-    }
-    
-    .admin-sidebar,
-    .dashboard-sidebar {
-        width: 100%;
-    }
-    
-    /* Card stars */
     .braider-card .rating {
         flex-direction: row;
         align-items: center;
