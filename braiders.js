@@ -428,7 +428,7 @@ function createDefaultBraiders() {
                 {
                     id: 201,
                     type: 'photo',
-                    url: 'https://unsplash.com/photos/woman-in-gray-sweater-holding-white-clothes-hanger-WDmvpGs2060',
+                    url: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80',
                     caption: 'Straight back cornrows',
                     category: 'Cornrows',
                     status: 'approved',
@@ -437,7 +437,7 @@ function createDefaultBraiders() {
                 {
                     id: 202,
                     type: 'video',
-                    url: 'https://unsplash.com/photos/woman-in-gray-sweater-holding-white-clothes-hanger-WDmvpGs2060',
+                    url: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80',
                     caption: 'Cornrow tutorial',
                     category: 'Cornrows',
                     status: 'pending',
@@ -465,7 +465,7 @@ function createDefaultBraiders() {
                 {
                     id: 301,
                     type: 'photo',
-                    url: 'https://unsplash.com/photos/person-wearing-black-top-W6cwaL7PMSw',
+                    url: 'https://images.unsplash.com/photo-1549236177-f9b8a1c89f7c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80',
                     caption: 'Fulani braids with beads',
                     category: 'Fulani',
                     status: 'approved',
@@ -1062,4 +1062,5 @@ function incrementProfileViews(braiderId) {
     views[braiderId] = (views[braiderId] || 0) + 1;
     localStorage.setItem('profileViews', JSON.stringify(views));
     return views[braiderId];
+
 }
