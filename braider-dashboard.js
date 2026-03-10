@@ -224,7 +224,7 @@ if (uploadForm) {
     });
 }
 
-// Preview upload
+// Preview upload - FIXED VERSION
 const mediaUrlInput = document.getElementById('mediaUrl');
 if (mediaUrlInput) {
     // Remove old listener by cloning
@@ -232,7 +232,7 @@ if (mediaUrlInput) {
     mediaUrlInput.parentNode.replaceChild(newMediaUrl, mediaUrlInput);
     
     newMediaUrl.addEventListener('input', function() {
-        const url = this.value;
+        const url = this.value.trim();
         const type = document.getElementById('uploadType').value;
         const preview = document.getElementById('uploadPreview');
         
@@ -241,13 +241,55 @@ if (mediaUrlInput) {
             try {
                 new URL(url); // This will throw if invalid URL
                 
+                // Clear previous preview
+                preview.innerHTML = '';
+                
                 if (type === 'photo') {
-                    preview.innerHTML = `<img src="${url}" alt="Preview" style="max-width: 100%; max-height: 300px;" onerror="this.onerror=null; this.parentNode.innerHTML='<p style=\'color: red;\'>Invalid image URL or image not accessible</p>'">`;
+                    // For photos, create an image element
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.alt = 'Preview';
+                    img.style.maxWidth = '100%';
+                    img.style.maxHeight = '300px';
+                    img.style.borderRadius = '5px';
+                    
+                    // Handle image load error
+                    img.onerror = function() {
+                        preview.innerHTML = '<p style="color: red;">❌ Invalid image URL or image not accessible. Please check the URL.</p>';
+                    };
+                    
+                    // Handle successful load
+                    img.onload = function() {
+                        preview.innerHTML = ''; // Clear any error messages
+                        preview.appendChild(img);
+                    };
+                    
+                    preview.appendChild(img);
+                    
                 } else {
-                    preview.innerHTML = `<video src="${url}" controls style="max-width: 100%; max-height: 300px;" onerror="this.onerror=null; this.parentNode.innerHTML='<p style=\'color: red;\'>Invalid video URL or video not accessible</p>'"></video>`;
+                    // For videos, create a video element
+                    const video = document.createElement('video');
+                    video.src = url;
+                    video.controls = true;
+                    video.style.maxWidth = '100%';
+                    video.style.maxHeight = '300px';
+                    video.style.borderRadius = '5px';
+                    
+                    // Handle video load error
+                    video.onerror = function() {
+                        preview.innerHTML = '<p style="color: red;">❌ Invalid video URL or video not accessible. Please check the URL.</p>';
+                    };
+                    
+                    // Handle successful load
+                    video.onloadeddata = function() {
+                        preview.innerHTML = ''; // Clear any error messages
+                        preview.appendChild(video);
+                    };
+                    
+                    preview.appendChild(video);
                 }
             } catch (e) {
-                preview.innerHTML = '<p style="color: red;">Please enter a valid URL</p>';
+                preview.innerHTML = '<p style="color: red;">❌ Please enter a valid URL (include http:// or https://)</p>';
             }
         } else {
             preview.innerHTML = '';
@@ -255,15 +297,46 @@ if (mediaUrlInput) {
     });
 }
 
-// Change preview when upload type changes
+// Change preview when upload type changes - FIXED VERSION
 document.getElementById('uploadType')?.addEventListener('change', function() {
-    const url = document.getElementById('mediaUrl').value;
+    const url = document.getElementById('mediaUrl').value.trim();
+    const preview = document.getElementById('uploadPreview');
+    
     if (url) {
-        const preview = document.getElementById('uploadPreview');
-        if (this.value === 'photo') {
-            preview.innerHTML = `<img src="${url}" alt="Preview" onerror="this.outerHTML='<p style=\'color: red;\'>Invalid image URL</p>'">`;
-        } else {
-            preview.innerHTML = `<video src="${url}" controls onerror="this.outerHTML='<p style=\'color: red;\'>Invalid video URL</p>'"></video>`;
+        try {
+            new URL(url); // Validate URL
+            
+            preview.innerHTML = '';
+            
+            if (this.value === 'photo') {
+                const img = document.createElement('img');
+                img.src = url;
+                img.alt = 'Preview';
+                img.style.maxWidth = '100%';
+                img.style.maxHeight = '300px';
+                img.style.borderRadius = '5px';
+                
+                img.onerror = function() {
+                    preview.innerHTML = '<p style="color: red;">❌ Invalid image URL</p>';
+                };
+                
+                preview.appendChild(img);
+            } else {
+                const video = document.createElement('video');
+                video.src = url;
+                video.controls = true;
+                video.style.maxWidth = '100%';
+                video.style.maxHeight = '300px';
+                video.style.borderRadius = '5px';
+                
+                video.onerror = function() {
+                    preview.innerHTML = '<p style="color: red;">❌ Invalid video URL</p>';
+                };
+                
+                preview.appendChild(video);
+            }
+        } catch (e) {
+            preview.innerHTML = '<p style="color: red;">❌ Invalid URL format</p>';
         }
     }
 });
@@ -398,4 +471,5 @@ document.addEventListener('DOMContentLoaded', function() {
     
     currentBraider = currentUser;
     loadBraiderDashboard();
+
 });
