@@ -886,9 +886,9 @@ function createProfilePage() {
                 </div>
             </div>
 
-           <div class="gallery-section">
+        <div class="gallery-section">
     <h2>Portfolio</h2>
-    <div class="gallery-grid" id="galleryGrid">
+    <div class="gallery-grid" id="galleryGrid" data-braider-id="${braider.id}">
         ${generateGalleryHTML(braider.uploads)}
     </div>
 </div>
@@ -1064,3 +1064,288 @@ function incrementProfileViews(braiderId) {
     return views[braiderId];
 
 }
+// ========== LIGHTBOX/GALLERY POPUP FUNCTIONALITY ==========
+
+// Lightbox state
+let lightboxState = {
+    currentIndex: 0,
+    items: [],
+    braiderId: null
+};
+
+// Create lightbox modal if it doesn't exist
+function createLightboxModal() {
+    if (document.getElementById('lightboxModal')) return;
+    
+    const modal = document.createElement('div');
+    modal.id = 'lightboxModal';
+    modal.className = 'lightbox-modal';
+    modal.innerHTML = `
+        <div class="lightbox-content">
+            <span class="lightbox-close">&times;</span>
+            <button class="lightbox-nav prev" id="lightboxPrev" disabled>
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="lightbox-nav next" id="lightboxNext" disabled>
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            <div class="lightbox-media-container" id="lightboxMediaContainer">
+                <div class="lightbox-loading" id="lightboxLoading">
+                    <i class="fas fa-spinner"></i> Loading...
+                </div>
+            </div>
+            <div class="lightbox-info" id="lightboxInfo">
+                <div class="lightbox-caption" id="lightboxCaption"></div>
+                <div class="lightbox-category" id="lightboxCategory"></div>
+            </div>
+            <div class="lightbox-counter" id="lightboxCounter"></div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Add event listeners
+    modal.querySelector('.lightbox-close').addEventListener('click', closeLightbox);
+    modal.querySelector('#lightboxPrev').addEventListener('click', showPreviousItem);
+    modal.querySelector('#lightboxNext').addEventListener('click', showNextItem);
+    
+    // Close on click outside
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closeLightbox();
+        }
+    });
+    
+    // Keyboard navigation
+    document.addEventListener('keydown', function(e) {
+        if (modal.style.display === 'block') {
+            if (e.key === 'Escape') {
+                closeLightbox();
+            } else if (e.key === 'ArrowLeft') {
+                showPreviousItem();
+            } else if (e.key === 'ArrowRight') {
+                showNextItem();
+            }
+        }
+    });
+}
+
+// Open lightbox with specific item
+function openLightbox(braiderId, itemIndex) {
+    createLightboxModal();
+    
+    const braiders = JSON.parse(localStorage.getItem('braiders')) || [];
+    const braider = braiders.find(b => b.id === braiderId);
+    
+    if (!braider) return;
+    
+    // Get approved uploads
+    const approvedUploads = (braider.uploads || []).filter(u => u.status === 'approved');
+    
+    if (approvedUploads.length === 0) return;
+    
+    // Update state
+    lightboxState = {
+        currentIndex: itemIndex,
+        items: approvedUploads,
+        braiderId: braiderId
+    };
+    
+    // Update navigation buttons
+    updateNavButtons();
+    
+    // Show current item
+    showLightboxItem(lightboxState.currentIndex);
+    
+    // Show modal
+    document.getElementById('lightboxModal').style.display = 'block';
+    document.body.style.overflow = 'hidden'; // Prevent scrolling
+}
+
+// Show item in lightbox
+function showLightboxItem(index) {
+    const item = lightboxState.items[index];
+    if (!item) return;
+    
+    const container = document.getElementById('lightboxMediaContainer');
+    const loading = document.getElementById('lightboxLoading');
+    const caption = document.getElementById('lightboxCaption');
+    const category = document.getElementById('lightboxCategory');
+    const counter = document.getElementById('lightboxCounter');
+    
+    // Show loading
+    loading.style.display = 'flex';
+    
+    // Clear previous content
+    const existingMedia = container.querySelector('img, video');
+    if (existingMedia) existingMedia.remove();
+    
+    // Create new media element
+    if (item.type === 'photo') {
+        const img = document.createElement('img');
+        img.className = 'lightbox-media';
+        img.src = item.url;
+        img.alt = item.caption;
+        
+        img.onload = function() {
+            loading.style.display = 'none';
+        };
+        
+        img.onerror = function() {
+            loading.style.display = 'none';
+            container.innerHTML += '<p style="color: red; text-align: center;">Failed to load image</p>';
+        };
+        
+        container.appendChild(img);
+    } else {
+        const video = document.createElement('video');
+        video.className = 'lightbox-media lightbox-video';
+        video.src = item.url;
+        video.controls = true;
+        video.autoplay = true;
+        
+        video.onloadeddata = function() {
+            loading.style.display = 'none';
+        };
+        
+        video.onerror = function() {
+            loading.style.display = 'none';
+            container.innerHTML += '<p style="color: red; text-align: center;">Failed to load video</p>';
+        };
+        
+        container.appendChild(video);
+    }
+    
+    // Update info
+    caption.textContent = item.caption || 'No description';
+    category.innerHTML = `<i class="fas fa-tag"></i> ${item.category || 'General'}`;
+    counter.textContent = `${index + 1} of ${lightboxState.items.length}`;
+    
+    updateNavButtons();
+}
+
+// Show previous item
+function showPreviousItem() {
+    if (lightboxState.currentIndex > 0) {
+        lightboxState.currentIndex--;
+        showLightboxItem(lightboxState.currentIndex);
+    }
+}
+
+// Show next item
+function showNextItem() {
+    if (lightboxState.currentIndex < lightboxState.items.length - 1) {
+        lightboxState.currentIndex++;
+        showLightboxItem(lightboxState.currentIndex);
+    }
+}
+
+// Update navigation buttons state
+function updateNavButtons() {
+    const prevBtn = document.getElementById('lightboxPrev');
+    const nextBtn = document.getElementById('lightboxNext');
+    
+    if (prevBtn) {
+        prevBtn.disabled = lightboxState.currentIndex === 0;
+    }
+    
+    if (nextBtn) {
+        nextBtn.disabled = lightboxState.currentIndex === lightboxState.items.length - 1;
+    }
+}
+
+// Close lightbox
+function closeLightbox() {
+    const modal = document.getElementById('lightboxModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = ''; // Restore scrolling
+        
+        // Stop video if playing
+        const video = modal.querySelector('video');
+        if (video) {
+            video.pause();
+        }
+    }
+}
+
+// Modify the generateGalleryHTML function to add click handlers
+function generateGalleryHTML(uploads) {
+    if (!uploads || uploads.length === 0) {
+        return '<p class="no-results">No portfolio items yet.</p>';
+    }
+    
+    const approvedUploads = uploads.filter(u => u.status === 'approved');
+    
+    if (approvedUploads.length === 0) {
+        return '<p class="no-results">No approved portfolio items yet.</p>';
+    }
+    
+    return approvedUploads.map((upload, index) => {
+        if (upload.type === 'photo') {
+            return `
+                <div class="gallery-item" onclick="openLightbox(${getCurrentBraiderId()}, ${index})" style="cursor: pointer;">
+                    <img src="${upload.url}" alt="${upload.caption}">
+                    <div class="gallery-caption">${upload.caption}</div>
+                </div>
+            `;
+        } else {
+            return `
+                <div class="gallery-item" onclick="openLightbox(${getCurrentBraiderId()}, ${index})" style="cursor: pointer;">
+                    <video src="${upload.url}" preload="metadata"></video>
+                    <div class="video-indicator"><i class="fas fa-play"></i></div>
+                    <div class="gallery-caption">${upload.caption}</div>
+                </div>
+            `;
+        }
+    }).join('');
+}
+
+// Helper function to get current braider ID from URL
+function getCurrentBraiderId() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return parseInt(urlParams.get('id'));
+}
+
+// Update the createProfilePage function to include the braider ID in gallery items
+// Find this line in createProfilePage:
+// <div class="gallery-grid" id="galleryGrid">
+//     ${generateGalleryHTML(braider.uploads)}
+// </div>
+
+// Replace with this enhanced version that passes the braider ID:
+/*
+<div class="gallery-grid" id="galleryGrid" data-braider-id="${braider.id}">
+    ${generateGalleryHTML(braider.uploads)}
+</div>
+*/
+
+// But since we can't modify the string directly in this response, 
+// add this function to handle gallery clicks globally
+document.addEventListener('click', function(e) {
+    // Check if clicked element is a gallery item or inside a gallery item
+    const galleryItem = e.target.closest('.gallery-item');
+    if (galleryItem) {
+        // Prevent if the click is on a button or control
+        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'I' || e.target.closest('button')) {
+            return;
+        }
+        
+        // Get the braider ID from the gallery grid
+        const galleryGrid = document.getElementById('galleryGrid');
+        if (!galleryGrid) return;
+        
+        const braiderId = parseInt(galleryGrid.dataset.braiderId);
+        if (!braiderId) return;
+        
+        // Get all gallery items
+        const items = Array.from(galleryGrid.children);
+        const index = items.indexOf(galleryItem);
+        
+        if (index !== -1) {
+            e.preventDefault();
+            openLightbox(braiderId, index);
+        }
+    }
+});
+
