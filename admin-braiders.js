@@ -4,12 +4,12 @@
 // Global variables
 let currentEditingId = null;
 
-// HELPER FUNCTION for upload previews - ADD THIS
+// HELPER FUNCTION for upload previews - FIXED
 function getUploadPreviewHTML(upload) {
     if (upload.type === 'photo') {
-        return '<img src="' + upload.url + '" class="upload-thumbnail" onerror="this.onerror=null; this.src=\'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'50\' height=\'50\' viewBox=\'0 0 50 50\'%3E%3Crect width=\'50\' height=\'50\' fill=\'%23f0f0f0\'/%3E%3Ctext x=\'10\' y=\'30\' font-family=\'Arial\' font-size=\'12\' fill=\'%23999\'%3ENo img%3C/text%3E%3C/svg%3E\'">';
+        return '<img src="' + upload.url + '" class="upload-thumbnail" onerror="this.onerror=null; this.src=\'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'50\' height=\'50\' viewBox=\'0 0 50 50\'%3E%3Crect width=\'50\' height=\'50\' fill=\'%23f0f0f0\'/%3E%3Ctext x=\'5\' y=\'30\' font-family=\'Arial\' font-size=\'10\' fill=\'%23999\'%3EImage%20Error%3C/text%3E%3C/svg%3E\'">';
     } else {
-        return '<i class="fas fa-video"></i> Video';
+        return '<i class="fas fa-video" style="font-size: 24px; color: #666;"></i> <span style="font-size: 12px;">Video</span>';
     }
 }
 
@@ -701,4 +701,5 @@ window.logout = function() {
 }
 
 // Load dashboard on page load
+
 document.addEventListener('DOMContentLoaded', loadDashboard);
