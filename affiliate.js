@@ -348,7 +348,7 @@ function getReferralCode() {
 function updateReferralLink() {
     const referralCode = getReferralCode();
     const baseUrl = window.location.origin + window.location.pathname.replace('affiliate.html', '');
-    const referralLink = `${baseUrl}index.html?ref=${referralCode}`;
+    const referralLink = `${baseUrl}client-login.html?ref=${referralCode}`;
     
     const linkInput = document.getElementById('referralLink');
     if (linkInput) {
@@ -945,6 +945,7 @@ function logout() {
         window.location.href = 'index.html';
     }
 }
+
 
 
 
