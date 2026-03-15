@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WigHub - Find Professional Braiders</title>
+    <link rel="stylesheet" href="braiders.css">
+     <link rel="stylesheet" href="ai-chatbot.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav-container">
+            <div class="logo">WigHub</div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="active">Home</a></li>
+                <li><a href="index.html#products">Wigs</a></li>
+                <li><a href="#braiders">Braiders</a></li>
+                <li><a href="index.html#contact">Contact</a></li>
+            </ul>
+            <div class="nav-right">
+                <button class="login-btn" id="loginBtn">
+                    <i class="fas fa-lock"></i> Braider Login
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Braider Login</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="btn-primary">Login</button>
+            </form>
+            <p class="login-note">Only registered braiders can login. Accounts created by admin only.</p>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+   <!-- Hero Section - Now dynamic -->
+<section class="hero" id="hero-section" style="background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1580618672591-eb180b1a973f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80'); background-size: cover; background-position: center;">
+    <div class="hero-content">
+        <h1 id="hero-title">Find Your Perfect Braider</h1>
+        <p id="hero-subtitle">Discover professional braiders near you</p>
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchLocation" placeholder="Enter your location...">
+            <button class="btn-primary" id="searchBtn">Search</button>
+        </div>
+    </div>
+</section>
+
+    <!-- Featured Braiders Section -->
+    <section class="featured-braiders" id="braiders">
+        <h2>Featured Braiders</h2>
+        <section class="featured-braiders" id="braiders">
+    <div class="filter-section">
+        <select id="cityFilter">
+            <option value="">All Cities</option>
+            <option value="Nairobi">Nairobi</option>
+            <option value="Eldoret">Eldoret</option>
+            <option value="Nakuru">Nakuru</option>
+            <option value="Mombasa">Mombasa</option>
+        </select>
+        <select id="specialityFilter">
+            <option value="">All Specialities</option>
+            <option value="Box Braids">Box Braids</option>
+            <option value="Cornrows">Cornrows</option>
+            <option value="Fulani">Fulani</option>
+            <option value="Goddess Braids">Goddess Braids</option>
+            <option value="Knotless Braids">Knotless Braids</option>
+        </select>
+        <select id="sortFilter">
+            <option value="">Sort By</option>
+            <option value="rating_high">Highest Rated</option>
+            <option value="rating_low">Lowest Rated</option>
+            <option value="reviews_most">Most Reviews</option>
+            <option value="name_asc">Name A-Z</option>
+        </select>
+    </div>
+    
+    <!-- ADD THIS MISSING CONTAINER -->
+    <div class="braiders-grid" id="braidersGrid">
+        <!-- Braiders will be loaded here -->
+    </div>
+</section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="feature-card">
+            <i class="fas fa-map-marker-alt"></i>
+            <h3>Find Nearby</h3>
+            <p>Search braiders in your location</p>
+        </div>
+        <div class="feature-card">
+            <i class="fas fa-star"></i>
+            <h3>Top Rated</h3>
+            <p>View ratings and reviews</p>
+        </div>
+        <div class="feature-card">
+            <i class="fas fa-camera"></i>
+            <h3>View Gallery</h3>
+            <p>See actual work before booking</p>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact" id="contact">
+        <h2>Contact Us</h2>
+        <div class="contact-container">
+            <div class="contact-info">
+                <h3>Get in Touch</h3>
+                <p><i class="fas fa-phone"></i> +254768832415</p>
+                <p><i class="fas fa-envelope"></i> wigsandbeauty.com</p>
+                <p><i class="fas fa-map-marker-alt"></i> Eldore, Kenya</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; PHIDAGENCY. All rights reserved.</p>
+    </footer>
+
+    <script src="braiders.js"></script>
+     <script src="ai-chatbot.js"></script>
+     <script src="ai-chatbot-knowledge-base.js"></script>
+</body>
+</html>
