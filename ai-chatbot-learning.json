@@ -1,0 +1,299 @@
+{
+  "version": "2.0",
+  "lastUpdated": "2026-03-15T12:00:00.000Z",
+  
+  "knowledgeBase": {
+    "faq": [
+      {
+        "id": "faq_1",
+        "keywords": ["shipping", "delivery", "how long", "arrive", "ship", "delivered"],
+        "question": "How long does shipping take?",
+        "answer": "📦 **Shipping Information**\n\n• Standard shipping: 3-5 business days ($5.99)\n• Express shipping: 1-2 business days ($12.99)\n• Free shipping on orders over $100\n• Tracking provided via email once order ships\n\nWe ship to all major cities in Kenya including Nairobi, Mombasa, Kisumu, Nakuru, and Eldoret.",
+        "category": "shipping",
+        "usageCount": 0,
+        "lastUsed": null
+      },
+      {
+        "id": "faq_2",
+        "keywords": ["return", "refund", "money back", "exchange", "send back"],
+        "question": "What is your return policy?",
+        "answer": "↩️ **Returns & Refunds**\n\n• 30-day return window from delivery date\n• Items must be unworn, unwashed, with original tags\n• Return shipping is customer's responsibility\n• Refunds processed within 3-5 business days after we receive the item\n• Final sale items cannot be returned\n\nTo start a return, go to My Orders → Select Order → Request Return.",
+        "category": "returns",
+        "usageCount": 0,
+        "lastUsed": null
+      },
+      {
+        "id": "faq_3",
+        "keywords": ["payment", "pay", "mpesa", "card", "credit", "debit", "paypal"],
+        "question": "What payment methods do you accept?",
+        "answer": "💳 **Payment Methods**\n\n• **M-Pesa** - Instant payment via mobile money\n• **Credit/Debit Cards** - Visa, Mastercard\n• **PayPal** - Secure online payments\n• **Store Credit** - For affiliates and gift cards\n\nAll payments are encrypted and secure. We never store your card details.",
+        "category": "payment",
+        "usageCount": 0,
+        "lastUsed": null
+      },
+      {
+        "id": "faq_4",
+        "keywords": ["contact", "email", "phone", "call", "reach", "support", "help"],
+        "question": "How can I contact support?",
+        "answer": "📞 **Contact Us**\n\n📧 Email: support@wighub.com\n📱 Phone: 0768832415\n💬 Live Chat: Available 24/7 on our website\n⏰ Hours: 24/7 Customer Support\n\nYou can also submit a support ticket from your dashboard for faster assistance!",
+        "category": "contact",
+        "usageCount": 0,
+        "lastUsed": null
+      },
+      {
+        "id": "faq_5",
+        "keywords": ["account", "login", "sign in", "password", "forgot", "reset"],
+        "question": "I forgot my password. What do I do?",
+        "answer": "🔐 **Forgot Password?**\n\n1. Go to the login page\n2. Click 'Forgot Password'\n3. Enter your email address\n4. Check your email for reset instructions\n5. Follow the link to create a new password\n\nIf you don't receive the email within 5 minutes, check your spam folder or contact support.",
+        "category": "account",
+        "usageCount": 0,
+        "lastUsed": null
+      },
+      {
+        "id": "faq_6",
+        "keywords": ["track", "order", "where", "status", "delivery"],
+        "question": "How do I track my order?",
+        "answer": "📍 **Track Your Order**\n\nYou can track your order by:\n\n1. Going to 'My Orders' in your dashboard\n2. Clicking 'Track Order' next to your order\n3. Entering your order ID on the tracking page\n\nOr simply tell me your order ID (e.g., ORD12345) and I'll check for you!",
+        "category": "orders",
+        "usageCount": 0,
+        "lastUsed": null
+      },
+      {
+        "id": "faq_7",
+        "keywords": ["cancel", "cancellation", "stop order"],
+        "question": "Can I cancel my order?",
+        "answer": "⏰ **Order Cancellation**\n\n• Orders can be cancelled within 1 hour of placement\n• After 1 hour, cancellation is not guaranteed but you can request it\n• Cancellation requests are reviewed by our team\n• You'll receive email confirmation once processed\n\nTo request cancellation, go to My Orders → Select Order → Request Cancellation.",
+        "category": "orders",
+        "usageCount": 0,
+        "lastUsed": null
+      }
+    ],
+    
+    "products": [
+      {
+        "id": "prod_1",
+        "keywords": ["wig", "real", "human hair", "synthetic", "material"],
+        "question": "Are your wigs real human hair?",
+        "answer": "💇 **Wig Materials**\n\n• **Human Hair Wigs** - 100% real human hair, can be styled with heat, lasts 1-2 years with proper care\n• **Synthetic Wigs** - Made from high-quality synthetic fibers, pre-styled, more affordable\n\nCheck each product description - it clearly states whether it's human hair or synthetic.",
+        "category": "products",
+        "usageCount": 0,
+        "lastUsed": null
+      },
+      {
+        "id": "prod_2",
+        "keywords": ["size", "fit", "adjustable", "cap size", "head size"],
+        "question": "How do I know which size wig to buy?",
+        "answer": "📏 **Wig Sizing**\n\nMost wigs are adjustable with:\n• Adjustable straps at the back\n• Comfort combs inside\n• Stretchy cap construction\n\n**Average cap size:** 21.5-22.5 inches circumference\n\nIf you have a larger head, look for wigs labeled 'Large Cap' or 'Extended Size'. Check individual product dimensions for exact measurements.",
+        "category": "products",
+        "usageCount": 0,
+        "lastUsed": null
+      },
+      {
+        "id": "prod_3",
+        "keywords": ["care", "maintain", "wash", "clean", "how to"],
+        "question": "How do I care for my wig?",
+        "answer": "🧴 **Wig Care Guide**\n\n• Wash every 6-8 wears with sulfate-free shampoo\n• Use cool water and gentle motions (don't rub)\n• Condition and let air dry on a wig stand\n• Store on a wig stand or in a silk bag\n• Avoid excessive heat styling\n• Detangle gently with a wide-tooth comb\n\nFor synthetic wigs, use products specifically made for synthetics.",
+        "category": "products",
+        "usageCount": 0,
+        "lastUsed": null
+      },
+      {
+        "id": "prod_4",
+        "keywords": ["stock", "available", "in stock", "sold out"],
+        "question": "How can I check if a product is in stock?",
+        "answer": "📦 **Stock Availability**\n\nYou can check stock by:\n\n1. Looking at the product page - stock is displayed\n2. Asking me! Just tell me which product you're interested in\n3. Green badge = In Stock, Yellow = Low Stock, Red = Out of Stock\n\nIf something is out of stock, you can add it to your wishlist and we'll notify you when it's back!",
+        "category": "products",
+        "usageCount": 0,
+        "lastUsed": null
+      }
+    ],
+    
+    "braiders": [
+      {
+        "id": "braid_1",
+        "keywords": ["book", "appointment", "braider", "stylist", "hire"],
+        "question": "How do I book a braider?",
+        "answer": "💇 **Booking a Braider**\n\n1. Go to the Braiders page\n2. Use filters to find braiders by location and specialty\n3. Click 'View Profile' on any braider\n4. See their portfolio, ratings, and contact info\n5. Contact them directly via phone or Instagram\n\nYou can also ask me to find braiders in your area!",
+        "category": "braiders",
+        "usageCount": 0,
+        "lastUsed": null
+      },
+      {
+        "id": "braid_2",
+        "keywords": ["nairobi", "eldoret", "mombasa", "nakuru", "kisumu", "location", "near me"],
+        "question": "Are there braiders in my city?",
+        "answer": "📍 **Braiders by Location**\n\nWe have braiders in:\n• Nairobi\n• Eldoret\n• Mombasa\n• Nakuru\n• Kisumu\n\nJust tell me your city and I'll find braiders near you! You can also use the location filter on the Braiders page.",
+        "category": "braiders",
+        "usageCount": 0,
+        "lastUsed": null
+      },
+      {
+        "id": "braid_3",
+        "keywords": ["best", "top", "highest rated", "rating", "reviews"],
+        "question": "Who are the top-rated braiders?",
+        "answer": "🏆 **Top Rated Braiders**\n\nI can show you braiders with the highest ratings! Just ask:\n• \"Show me top braiders in Nairobi\"\n• \"Who has 5-star ratings?\"\n• \"Best braiders near me\"\n\nYou can also sort braiders by rating on the Braiders page.",
+        "category": "braiders",
+        "usageCount": 0,
+        "lastUsed": null
+      },
+      {
+        "id": "braid_4",
+        "keywords": ["become", "join", "apply", "braider registration"],
+        "question": "How do I become a braider on WigHub?",
+        "answer": "✨ **Become a Braider**\n\nTo join our braider network:\n\n1. Contact admin@wighub.com\n2. Provide your portfolio (photos of your work)\n3. Share your experience and specialties\n4. Include your location and contact info\n5. Our team will review and set up your account\n\nAccounts are created by admin only to ensure quality.",
+        "category": "braiders",
+        "usageCount": 0,
+        "lastUsed": null
+      }
+    ],
+    
+    "affiliate": [
+      {
+        "id": "aff_1",
+        "keywords": ["commission", "earn", "affiliate", "referral", "money"],
+        "question": "How much commission do affiliates earn?",
+        "answer": "💰 **Affiliate Commission Rates**\n\n• Base commission: 10% on all sales\n• Wigs & Extensions: 12%\n• Skincare: 8%\n• Haircare: 8%\n• Fragrances: 10%\n• Makeup: 8%\n\nPlus $5 welcome bonus per referral! Commissions are credited to your store credit when orders are completed.",
+        "category": "affiliate",
+        "usageCount": 0,
+        "lastUsed": null
+      },
+      {
+        "id": "aff_2",
+        "keywords": ["referral link", "share", "invite", "link"],
+        "question": "How do I get my referral link?",
+        "answer": "🔗 **Your Referral Link**\n\n1. Log in to your account\n2. Go to the Affiliate Program page\n3. Your unique referral link is displayed at the top\n4. Click 'Copy Link' to share it\n\nShare this link with friends! When they sign up and purchase, you earn commission.",
+        "category": "affiliate",
+        "usageCount": 0,
+        "lastUsed": null
+      },
+      {
+        "id": "aff_3",
+        "keywords": ["withdraw", "payout", "cash out", "store credit"],
+        "question": "How do I withdraw my earnings?",
+        "answer": "💳 **Withdrawing Earnings**\n\nYour affiliate earnings are automatically added to your store credit. You can use store credit to:\n• Make purchases on WigHub\n• Apply at checkout\n\nMinimum withdrawal/purchase amount: $10\n\nStore credit never expires and can be combined with other payment methods.",
+        "category": "affiliate",
+        "usageCount": 0,
+        "lastUsed": null
+      }
+    ],
+    
+    "account": [
+      {
+        "id": "acc_1",
+        "keywords": ["delete", "close", "remove", "terminate"],
+        "question": "How do I delete my account?",
+        "answer": "⚠️ **Account Deletion**\n\nTo delete your account:\n\n1. Go to Profile section\n2. Click 'Account Settings'\n3. Select 'Delete Account'\n4. Confirm your decision\n\nThis is permanent and will remove all your data. If you have pending orders, please complete them first.\n\nContact support if you need assistance.",
+        "category": "account",
+        "usageCount": 0,
+        "lastUsed": null
+      },
+      {
+        "id": "acc_2",
+        "keywords": ["update", "change", "edit", "profile"],
+        "question": "How do I update my profile?",
+        "answer": "✏️ **Update Profile**\n\n1. Go to Profile section\n2. Click 'Edit Profile'\n3. Update your information\n4. Click 'Save Changes'\n\nYou can update your:\n• Name\n• Email\n• Phone number\n• Address\n• Password",
+        "category": "account",
+        "usageCount": 0,
+        "lastUsed": null
+      }
+    ]
+  },
+  
+  "settings": {
+    "welcomeMessage": {
+      "guest": "Hi there! 👋 I'm your WigHub AI assistant. How can I help you today?",
+      "client": "Welcome back, {username}! 👋 I'm here to help with orders, products, or anything else.",
+      "braider": "Hello {name}! 👋 I see you're logged in as a braider. Need help with your uploads or profile?",
+      "admin": "Welcome Admin {name}! 👋 I'm ready to help you manage the store."
+    },
+    "quickActions": {
+      "guest": ["products", "braiders", "shipping", "help"],
+      "client": ["my_orders", "track", "wishlist", "find_products"],
+      "braider": ["my_uploads", "profile", "earnings", "help"],
+      "admin": ["analytics", "sessions", "knowledge", "teach"]
+    },
+    "learningEnabled": true,
+    "trackingEnabled": true,
+    "maxSessionsStored": 1000,
+    "typingDelay": {
+      "min": 300,
+      "max": 800
+    }
+  },
+  
+  "sampleData": {
+    "sampleProducts": [
+      {
+        "id": 1,
+        "name": "Brazilian Straight Wig",
+        "category": "Brazilian",
+        "price": 89.99,
+        "stock": 15,
+        "description": "Premium Brazilian straight hair wig with natural look and feel.",
+        "length": "22-24 inches",
+        "color": "Natural Black",
+        "image": "https://images.unsplash.com/photo-1522338242990-8c5a7f015b8d?w=400&h=400&fit=crop",
+        "productType": "wig"
+      },
+      {
+        "id": 2,
+        "name": "Peruvian Curly Wig",
+        "category": "Peruvian",
+        "price": 109.99,
+        "stock": 8,
+        "description": "Luxurious Peruvian curly wig with voluminous curls.",
+        "length": "20-22 inches",
+        "color": "Dark Brown",
+        "image": "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400&h=400&fit=crop",
+        "productType": "wig"
+      }
+    ],
+    "sampleBraiders": [
+      {
+        "id": 1,
+        "name": "Sarah Beauty",
+        "location": "Nairobi",
+        "speciality": "Box Braids",
+        "rating": 4.8,
+        "experience": 5
+      },
+      {
+        "id": 2,
+        "name": "Grace Styles",
+        "location": "Eldoret",
+        "speciality": "Cornrows",
+        "rating": 4.5,
+        "experience": 3
+      }
+    ]
+  },
+  
+  "intentPatterns": {
+    "order_status": "\\b(order|where is|track|status).*?(#?ORD[A-Z0-9]+|\\b\\w{6,}\\b)",
+    "cancel_order": "\\b(cancel|cancellation).*?(order|purchase)",
+    "my_orders": "\\b(my|recent).*?orders?\\b",
+    "find_product": "\\b(find|search|looking for|have).*?(wig|product|braid|serum|lipstick)",
+    "product_stock": "\\b(in stock|available|stock|when).*?(wig|product)",
+    "product_price": "\\b(price|cost|how much).*?(wig|product)",
+    "find_braider": "\\b(find|book|hire).*?braider",
+    "braider_location": "\\b(braider|stylist).*?(in|at|near).*?(nairobi|eldoret|mombasa|nakuru|kisumu)",
+    "top_braiders": "\\b(best|top|highest rated).*?braider",
+    "commission": "\\b(commission|earnings|how much.*?earned)",
+    "referral_link": "\\b(referral|share.*?link|invite)",
+    "change_password": "\\b(change|reset|update).*?password",
+    "profile_info": "\\b(my|view).*?(profile|info|details)",
+    "wishlist": "\\b(my|view).*?wishlist",
+    "whats_on_page": "\\b(what|show|tell).*?(on this|this page|current)",
+    "who_am_i": "\\b(who am i|my account|my details)",
+    "help": "\\b(help|what can you do|support|assist)",
+    "contact": "\\b(contact|email|phone|call|reach)",
+    "policy": "\\b(return|shipping|payment|policy|terms)"
+  },
+  
+  "responses": {
+    "unknown": "I'm still learning! This question has been logged for our team. In the meantime, you can:\n\n• 📞 Contact support: 0768832415\n• 📧 Email: support@wighub.com\n• 💬 Try rephrasing your question",
+    "login_required": "Please login first to access this information. Would you like to login now?",
+    "error": "Sorry, I encountered an error. Please try again or contact support.",
+    "thanks": "You're welcome! 😊 Is there anything else I can help with?"
+  }
+}
