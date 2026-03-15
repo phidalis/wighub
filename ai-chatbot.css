@@ -1,5 +1,3 @@
-
-
 /* Main Container */
 .wighub-ai-container {
     position: fixed;
@@ -839,5 +837,47 @@
     .confetti {
         animation: none !important;
         transition: none !important;
+    }
+}
+/* ===== MOBILE FIXES FOR CHATBOT ===== */
+@media screen and (max-width: 768px) {
+    .wighub-ai-container {
+        bottom: 15px;
+        right: 15px;
+        z-index: 99999;
+    }
+    
+    .ai-chat-window {
+        width: 90vw !important;
+        height: 80vh !important;
+        bottom: 70px !important;
+        right: 5% !important;
+        left: 5% !important;
+        transform: none !important;
+        background: white !important;
+    }
+    
+    .ai-chat-messages {
+        background: #f8f9fa !important;
+    }
+    
+    .ai-message.ai-bot {
+        background: white !important;
+        color: #333 !important;
+    }
+    
+    .ai-message.ai-user {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: white !important;
+    }
+    
+    .ai-chat-input-area input {
+        background: white !important;
+        color: #333 !important;
+        border: 2px solid #e2e8f0 !important;
+    }
+    
+    .ai-chat-input-area input::placeholder {
+        color: #999 !important;
     }
 }
