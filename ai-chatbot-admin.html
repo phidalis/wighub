@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WigHub AI - Admin Dashboard</title>
+    <link rel="stylesheet" href="admin-dashboard.css">
+    <link rel="stylesheet" href="ai-chatbot.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .notification-badge {
+    background: #dc3545;
+    color: white;
+    margin-left: 8px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+    animation: pulseBadge 1.5s infinite;
+}
+
+@keyframes pulseBadge {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+}
+        .ai-admin-container {
+            padding: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .ai-admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 30px;
+            border-radius: 15px;
+        }
+        
+        .ai-admin-header h1 {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .ai-admin-header h1 i {
+            font-size: 40px;
+        }
+        
+        .ai-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .ai-stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border-left: 4px solid;
+        }
+        
+        .ai-stat-card.sessions { border-color: #3498db; }
+        .ai-stat-card.questions { border-color: #2ecc71; }
+        .ai-stat-card.unanswered { border-color: #e74c3c; }
+        .ai-stat-card.knowledge { border-color: #f39c12; }
+        
+        .ai-stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .ai-stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .ai-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .ai-tab-btn {
+            padding: 12px 25px;
+            background: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .ai-tab-btn:hover {
+            background: #f0f0f0;
+        }
+        
+        .ai-tab-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .ai-tab-content {
+            display: none;
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .ai-tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .ai-filter-bar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .ai-filter-bar input,
+        .ai-filter-bar select {
+            padding: 10px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .ai-filter-bar input {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .ai-sessions-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .ai-sessions-table th {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .ai-sessions-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .ai-sessions-table tr:hover {
+            background: #f8f9fa;
+            cursor: pointer;
+        }
+        
+        .user-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        .badge-client { background: #e3f2fd; color: #1976d2; }
+        .badge-braider { background: #f3e5f5; color: #7b1fa2; }
+        .badge-admin { background: #ffeb3b; color: #333; }
+        .badge-guest { background: #e0e0e0; color: #666; }
+        
+        .view-btn {
+            padding: 6px 12px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        
+        .view-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .delete-btn {
+            padding: 6px 12px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+        
+        .delete-btn:hover {
+            background: #c0392b;
+        }
+        
+        .activity-timeline {
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        
+        .activity-item {
+            padding: 12px;
+            border-left: 3px solid;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .activity-item.click { border-color: #3498db; }
+        .activity-item.question { border-color: #2ecc71; }
+        .activity-item.pageview { border-color: #f39c12; }
+        
+        .activity-time {
+            font-size: 11px;
+            color: #999;
+            margin-top: 5px;
+        }
+        
+        .knowledge-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .knowledge-question {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        
+        .knowledge-answer {
+            color: #666;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+        }
+        
+        .knowledge-meta {
+            display: flex;
+            gap: 20px;
+            font-size: 12px;
+            color: #999;
+        }
+        
+        .edit-knowledge-btn {
+            padding: 5px 10px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+        
+        .delete-knowledge-btn {
+            padding: 5px 10px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .teach-form {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .teach-form h3 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .teach-form .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .teach-form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .teach-form input,
+        .teach-form select,
+        .teach-form textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 5px;
+        }
+        
+        .teach-form textarea {
+            min-height: 100px;
+        }
+        
+        .save-teach-btn {
+            padding: 12px 25px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .save-teach-btn:hover {
+            background: #218838;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 10px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-body {
+            padding: 25px;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <header class="admin-header">
+            <div class="header-left">
+                <h1><i class="fas fa-robot"></i> WigHub AI Admin</h1>
+                <p>Chatbot Intelligence Management</p>
+            </div>
+            <div class="header-right">
+                <div class="admin-info">
+                    <i class="fas fa-user-shield"></i>
+                    <span id="adminName">Administrator</span>
+                </div>
+                <button class="btn btn-logout" onclick="window.location.href='admin-dashboard.html'">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </button>
+            </div>
+        </header>
+        
+        <div class="breadcrumb">
+            <a href="admin-dashboard.html">Dashboard</a>
+            <span class="separator">/</span>
+            <span>AI Chatbot Management</span>
+        </div>
+        
+        <div class="ai-admin-container">
+            <!-- Stats Overview -->
+            <div class="ai-stats-grid" id="aiStats">
+                <div class="ai-stat-card sessions">
+                    <div class="ai-stat-value" id="totalSessions">0</div>
+                    <div class="ai-stat-label">Total User Sessions</div>
+                </div>
+                <div class="ai-stat-card questions">
+                    <div class="ai-stat-value" id="totalQuestions">0</div>
+                    <div class="ai-stat-label">Questions Asked</div>
+                </div>
+                <div class="ai-stat-card unanswered">
+                    <div class="ai-stat-value" id="unansweredCount">0</div>
+                    <div class="ai-stat-label">Unanswered Questions</div>
+                </div>
+                <div class="ai-stat-card knowledge">
+                    <div class="ai-stat-value" id="knowledgeCount">0</div>
+                    <div class="ai-stat-label">Knowledge Base</div>
+                </div>
+            </div>
+            
+            <!-- Tabs -->
+            <div class="ai-tabs">
+                <button class="ai-tab-btn active" onclick="showAITab('sessions')">
+                    <i class="fas fa-history"></i> User Sessions
+                </button>
+                <button class="ai-tab-btn" onclick="showAITab('knowledge')">
+                    <i class="fas fa-book"></i> Knowledge Base
+                </button>
+                <button class="ai-tab-btn" onclick="showAITab('unanswered')">
+                    <i class="fas fa-question-circle"></i> Unanswered Questions
+                </button>
+                <button class="ai-tab-btn" onclick="showAITab('teach')">
+                    <i class="fas fa-graduation-cap"></i> Teach AI
+                </button>
+                <button class="ai-tab-btn" onclick="showAITab('analytics')">
+                    <i class="fas fa-chart-line"></i> Analytics
+                </button>
+                 <!-- Add this button to the ai-tabs div in ai-chatbot-admin.html -->
+                <button class="ai-tab-btn" onclick="showAITab('live')">
+                <i class="fas fa-headset"></i> Live Support
+                <span class="notification-badge" id="liveSupportBadge" style="display: none;">0</span>
+                </button>
+            </div>
+            
+            <!-- Sessions Tab -->
+           <!-- Sessions Tab -->
+      <div id="sessionsTab" class="ai-tab-content active">
+    <div class="ai-filter-bar">
+        <input type="text" id="sessionSearch" placeholder="Search by user, email, page..." onkeyup="filterSessions()">
+        <select id="userTypeFilter" onchange="filterSessions()">
+            <option value="">All User Types</option>
+            <option value="client">Client</option>
+            <option value="braider">Braider</option>
+            <option value="admin">Admin</option>
+            <option value="guest">Guest</option>
+        </select>
+        <select id="dateFilter" onchange="filterSessions()">
+            <option value="">All Time</option>
+            <option value="today">Today</option>
+            <option value="week">Last 7 Days</option>
+            <option value="month">Last 30 Days</option>
+        </select>
+        <button class="view-btn" onclick="exportSessions()">
+            <i class="fas fa-download"></i> Export CSV
+        </button>
+    </div>
+    
+    <!-- ADD THIS BULK ACTIONS BAR -->
+    <div class="bulk-actions-bar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 12px 15px; background: #f8f9fa; border-radius: 8px;">
+        <div class="bulk-select-all">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="checkbox" id="selectAllSessions" onchange="toggleSelectAllSessions()">
+                <span>Select All</span>
+            </label>
+            <span id="selectedCount" style="margin-left: 15px; color: #666; font-size: 13px;">0 selected</span>
+        </div>
+        <div class="bulk-actions">
+            <button class="delete-btn" onclick="bulkDeleteSessions()" style="background: #dc3545; padding: 8px 16px;" id="bulkDeleteBtn" disabled>
+                <i class="fas fa-trash-alt"></i> Delete Selected (<span id="bulkSelectedCount">0</span>)
+            </button>
+            <button class="delete-btn" onclick="clearAllSessions()" style="background: #e74c3c; margin-left: 10px; padding: 8px 16px;">
+                <i class="fas fa-trash"></i> Clear All Sessions
+            </button>
+        </div>
+    </div>
+    
+    <table class="ai-sessions-table">
+        <thead>
+            <tr>
+                <th style="width: 40px;">
+                    <input type="checkbox" id="headerSelectAll" onchange="toggleSelectAllSessions()" style="cursor: pointer;">
+                </th>
+                <th>User</th>
+                <th>Type</th>
+                <th>Page</th>
+                <th>Questions</th>
+                <th>Start Time</th>
+                <th>Duration</th>
+                <th>Actions</th>
+            </tr>
+               </thead>
+               <tbody id="sessionsTableBody">
+            <tr>
+                <td colspan="8" class="empty-table">Loading sessions...</td>
+            </tr>
+               </tbody>
+             </table>
+           </div>
+            <!-- Knowledge Base Tab -->
+            <div id="knowledgeTab" class="ai-tab-content">
+                <div class="ai-filter-bar">
+                    <input type="text" id="knowledgeSearch" placeholder="Search knowledge base..." onkeyup="filterKnowledge()">
+                    <select id="categoryFilter" onchange="filterKnowledge()">
+                        <option value="">All Categories</option>
+                        <option value="faq">FAQ</option>
+                        <option value="products">Products</option>
+                        <option value="braiders">Braiders</option>
+                        <option value="affiliate">Affiliate</option>
+                    </select>
+                </div>
+                
+                <div id="knowledgeBaseContainer">
+                    <!-- Knowledge items will be loaded here -->
+                </div>
+            </div>
+            
+            <!-- Unanswered Questions Tab -->
+            <div id="unansweredTab" class="ai-tab-content">
+                <div class="ai-filter-bar">
+                    <input type="text" id="unansweredSearch" placeholder="Search unanswered questions..." onkeyup="filterUnanswered()">
+                </div>
+                
+                <div id="unansweredContainer">
+                    <!-- Unanswered questions will be loaded here -->
+                </div>
+            </div>
+            
+            <!-- Teach AI Tab -->
+            <div id="teachTab" class="ai-tab-content">
+                <div class="teach-form">
+                    <h3><i class="fas fa-graduation-cap"></i> Teach the AI a New Answer</h3>
+                    
+                    <div class="form-group">
+                        <label>Question Pattern</label>
+                        <input type="text" id="teachQuestion" placeholder="e.g., How do I track my order?">
+                        <small>The AI will match similar questions to this answer</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Answer</label>
+                        <textarea id="teachAnswer" placeholder="Provide a helpful answer..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="teachCategory">
+                            <option value="faq">FAQ</option>
+                            <option value="products">Products</option>
+                            <option value="braiders">Braiders</option>
+                            <option value="affiliate">Affiliate</option>
+                            <option value="orders">Orders</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Keywords (comma separated)</label>
+                        <input type="text" id="teachKeywords" placeholder="track, order, where, status">
+                        <small>These help the AI recognize similar questions</small>
+                    </div>
+                    
+                    <button class="save-teach-btn" onclick="teachAI()">
+                        <i class="fas fa-save"></i> Save to Knowledge Base
+                    </button>
+                </div>
+                
+                <div class="teach-form" style="background: #fff3cd;">
+                    <h3><i class="fas fa-bolt"></i> Quick Teach from Unanswered</h3>
+                    <p>Select an unanswered question below to quickly add an answer.</p>
+                    <div id="quickTeachList" style="max-height: 200px; overflow-y: auto;">
+                        <!-- Quick teach list will be loaded here -->
+                    </div>
+                </div>
+
+                
+            </div>
+            
+            <!-- Analytics Tab -->
+             <div id="analyticsTab" class="ai-tab-content">
+         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div>
+            <h3>Popular Questions</h3>
+            <div id="popularQuestions"></div>
+        </div>
+        <div>
+            <h3>Popular Keywords</h3>
+            <div id="popularKeywords"></div>
+        </div>
+        <div style="grid-column: 1/-1;">
+            <h3>User Activity by Page</h3>
+            <div id="pageStats"></div>
+        </div>
+    </div>
+    <div id="timeStats" style="margin-top: 30px;"></div>
+    <div id="performanceCharts" style="margin-top: 30px;"></div>
+</div>
+        </div>
+    </div>
+    
+    <!-- Session Detail Modal -->
+    <div id="sessionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-user"></i> Session Details</h3>
+                <button class="close-modal" onclick="closeSessionModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="sessionModalBody">
+                <!-- Session details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+     <!-- Live Support Tab -->
+<div id="liveTab" class="ai-tab-content">
+    <div class="ai-stats-grid" style="margin-bottom: 20px;">
+        <div class="ai-stat-card" style="border-color: #28a745;">
+            <div class="ai-stat-value" id="totalLiveRequests">0</div>
+            <div class="ai-stat-label">Total Requests</div>
+        </div>
+        <div class="ai-stat-card" style="border-color: #3498db;">
+            <div class="ai-stat-value" id="activeLiveChats">0</div>
+            <div class="ai-stat-label">Active Chats</div>
+        </div>
+        <div class="ai-stat-card" style="border-color: #ffc107;">
+            <div class="ai-stat-value" id="waitingLiveChats">0</div>
+            <div class="ai-stat-label">Waiting</div>
+        </div>
+    </div>
+    
+    <div id="liveSupportContainer">
+        <!-- Live support content will be loaded here -->
+    </div>
+</div>
+    
+    <script src="ai-chatbot-admin.js"></script>
+</body>
+</html>
