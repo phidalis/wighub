@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wig Hub - Client Dashboard</title>
+    <link rel="stylesheet" href="affiliate.css">
+     <link rel="stylesheet" href="ai-chatbot.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-left">
+                <h1><i class="fas fa-store"></i> WIG HUB</h1>
+                <p>Welcome to your wig shopping paradise</p>
+            </div>
+            <div class="header-right">
+                <!-- Mobile Menu Toggle (hidden on desktop) -->
+                <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="user-info">
+                    <i class="fas fa-user-circle"></i>
+                    <span id="clientName">Loading...</span>
+                </div>
+                <button class="btn btn-logout" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="dashboard-main">
+            <!-- Sidebar -->
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-menu">
+                    <button class="sidebar-btn active" onclick="showSection('products')">
+                        <i class="fas fa-wig"></i> <span class="menu-text">Browse Wigs</span>
+                    </button>
+                    <button class="sidebar-btn" onclick="showSection('cart')">
+                        <i class="fas fa-shopping-cart"></i> <span class="menu-text">My Cart</span>
+                        <span class="cart-count" id="cartCount">0</span>
+                    </button>
+                    <button class="sidebar-btn" onclick="showSection('orders')">
+                        <i class="fas fa-box"></i> <span class="menu-text">My Orders</span>
+                    </button>
+                    <button class="sidebar-btn" onclick="showSection('profile')">
+                        <i class="fas fa-user"></i> <span class="menu-text">My Profile</span>
+                    </button>
+                    <button class="sidebar-btn" onclick="showSection('wishlist')">
+                        <i class="fas fa-heart"></i> <span class="menu-text">Wishlist</span>
+                    </button>
+                    <button class="sidebar-btn" onclick="showSection('support')">
+                        <i class="fas fa-headset"></i> <span class="menu-text">Support</span>
+                    </button>
+                     <button class="sidebar-btn" onclick="window.location.href='affiliate.html'">
+                 <i class="fas fa-hand-holding-usd"></i> <span class="menu-text">Affiliate Program</span>
+                   </button>
+                </div>
+            </aside>
+
+
+        <!-- Stats Cards -->
+        <div class="affiliate-stats-grid" id="affiliateStats">
+            <div class="stat-card earnings">
+                <div class="stat-icon">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <div class="stat-value" id="totalEarnings">$0.00</div>
+                <div class="stat-label">Total Earnings</div>
+            </div>
+            <div class="stat-card referrals">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-value" id="totalReferrals">0</div>
+                <div class="stat-label">Total Referrals</div>
+            </div>
+            <div class="stat-card commission">
+                <div class="stat-icon">
+                    <i class="fas fa-percent"></i>
+                </div>
+                <div class="stat-value" id="commissionRate">10%</div>
+                <div class="stat-label">Commission Rate</div>
+            </div>
+            <div class="stat-card withdrawn">
+                <div class="stat-icon">
+                    <i class="fas fa-wallet"></i>
+                </div>
+                <div class="stat-value" id="walletBalance">$0.00</div>
+                <div class="stat-label">Available Balance</div>
+            </div>
+        </div>
+
+        <!-- Referral Link Section -->
+        <div class="referral-section">
+            <h3><i class="fas fa-link"></i> Your Referral Link</h3>
+            <div class="referral-link-container">
+                <input type="text" id="referralLink" readonly value="Loading..." onclick="this.select()">
+                <button class="btn-copy" onclick="copyReferralLink()">
+                    <i class="fas fa-copy"></i> Copy Link
+                </button>
+            </div>
+            <div class="referral-stats">
+                <div class="stat-item">
+                    <span class="label">Total Clicks</span>
+                    <span class="value" id="totalClicks">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="label">Conversion Rate</span>
+                    <span class="value" id="conversionRate">0%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="label">Pending Orders</span>
+                    <span class="value" id="pendingOrders">0</span>
+                </div>
+            </div>
+        </div>
+
+                 <!-- Tabs -->
+        <div class="affiliate-tabs">
+            <button class="affiliate-tab active" onclick="showAffiliateTab('referrals')">
+                <i class="fas fa-users"></i> Referrals
+            </button>
+            <button class="affiliate-tab" onclick="showAffiliateTab('giftcards')">
+                <i class="fas fa-gift"></i> Gift Cards
+            </button>
+            <button class="affiliate-tab" onclick="showAffiliateTab('storecredit')">
+                <i class="fas fa-wallet"></i> Store Credit
+            </button>
+            <button class="affiliate-tab" onclick="showAffiliateTab('commissions')">
+                <i class="fas fa-percent"></i> Commission Rates
+            </button>
+        </div>
+
+        <!-- Referrals Tab -->
+        <div id="referralsTab" class="affiliate-tab-content active">
+            <div class="referrals-table-container">
+                <table class="referrals-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Customer</th>
+                            <th>Order ID</th>
+                            <th>Order Total</th>
+                            <th>Commission</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="referralsTableBody">
+                        <tr>
+                            <td colspan="6" class="empty-table">Loading referrals...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Gift Cards Tab -->
+        <div id="giftcardsTab" class="affiliate-tab-content">
+            <div class="giftcards-container" id="giftCardsContainer">
+                <!-- Gift cards will be loaded here -->
+                <div class="empty-state">
+                    <i class="fas fa-gift"></i>
+                    <h3>No Gift Cards</h3>
+                    <p>You haven't redeemed any gift cards yet.</p>
+                    <div class="gift-card-form">
+                        <h4>Redeem a Gift Card</h4>
+                        <div class="form-group">
+                            <input type="text" id="giftCardCode" placeholder="Enter 6-digit gift card code" maxlength="6" style="padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; width: 100%;">
+                        </div>
+                        <button class="btn btn-primary" onclick="redeemGiftCard()" style="width: 100%;">
+                            <i class="fas fa-gift"></i> Redeem Gift Card
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Store Credit Tab -->
+        <div id="storecreditTab" class="affiliate-tab-content">
+            <div id="storeCreditContainer">
+                <!-- Store credit will be loaded here -->
+                <div class="empty-state">
+                    <i class="fas fa-wallet"></i>
+                    <h3>Loading...</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Commissions Tab -->
+        <div id="commissionsTab" class="affiliate-tab-content">
+            <div class="commission-rates">
+                <h3><i class="fas fa-percent"></i> Current Commission Rates</h3>
+                
+                <div class="rates-grid" id="commissionRatesGrid">
+                    <div class="rate-card">
+                        <h4>Default Rate</h4>
+                        <div class="rate-percentage" id="defaultRate">10<small>%</small></div>
+                        <p>Applies to all products</p>
+                    </div>
+                    <div class="rate-card">
+                        <h4>Wigs & Extensions</h4>
+                        <div class="rate-percentage" id="wigRate">10<small>%</small></div>
+                    </div>
+                    <div class="rate-card">
+                        <h4>Skincare</h4>
+                        <div class="rate-percentage" id="skincareRate">8<small>%</small></div>
+                    </div>
+                    <div class="rate-card">
+                        <h4>Makeup</h4>
+                        <div class="rate-percentage" id="makeupRate">8<small>%</small></div>
+                    </div>
+                </div>
+
+                <div class="info-box" style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-top: 20px;">
+                    <i class="fas fa-info-circle" style="color: #1976d2;"></i>
+                    <p style="margin: 10px 0 0; color: #333;">
+                        Commissions are calculated based on the product category. 
+                        Higher rates apply to premium products. Commissions are credited 
+                        to your store credit after the order is marked as "Completed".
+                    </p>
+                </div>
+                
+                <div class="info-box" style="background: #f0f7ff; padding: 15px; border-radius: 8px; margin-top: 20px; border-left: 4px solid #667eea;">
+                    <i class="fas fa-gift" style="color: #667eea;"></i>
+                    <p style="margin: 10px 0 0; color: #333;">
+                        <strong>Gift Cards:</strong> You can redeem gift cards in the Gift Cards tab. 
+                        The amount will be added to your store credit automatically.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+       
+    </footer>
+     <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+    
+    const firebaseConfig = {
+        apiKey: "AIzaSyDmpsaBtFvWjVBX5IeZzN9ktYZRxwoInmA",
+        authDomain: "aviator-pro-16914.firebaseapp.com",
+        projectId: "aviator-pro-16914",
+        storageBucket: "aviator-pro-16914.firebasestorage.app",
+        messagingSenderId: "536049864881",
+        appId: "1:536049864881:web:5ac2cb820394e6a90dd290",
+        measurementId: "G-BZZ1SQM9EX"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    window.auth = getAuth(app);
+    window.db = getFirestore(app);
+    window.storage = getStorage(app);
+    
+    // Make Firebase Storage functions globally available
+    window.uploadImageToFirebase = uploadImageToFirebase;
+    window.deleteImageFromFirebase = deleteImageFromFirebase;
+    window.getFirebaseImageUrl = getFirebaseImageUrl;
+    
+    console.log('🔥 Firebase Storage initialized');
+    
+    // ========== FIREBASE STORAGE FUNCTIONS ==========
+    
+    /**
+     * Upload image to Firebase Storage
+     * @param {File} file - The image file to upload
+     * @param {string} path - Storage path (e.g., 'products', 'braiders', 'profile-photos')
+     * @param {string} id - Unique identifier (productId, braiderId, etc.)
+     * @param {Function} onProgress - Progress callback (optional)
+     * @returns {Promise<string>} - Download URL of uploaded image
+     */
+    async function uploadImageToFirebase(file, path, id, onProgress) {
+        if (!file || !file.type.startsWith('image/')) {
+            throw new Error('Please select an image file');
+        }
+        
+        // Compress image before upload (max 1MB for storage efficiency)
+        const compressedFile = await compressImage(file, 1200, 0.7);
+        
+        // Generate unique filename
+        const timestamp = Date.now();
+        const random = Math.random().toString(36).substring(2, 8);
+        const extension = file.type.split('/')[1] || 'jpg';
+        const fileName = `${id}_${timestamp}_${random}.${extension}`;
+        const storagePath = `${path}/${fileName}`;
+        
+        const storageRef = ref(window.storage, storagePath);
+        
+        // Upload with progress tracking
+        const uploadTask = uploadBytes(storageRef, compressedFile);
+        
+        // Wait for upload to complete
+        const snapshot = await uploadTask;
+        
+        // Get download URL
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        
+        console.log(`✅ Image uploaded to: ${storagePath}`);
+        console.log(`📸 Download URL: ${downloadURL}`);
+        
+        return downloadURL;
+    }
+    
+    /**
+     * Delete image from Firebase Storage
+     * @param {string} imageUrl - The image URL to delete
+     * @returns {Promise<void>}
+     */
+    async function deleteImageFromFirebase(imageUrl) {
+        if (!imageUrl) return;
+        
+        try {
+            // Extract storage path from URL
+            const decodedUrl = decodeURIComponent(imageUrl);
+            const match = decodedUrl.match(/\/o\/(.+?)\?/);
+            
+            if (match && match[1]) {
+                const storagePath = match[1];
+                const imageRef = ref(window.storage, storagePath);
+                await deleteObject(imageRef);
+                console.log(`🗑️ Deleted image: ${storagePath}`);
+            }
+        } catch (error) {
+            console.warn('Could not delete image (might be external URL):', error);
+        }
+    }
+    
+    /**
+     * Get Firebase image URL (useful for refreshing after upload)
+     * @param {string} storagePath - The storage path
+     * @returns {Promise<string>} - Download URL
+     */
+    async function getFirebaseImageUrl(storagePath) {
+        const imageRef = ref(window.storage, storagePath);
+        return await getDownloadURL(imageRef);
+    }
+    
+    /**
+     * Compress image before upload
+     * @param {File} file - Original image file
+     * @param {number} maxWidth - Maximum width
+     * @param {number} quality - JPEG quality (0-1)
+     * @returns {Promise<Blob>} - Compressed image blob
+     */
+    async function compressImage(file, maxWidth = 1200, quality = 0.7) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function(event) {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    
+                    // Maintain aspect ratio
+                    if (width > maxWidth) {
+                        height = Math.round((height * maxWidth) / width);
+                        width = maxWidth;
+                    }
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    canvas.toBlob((blob) => {
+                        resolve(blob);
+                    }, 'image/jpeg', quality);
+                };
+                img.onerror = reject;
+            };
+            reader.onerror = reject;
+        });
+    }
+</script>
+    <script src="affiliate.js"></script>
+     <link rel="stylesheet" href="ai-chatbot.css">   
+</body>
+</html>

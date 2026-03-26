@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WigHub - Find Professional Braiders</title>
+    <link rel="stylesheet" href="braiders.css">
+     <link rel="stylesheet" href="ai-chatbot.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav-container">
+            <div class="logo">WigHub</div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="active">Home</a></li>
+                <li><a href="index.html#products">Wigs</a></li>
+                <li><a href="#braiders">Braiders</a></li>
+                <li><a href="index.html#contact">Contact</a></li>
+            </ul>
+            <div class="nav-right">
+                <button class="login-btn" id="loginBtn">
+                    <i class="fas fa-lock"></i> Braider Login
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Braider Login</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="btn-primary">Login</button>
+            </form>
+            <p class="login-note">Only registered braiders can login. Accounts created by admin only.</p>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+   <!-- Hero Section - Now dynamic -->
+<section class="hero" id="hero-section" style="background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1580618672591-eb180b1a973f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80'); background-size: cover; background-position: center;">
+    <div class="hero-content">
+        <h1 id="hero-title">Find Your Perfect Braider</h1>
+        <p id="hero-subtitle">Discover professional braiders near you</p>
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchLocation" placeholder="Enter your location...">
+            <button class="btn-primary" id="searchBtn">Search</button>
+        </div>
+    </div>
+</section>
+
+    <!-- Featured Braiders Section -->
+    <section class="featured-braiders" id="braiders">
+        <h2>Featured Braiders</h2>
+        <section class="featured-braiders" id="braiders">
+    <div class="filter-section">
+        <select id="cityFilter">
+            <option value="">All Cities</option>
+            <option value="Nairobi">Nairobi</option>
+            <option value="Eldoret">Eldoret</option>
+            <option value="Nakuru">Nakuru</option>
+            <option value="Mombasa">Mombasa</option>
+        </select>
+        <select id="specialityFilter">
+            <option value="">All Specialities</option>
+            <option value="Box Braids">Box Braids</option>
+            <option value="Cornrows">Cornrows</option>
+            <option value="Fulani">Fulani</option>
+            <option value="Goddess Braids">Goddess Braids</option>
+            <option value="Knotless Braids">Knotless Braids</option>
+        </select>
+        <select id="sortFilter">
+            <option value="">Sort By</option>
+            <option value="rating_high">Highest Rated</option>
+            <option value="rating_low">Lowest Rated</option>
+            <option value="reviews_most">Most Reviews</option>
+            <option value="name_asc">Name A-Z</option>
+        </select>
+    </div>
+    
+    <!-- ADD THIS MISSING CONTAINER -->
+    <div class="braiders-grid" id="braidersGrid">
+        <!-- Braiders will be loaded here -->
+    </div>
+</section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="feature-card">
+            <i class="fas fa-map-marker-alt"></i>
+            <h3>Find Nearby</h3>
+            <p>Search braiders in your location</p>
+        </div>
+        <div class="feature-card">
+            <i class="fas fa-star"></i>
+            <h3>Top Rated</h3>
+            <p>View ratings and reviews</p>
+        </div>
+        <div class="feature-card">
+            <i class="fas fa-camera"></i>
+            <h3>View Gallery</h3>
+            <p>See actual work before booking</p>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact" id="contact">
+        <h2>Contact Us</h2>
+        <div class="contact-container">
+            <div class="contact-info">
+                <h3>Get in Touch</h3>
+                <p><i class="fas fa-phone"></i> +254768832415</p>
+                <p><i class="fas fa-envelope"></i> wigsandbeauty.com</p>
+                <p><i class="fas fa-map-marker-alt"></i> Eldore, Kenya</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; PHIDAGENCY. All rights reserved.</p>
+    </footer>
+     <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+    
+    const firebaseConfig = {
+        apiKey: "AIzaSyDmpsaBtFvWjVBX5IeZzN9ktYZRxwoInmA",
+        authDomain: "aviator-pro-16914.firebaseapp.com",
+        projectId: "aviator-pro-16914",
+        storageBucket: "aviator-pro-16914.firebasestorage.app",
+        messagingSenderId: "536049864881",
+        appId: "1:536049864881:web:5ac2cb820394e6a90dd290",
+        measurementId: "G-BZZ1SQM9EX"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    window.auth = getAuth(app);
+    window.db = getFirestore(app);
+    window.storage = getStorage(app);
+    
+    // Make Firebase Storage functions globally available
+    window.uploadImageToFirebase = uploadImageToFirebase;
+    window.deleteImageFromFirebase = deleteImageFromFirebase;
+    window.getFirebaseImageUrl = getFirebaseImageUrl;
+    
+    console.log('🔥 Firebase Storage initialized');
+    
+    // ========== FIREBASE STORAGE FUNCTIONS ==========
+    
+    /**
+     * Upload image to Firebase Storage
+     * @param {File} file - The image file to upload
+     * @param {string} path - Storage path (e.g., 'products', 'braiders', 'profile-photos')
+     * @param {string} id - Unique identifier (productId, braiderId, etc.)
+     * @param {Function} onProgress - Progress callback (optional)
+     * @returns {Promise<string>} - Download URL of uploaded image
+     */
+    async function uploadImageToFirebase(file, path, id, onProgress) {
+        if (!file || !file.type.startsWith('image/')) {
+            throw new Error('Please select an image file');
+        }
+        
+        // Compress image before upload (max 1MB for storage efficiency)
+        const compressedFile = await compressImage(file, 1200, 0.7);
+        
+        // Generate unique filename
+        const timestamp = Date.now();
+        const random = Math.random().toString(36).substring(2, 8);
+        const extension = file.type.split('/')[1] || 'jpg';
+        const fileName = `${id}_${timestamp}_${random}.${extension}`;
+        const storagePath = `${path}/${fileName}`;
+        
+        const storageRef = ref(window.storage, storagePath);
+        
+        // Upload with progress tracking
+        const uploadTask = uploadBytes(storageRef, compressedFile);
+        
+        // Wait for upload to complete
+        const snapshot = await uploadTask;
+        
+        // Get download URL
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        
+        console.log(`✅ Image uploaded to: ${storagePath}`);
+        console.log(`📸 Download URL: ${downloadURL}`);
+        
+        return downloadURL;
+    }
+    
+    /**
+     * Delete image from Firebase Storage
+     * @param {string} imageUrl - The image URL to delete
+     * @returns {Promise<void>}
+     */
+    async function deleteImageFromFirebase(imageUrl) {
+        if (!imageUrl) return;
+        
+        try {
+            // Extract storage path from URL
+            const decodedUrl = decodeURIComponent(imageUrl);
+            const match = decodedUrl.match(/\/o\/(.+?)\?/);
+            
+            if (match && match[1]) {
+                const storagePath = match[1];
+                const imageRef = ref(window.storage, storagePath);
+                await deleteObject(imageRef);
+                console.log(`🗑️ Deleted image: ${storagePath}`);
+            }
+        } catch (error) {
+            console.warn('Could not delete image (might be external URL):', error);
+        }
+    }
+    
+    /**
+     * Get Firebase image URL (useful for refreshing after upload)
+     * @param {string} storagePath - The storage path
+     * @returns {Promise<string>} - Download URL
+     */
+    async function getFirebaseImageUrl(storagePath) {
+        const imageRef = ref(window.storage, storagePath);
+        return await getDownloadURL(imageRef);
+    }
+    
+    /**
+     * Compress image before upload
+     * @param {File} file - Original image file
+     * @param {number} maxWidth - Maximum width
+     * @param {number} quality - JPEG quality (0-1)
+     * @returns {Promise<Blob>} - Compressed image blob
+     */
+    async function compressImage(file, maxWidth = 1200, quality = 0.7) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function(event) {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    
+                    // Maintain aspect ratio
+                    if (width > maxWidth) {
+                        height = Math.round((height * maxWidth) / width);
+                        width = maxWidth;
+                    }
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    canvas.toBlob((blob) => {
+                        resolve(blob);
+                    }, 'image/jpeg', quality);
+                };
+                img.onerror = reject;
+            };
+            reader.onerror = reject;
+        });
+    }
+</script>
+    <script src="braiders.js"></script>
+     <script src="ai-chatbot.js"></script>
+</body>
+</html>
