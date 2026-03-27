@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guest Checkout - Wig Hub</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .checkout-container {
+            max-width: 600px;
+            margin: 100px auto 50px;
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .checkout-container h2 {
+            margin-bottom: 20px;
+            color: var(--dark);
+            text-align: center;
+        }
+        
+        .product-summary {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .product-summary h3 {
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .summary-item:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn-checkout {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+        
+        .btn-checkout:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+        
+        .guest-note {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+        
+        .signup-prompt {
+            text-align: center;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .signup-prompt a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .signup-prompt a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="logo">Wigs and Beauty</a>
+            <div class="nav-links">
+                <a href="index.html#home">Home</a>
+                <a href="index.html#products">Products</a>
+                <a href="index.html#about">About</a>
+                <a href="client-login.html?tab=login" class="btn-login">Login</a>
+                <a href="client-login.html?tab=signup" class="btn-signup">Sign Up</a>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="checkout-container">
+        <h2><i class="fas fa-shopping-bag"></i> Guest Checkout</h2>
+        
+        <div class="product-summary" id="productSummary">
+            <h3>Product Summary</h3>
+            <div id="productDetails">Loading...</div>
+        </div>
+        
+        <form id="guestCheckoutForm">
+            <div class="form-group">
+                <label for="fullName">Full Name *</label>
+                <input type="text" id="fullName" required placeholder="Enter your full name">
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email Address *</label>
+                <input type="email" id="email" required placeholder="Enter your email">
+                <small style="color: #666;">We'll send your order confirmation here</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">Phone Number *</label>
+                <input type="tel" id="phone" required placeholder="Enter your phone number">
+            </div>
+            
+            <div class="form-group">
+                <label for="address">Shipping Address *</label>
+                <input type="text" id="address" required placeholder="Street address">
+            </div>
+            
+            <div class="form-group">
+                <label for="city">City *</label>
+                <input type="text" id="city" required placeholder="City">
+            </div>
+            
+            <div class="form-row" style="display: flex; gap: 10px;">
+                <div class="form-group" style="flex: 2;">
+                    <label for="state">State/Province</label>
+                    <input type="text" id="state" placeholder="State">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label for="zip">ZIP Code</label>
+                    <input type="text" id="zip" placeholder="ZIP">
+                </div>
+            </div>
+            
+            <div class="guest-note">
+                <i class="fas fa-info-circle"></i> 
+                As a guest, you won't be able to track your order online. 
+                <a href="client-login.html?tab=signup" style="color: #667eea;">Create an account</a> to get order tracking and more benefits.
+            </div>
+            
+            <button type="submit" class="btn-checkout">
+                <i class="fas fa-credit-card"></i> Complete Purchase
+            </button>
+        </form>
+        
+        <div class="signup-prompt">
+            <p>Already have an account? <a href="client-login.html?tab=login">Login</a></p>
+            <p>Want to track your order? <a href="client-login.html?tab=signup">Sign Up</a> for free</p>
+        </div>
+    </div>
+    
+    <footer>
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 PHIDAGENCY. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get cart items from session storage
+    let items = [];
+    let subtotal = 0;
+    
+    // Check for cart items from session storage
+    const cartItems = JSON.parse(sessionStorage.getItem('guestCheckoutCart') || '[]');
+    const productId = sessionStorage.getItem('guestProductId');
+    const products = JSON.parse(localStorage.getItem('wigProducts') || '[]');
+    
+    console.log('=== GUEST CHECKOUT DEBUG ===');
+    console.log('Cart items from session:', cartItems);
+    console.log('Product ID from session:', productId);
+    console.log('Products in localStorage:', products.length);
+    
+    if (cartItems.length > 0) {
+        // Multiple items from cart
+        items = cartItems;
+        subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        console.log('Loaded multiple items:', items.length);
+        console.log('Items:', items);
+    } else if (productId) {
+        // Single product checkout
+        const product = products.find(p => p.id == productId || String(p.id) === productId);
+        if (product) {
+            items = [{
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                quantity: 1,
+                image: product.imageUrl || product.image || 'https://via.placeholder.com/400x400?text=Product',
+                stock: product.stock
+            }];
+            subtotal = product.price;
+            console.log('Loaded single product:', product.name);
+        }
+    }
+    
+    // Also check if there's a guest cart in localStorage (fallback)
+    if (items.length === 0) {
+        const guestCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
+        if (guestCart.length > 0) {
+            items = guestCart;
+            subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            console.log('Loaded from localStorage guest cart:', items.length);
+        }
+    }
+    
+    const productDetailsDiv = document.getElementById('productDetails');
+    const submitBtn = document.querySelector('button[type="submit"]');
+    
+    if (items.length === 0) {
+        productDetailsDiv.innerHTML = `
+            <div style="text-align: center; padding: 20px;">
+                <i class="fas fa-shopping-cart" style="font-size: 48px; color: #dc3545; margin-bottom: 15px;"></i>
+                <p style="color: #dc3545; font-size: 16px;">Your cart is empty!</p>
+                <p style="margin-top: 10px;">Session data: ${sessionStorage.getItem('guestCheckoutCart') || 'none'}</p>
+                <a href="index.html#products" class="btn" style="display: inline-block; margin-top: 15px; padding: 10px 20px; background: #8A2BE2; color: white; text-decoration: none; border-radius: 8px;">
+                    Continue Shopping
+                </a>
+            </div>
+        `;
+        if (submitBtn) submitBtn.disabled = true;
+        return;
+    }
+    
+    // Calculate totals
+    const config = JSON.parse(localStorage.getItem('wigStoreConfig') || '{"taxRate":8, "shippingFee":9.99, "freeShippingThreshold":100}');
+    const tax = subtotal * (config.taxRate / 100);
+    const shipping = subtotal >= config.freeShippingThreshold ? 0 : config.shippingFee;
+    const total = subtotal + tax + shipping;
+    
+    // Display cart items
+    let itemsHtml = '<div style="max-height: 300px; overflow-y: auto;">';
+    items.forEach((item, index) => {
+        const itemTotal = item.price * item.quantity;
+        itemsHtml += `
+            <div class="summary-item" style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #e0e0e0;">
+                <div style="flex: 2;">
+                    <strong>${escapeHtml(item.name)}</strong>
+                    <div style="font-size: 12px; color: #666;">Qty: ${item.quantity}</div>
+                </div>
+                <div style="flex: 1; text-align: right;">
+                    $${itemTotal.toFixed(2)}
+                </div>
+            </div>
+        `;
+    });
+    itemsHtml += '</div>';
+    
+    itemsHtml += `
+        <div class="summary-item" style="display: flex; justify-content: space-between; padding: 10px 0; border-top: 2px solid #e0e0e0; margin-top: 10px;">
+            <span>Subtotal</span>
+            <span>$${subtotal.toFixed(2)}</span>
+        </div>
+        <div class="summary-item" style="display: flex; justify-content: space-between; padding: 8px 0;">
+            <span>Tax (${config.taxRate}%)</span>
+            <span>$${tax.toFixed(2)}</span>
+        </div>
+        <div class="summary-item" style="display: flex; justify-content: space-between; padding: 8px 0;">
+            <span>Shipping</span>
+            <span>$${shipping.toFixed(2)}</span>
+        </div>
+        <div class="summary-item" style="display: flex; justify-content: space-between; padding: 12px 0; font-weight: bold; font-size: 18px; border-top: 2px solid #e0e0e0; margin-top: 8px;">
+            <span>Total</span>
+            <span>$${total.toFixed(2)}</span>
+        </div>
+    `;
+    
+    productDetailsDiv.innerHTML = itemsHtml;
+    
+    // Handle form submission
+    const form = document.getElementById('guestCheckoutForm');
+    
+    // Remove any existing listeners to avoid duplicates
+    const newForm = form.cloneNode(true);
+    form.parentNode.replaceChild(newForm, form);
+    
+    newForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const name = document.getElementById('fullName').value;
+        const email = document.getElementById('email').value;
+        const phone = document.getElementById('phone').value;
+        const address = document.getElementById('address').value;
+        const city = document.getElementById('city').value;
+        const state = document.getElementById('state').value;
+        const zip = document.getElementById('zip').value;
+        
+        if (!name || !email || !phone || !address || !city) {
+            alert('Please fill in all required fields.');
+            return;
+        }
+        
+        // Generate unique order ID
+        function generateGuestOrderId() {
+            const now = new Date();
+            const year = now.getFullYear().toString().slice(-2);
+            
+            const digitToLetter = {
+                '0': 'A', '1': 'B', '2': 'C', '3': 'D', '4': 'E',
+                '5': 'F', '6': 'G', '7': 'H', '8': 'I', '9': 'J'
+            };
+            
+            const yearCode = digitToLetter[year[0]] + digitToLetter[year[1]];
+            const monthLetters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
+            const monthCode = monthLetters[now.getMonth()];
+            const dayCode = now.getDate().toString().padStart(2, '0');
+            
+            const baseId = yearCode + monthCode + dayCode;
+            
+            const guestOrders = JSON.parse(localStorage.getItem('guestOrders') || '[]');
+            let maxSeq = 0;
+            guestOrders.forEach(order => {
+                if (order.id && order.id.startsWith(baseId)) {
+                    const seq = parseInt(order.id.substring(baseId.length));
+                    if (!isNaN(seq) && seq > maxSeq) maxSeq = seq;
+                }
+            });
+            
+            const seqNum = (maxSeq + 1).toString().padStart(4, '0');
+            return baseId + seqNum;
+        }
+        
+        // Create order
+        const order = {
+            id: generateGuestOrderId(),
+            date: new Date().toISOString(),
+            items: items.map(item => ({
+                id: item.id,
+                name: item.name,
+                price: item.price,
+                quantity: item.quantity,
+                image: item.image || item.imageUrl
+            })),
+            subtotal: subtotal,
+            tax: tax,
+            shipping: shipping,
+            total: total,
+            status: 'processing',
+            customer: {
+                name: name,
+                email: email,
+                phone: phone,
+                address: address,
+                city: city,
+                state: state,
+                zip: zip,
+                type: 'guest'
+            }
+        };
+        
+        // Update product stock
+        const allProducts = JSON.parse(localStorage.getItem('wigProducts') || '[]');
+        items.forEach(cartItem => {
+            const productIndex = allProducts.findIndex(p => String(p.id) === String(cartItem.id));
+            if (productIndex !== -1 && allProducts[productIndex]) {
+                allProducts[productIndex].stock = Math.max(0, (allProducts[productIndex].stock || 0) - cartItem.quantity);
+                console.log(`Updated stock for ${allProducts[productIndex].name}: new stock = ${allProducts[productIndex].stock}`);
+            }
+        });
+        localStorage.setItem('wigProducts', JSON.stringify(allProducts));
+        
+        // Save guest order
+        const guestOrders = JSON.parse(localStorage.getItem('guestOrders') || '[]');
+        guestOrders.push(order);
+        localStorage.setItem('guestOrders', JSON.stringify(guestOrders));
+        
+        // Clear cart
+        localStorage.removeItem('guestCart');
+        
+        // Clear logged in user cart if exists
+        const clientToken = localStorage.getItem('clientToken');
+        if (clientToken) {
+            const clientUser = JSON.parse(localStorage.getItem('clientUser') || '{}');
+            const cartKey = `cart_${clientUser.email}`;
+            localStorage.removeItem(cartKey);
+        }
+        
+        // Clear session storage
+        sessionStorage.removeItem('guestCheckoutCart');
+        sessionStorage.removeItem('guestProductId');
+        sessionStorage.removeItem('guestCheckout');
+        sessionStorage.removeItem('isLoggedInCheckout');
+        
+        // Update cart badge on main page
+        if (window.opener) {
+            try {
+                window.opener.initCartBadge();
+            } catch(e) {}
+        }
+        
+        // Show success and redirect
+        let itemsList = items.map(item => `${item.quantity}x ${item.name}`).join('\n');
+        alert(`✅ Order placed successfully!\n\nOrder #${order.id}\nItems:\n${itemsList}\nTotal: $${order.total.toFixed(2)}\n\nA confirmation has been sent to ${email}`);
+        
+        window.location.href = 'index.html';
+    });
+});
+
+// Helper function
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+</script>
+</body>
+</html>
